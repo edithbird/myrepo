@@ -1,0 +1,38 @@
+---
+title: "Portland Weather"
+author: "Christine Iyer"
+date: "April 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r}
+setwd("C:/Users/Chris Iyer/Downloads/")
+library(dplyr)
+library(lubridate)
+library(knitr)
+rain <- read.csv("949053.csv", header = TRUE)
+rain <- rain[-c(1, 4:5, 9:17)]
+rain <- rain[10772:11971,]
+rainPortland <- rain %>% mutate(STATION_NAME = gsub(" INTERNATIONAL JETPORT ME US", "", STATION_NAME))
+rainPortland[ , 2 ] <- ymd(rainPortland[, 2])
+rainPortland <- rainPortland %>% select(STATION_NAME,Date = DATE, InchesRain = PRCP, SnowDepth = SNWD, Snow = SNOW)
+rainPortland <- rainPortland %>%  mutate(WasThereRain = ifelse(InchesRain > 0, 1,0))
+kable(tail(rainPortland, 60))
+#replace -9999 with NA values
+rainPortland[rainPortland == -9999] <- NA
+kable(head(rainPortland))
+kable(tail(rainPortland, 60))
+```
+
+```{r}
+
+```
+
