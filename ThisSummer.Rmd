@@ -5,6 +5,8 @@ output: html_notebook
 
 Load the Data and Clean it up
 
+"C:\Users\Chris Iyer\Downloads\949497.csv"
+"C:\Users\Chris Iyer\Downloads\949053.csv"
 ```{r}
 setwd("C:/Users/Chris Iyer/Downloads/")
 library(dplyr)
@@ -16,12 +18,25 @@ rain <- read.csv("949053.csv", header = TRUE)
 rain <- rain[-c(1, 4:5, 9:17)]
 rain <- rain[10772:11969,]
 rainPortland <- rain %>% mutate(STATION_NAME = gsub(" INTERNATIONAL JETPORT ME US", "", STATION_NAME))
+
+head(rainPortland)
 #replace -9999 with NA values
 rainPortland[rainPortland == -9999] <- NA
 rainPortland[ , 2 ] <- ymd(rainPortland[, 2])
 rainPortland <- rainPortland %>% select(STATION_NAME,Date = DATE, InchesRain = PRCP, SnowDepth = SNWD, Snow = SNOW)
 rainPortland <- rainPortland %>%  mutate(WasThereRain = ifelse(InchesRain > 0, 1,0))
-kable(tail(rainPortland))
+april17 <- rainPortland[1187:1198, ]
+april17
+april16 <- rainPortland[822:833,]
+april16
+  april15 <-rainPortland[456:467,] 
+  april15
+  april14 <- rainPortland[91:102,] 
+  april14
+  aprils <- rbind(april14,april15,april16, april17)
+  aprils
+  aprils.ts <- ts(aprils$InchesRain, start = 2014, frequency = 12)
+  ggseasonplot(aprils.ts)
 kable(head(rainPortland))
 dim(rainPortland)
 ```
