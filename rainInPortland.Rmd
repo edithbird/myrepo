@@ -18,21 +18,85 @@ setwd("C:/Users/Chris Iyer/Downloads/")
 library(dplyr)
 library(lubridate)
 library(knitr)
+library(forecast)
 rain <- read.csv("949053.csv", header = TRUE)
 rain <- rain[-c(1, 4:5, 9:17)]
-rain <- rain[10772:11971,]
+rain <- rain[10772:11969,]
 rainPortland <- rain %>% mutate(STATION_NAME = gsub(" INTERNATIONAL JETPORT ME US", "", STATION_NAME))
+#replace -9999 with NA values
+rainPortland[rainPortland == -9999] <- NA
 rainPortland[ , 2 ] <- ymd(rainPortland[, 2])
 rainPortland <- rainPortland %>% select(STATION_NAME,Date = DATE, InchesRain = PRCP, SnowDepth = SNWD, Snow = SNOW)
 rainPortland <- rainPortland %>%  mutate(WasThereRain = ifelse(InchesRain > 0, 1,0))
-kable(tail(rainPortland, 60))
-#replace -9999 with NA values
-rainPortland[rainPortland == -9999] <- NA
+kable(tail(rainPortland))
 kable(head(rainPortland))
-kable(tail(rainPortland, 60))
 ```
 
 ```{r}
+rain.ts <- ts(rainPortland$InchesRain, start = 2014, frequency = 360)
+head(rain.ts)
 
+plot(rain.ts)
+rainMonthly <- aggregate.ts(rain.ts, nfrequency = 12, FUN = sum)
+plot(rainMonthly)
+seasonPlot <- ggseasonplot(rainMonthly)
+seasonPlot
+
+```
+
+```{r}
+rainVersion1 <- rainPortland %>% mutate(RainLag = lag(InchesRain, value = 1))
+rainVersion2 <- rainVersion1 %>% mutate(RainLag1 = lag(WasThereRain, value = 1))
+head(rainVersion2)
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+outLogReg <- glm(WasThereRain ~ RainLag1, data = rainVersion2, family = "binomial")
+summary(outLogReg)
+predictions <- predict(outLogReg, rainPortland[731:1198], type = "response")
+
+```
+
+
+```{r}
+rainPortland1 <- Acf(rain.ts, main = "rain")
+DiffAcf <- diff(rain.ts, lag = 1)
+rainAcfDiff <- Acf(DiffAcf, main = "With lag-1 Differencing")
+
+```
+
+
+```{r}
+
+naiveForecasts <- rainPortland$WasThereRain[(length(rainPortland$WasThereRain)-1-467):(length(rainPortland$WasThereRain)-1)]
+
+# See what they look like (Note, you should probably do a sanity check here)
+naiveForecasts
+
+# Make sure you have installed this package before trying to use
+library(caret)
+
+# Call it with the predictions as first parameter and the actuals as the second
+# Additionally, I set it use 1 (above) as the "positive" class
+confusionMatrix(naiveForecasts, rainPortland$WasThereRain[(length(rainPortland$WasThereRain)-467):length(rainPortland$WasThereRain)], positive=c("1"))
+
+```
+
+
+```{r, echo=TRUE}
+# First eighteen data points to be used for training period
+trainOut <- rainPortland[1:730, ]
+
+# Look at it to make sure it did what we wanted
+kable(tail(trainOut))
+```
+
+```{r, eval=FALSE, include=FALSE}
+# Now fit a logistic regression model to the training period
+outLogReg <- glm(WasThereRain, data=trainOut, family="binomial")
+
+# Look at the summary
+summary(outLogReg)
 ```
 
