@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(knitr)
+library(forecast)
+library(caret)
+rain <- read.csv("949053.csv", header = TRUE)
+rain <- rain[-c(1, 4:5, 9:17)]
+rain <- rain[10772:11969,]
+rainPortland <- rain %>% mutate(STATION_NAME = gsub(" INTERNATIONAL JETPORT ME US", "", STATION_NAME))
+#replace -9999 with NA values
+rainPortland[rainPortland == -9999] <- NA
+rainPortland[ , 2 ] <- ymd(rainPortland[, 2])
+rainPortland <- rainPortland %>% select(STATION_NAME,Date = DATE, InchesRain = PRCP, SnowDepth = SNWD, Snow = SNOW)
+rainPortland <- rainPortland %>%  mutate(WasThereRain = ifelse(InchesRain > 0, 1,0))
+#Add Lag, Sin, and Cos
+rainVersion1 <- rainPortland %>% mutate(RainLag = lag(InchesRain, value = 1))
+rainVersion2 <- rainVersion1 %>% mutate(RainLag1 = lag(WasThereRain, value = 1))
+head(rainVersion2)
+rainVersion2$time <- seq.int(1:1198)
+#Add seasonal sin and cosine
+rainVersion2 <- rainVersion2 %>% mutate(seasonalSine = sin(2*pi*rainVersion2$time/365.25), seasonalCosine = cos(2*pi*rainVersion2$time/365.25))
+#omit columns about snow
+rainVersion2$SnowDepth <- NULL
+rainVersion2$Snow <- NULL
+
+tail(rainVersion2)
+dim(rainVersion2)
+
+```
+
+Add new data
+
+```{r}
+Date <- as.Date("2017-04-13")
+Date <- Date + 0:13
+Date
+n <- 14
+STATION_NAME <-  rep("PORTLAND", each = n)
+length(STATION_NAME)
+InchesRain <- c(0.00, 0.00, 0.00, 0.03, 0.00, 0.00, 0.16, 0.00, 0.36, 0.13, 0.00, 0.00, 0.54, 1.31)
+WasThereRain <- ifelse(InchesRain >0, 1,0)
+RainLag <- lag(InchesRain, value = 1)
+RainLag1 <- lag(WasThereRain, value = 1)
+#generate seq of numbers 
+a<-c()  # stores expected sequence
+f<-1199  # starting number of final sub-sequence
+it<-2013 # interval
+for (d in seq(0,f,by=it))
+{
+    if (d==0)
+    {
+        d=1199
+    }
+    a<-c(a, seq(d,d+13))
+    print(d)
+}
+print(a)
+time <- a
+time
+seasonalSine <- sin(2*pi*time/365.25)
+seasonalCosine <- cos(2*pi*time/365.25)
+seasonalCosine
+length(RainLag)
+validationPeriod <- data.frame(STATION_NAME, Date, InchesRain, WasThereRain, RainLag, RainLag1, time, seasonalSine, seasonalCosine)
+validationPeriod
+rainVersion2 <- rbind.data.frame(rainVersion2, validationPeriod)
+head(rainVersion2)
+tail(rainVersion2)
+```
+
