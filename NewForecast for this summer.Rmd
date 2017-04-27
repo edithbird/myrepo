@@ -32,46 +32,98 @@ rainVersion2$Snow <- NULL
 
 tail(rainVersion2)
 dim(rainVersion2)
-
+PortlandWeather.ts <- ts(rainVersion2$InchesRain, start = c(2014,1), frequency = 360)
+portlandRainWeekly <- aggregate(PortlandWeather.ts, nfrequency = 12, FUN = mean)
+head(portlandRainWeekly)
+plot(portlandRainWeekly)
 ```
 
 Add new data
 
 ```{r}
 Date <- as.Date("2017-04-13")
-Date <- Date + 0:13
+Date <- Date + 0:139
 Date
-n <- 14
+n <- 140
 STATION_NAME <-  rep("PORTLAND", each = n)
 length(STATION_NAME)
-InchesRain <- c(0.00, 0.00, 0.00, 0.03, 0.00, 0.00, 0.16, 0.00, 0.36, 0.13, 0.00, 0.00, 0.54, 1.31)
+n <- 126
+InchesRain <- c(0.00, 0.00, 0.00, 0.03, 0.00, 0.00, 0.16, 0.00, 0.36, 0.13, 0.00, 0.00, 0.54, 1.31, rep("NA", each = n))
 WasThereRain <- ifelse(InchesRain >0, 1,0)
 RainLag <- lag(InchesRain, value = 1)
 RainLag1 <- lag(WasThereRain, value = 1)
 #generate seq of numbers 
 a<-c()  # stores expected sequence
 f<-1199  # starting number of final sub-sequence
-it<-2013 # interval
+it<-1339 # interval
 for (d in seq(0,f,by=it))
 {
     if (d==0)
     {
         d=1199
     }
-    a<-c(a, seq(d,d+13))
+    a<-c(a, seq(d,d+139))
     print(d)
 }
-print(a)
+#time <- seq(1198, 2012, length=14)
 time <- a
-time
 seasonalSine <- sin(2*pi*time/365.25)
 seasonalCosine <- cos(2*pi*time/365.25)
-seasonalCosine
 length(RainLag)
 validationPeriod <- data.frame(STATION_NAME, Date, InchesRain, WasThereRain, RainLag, RainLag1, time, seasonalSine, seasonalCosine)
+dim(validationPeriod)
+
+
+
+DataToForecast <- rbind.data.frame(rainVersion2, validationPeriod)
+head(DataToForecast)
+dim(DataToForecast)
+DataToForecast[1198:1226,]
+forTheValidation <- DataToForecast[1227:1338,c(2,8,9)]
+head(forTheValidation)
+
+```
+
+
+```{r}
+
+trainout <- DataToForecast[1:1227,]
+tail(trainout)
+outLogReg <- glm(WasThereRain ~ RainLag1 + seasonalSine + seasonalCosine, family = "binomial", data = trainout)
+summary(outLogReg)
+predictions <- predict(outLogReg, forTheValidation, type = "response")
+predictions
+
+
+outLogReg <- glm(WasThereRain ~ 
+                  # RainLag1 + 
+                   seasonalSine + seasonalCosine, family = "binomial", data = trainout)
+
+coeffficients1 <- coef(outLogReg)
+coeffficients1
+summary(outLogReg)
+
+
+predictions <- predict(outLogReg, DataToForecast[1213:1338], type = "response")
+predictions1 <- (ifelse(predictions > 0.5, 1,0))
+predictions1
+```
+
+Accuracy
+
+```{r}
+confusionMatrix(ifelse(predictions > 0.50, 1,0), validationPeriod$WasThereRain, positive = c("1"))
+
+```
+
+
+```{r, eval=FALSE, include=FALSE}
 validationPeriod
-rainVersion2 <- rbind.data.frame(rainVersion2, validationPeriod)
-head(rainVersion2)
-tail(rainVersion2)
+trainout <- validationPeriod[1:5,]
+trainout
+outLogReg <- glm(WasThereRain ~ RainLag1 + seasonalSine + seasonalCosine, family = "binomial", data = trainout)
+summary(outLogReg)
+predictions <- predict(outLogReg, validationPeriod[6:14, ], type = "response")
+predictions
 ```
 
