@@ -6,3 +6,17 @@ library(Amelia)
 library(Rcpp)
 missmap(newRain, main = "Missing values vs observed")
 sapply(newRain, function(x) sum(is.na(x)))
+#another way to select columns
+newRain <- subset(newRain,select=c(2,3,6))
+#selecting columns
+newRain <- newRain[10772:11969,]
+#Format date
+newRain[ , 2 ] <- ymd(newRain[, 2])
+head(newRain)
+#count and itemize the the NA
+sapply(newRain, function(x) sum(is.na(x)))
+#partition for logistic regression
+rainTrain <- newRain[1:730, ]
+
+
+head(rainTrain)
