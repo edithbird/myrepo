@@ -20,6 +20,16 @@ head(newRain)
 sapply(newRain, function(x) sum(is.na(x)))
 #partition for logistic regression
 rainTrain <- newRain[1:730, ]
-
-
-head(rainTrain)
+rainValid <- newRain[731:1198,]
+#partition for neural networks
+rain.ts <- ts(newRain$PRCP, start = c(2014,1), frequency = 360)
+validLength <- 467
+trainLength <- length(rain.ts) - validLength
+rainTrainWindow <- window(rain.ts, end = c(2014, trainLength))
+rainValidWindow <- window(rain.ts, start = c(2014, trainLength + 1))
+rainNN <- nnetar(rainTrainWindow)
+rainNN
+summary(rainNN$model[[1]])
+rainPredict <- forecast(rainNN, h = validLength)
+head(rainPredict$mean)
+accuracy(rainPredict, rainValidWindow)
