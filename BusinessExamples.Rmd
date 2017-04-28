@@ -1,0 +1,37 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+[Here are some practical business examples using R](https://www.r-bloggers.com/data-analysis-for-marketing-research-with-r-language-1/)
+
+```{r}
+setwd("C:/Users/Chris Iyer/Documents/R/myrepo/")
+juice <- read.csv("grapeJuice.csv", header = T, stringsAsFactors = FALSE)
+juice
+```
+Summary Stats
+
+```{r}
+summary(juice)
+```
+
+Visualize
+
+```{r}
+par(mfrow = c(1,2))
+boxplot(juice$sales, horizontal = T, xlab = "Sales", main = "Outliers?")
+lines(density(juice$sales, lty = "dashed", lwd = 2.5, col = "blue"))
+hist(juice$sales, main = "Distribution of Sales", xlab= "Sales", prob=T, col = "blue")
+lines(density(juice$sales), lty = 2, lwd = 2.5)
+```
+There are 2 different advertising campaigns. 
+
+```{r}
+sales_ad_nature <-  subset(juice,ad_type==0)
+sales_ad_family <-  subset(juice,ad_type==1)
+mean(sales_ad_nature$sales)
+mean(sales_ad_family$sales)
+```
+
