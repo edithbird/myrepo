@@ -6,6 +6,9 @@ library(Amelia)
 library(Rcpp)
 missmap(newRain, main = "Missing values vs observed")
 sapply(newRain, function(x) sum(is.na(x)))
+#a way to deal with NA is to substitute the mean
+newRain$PRCP[is.na(newRain$PRCP)] <- mean(newRain$PRCP, na.rm = T)
+sapply(newRain, function(x) sum(is.na(x)))
 #another way to select columns
 newRain <- subset(newRain,select=c(2,3,6))
 #selecting columns
