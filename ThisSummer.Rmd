@@ -5,9 +5,7 @@ output: html_notebook
 
 Load the Data and Clean it up
 
-"C:\Users\Chris Iyer\Downloads\949497.csv"
-"C:\Users\Chris Iyer\Downloads\949053.csv"
-```{r}
+```{r, message=FALSE, warning=FALSE}
 setwd("C:/Users/Chris Iyer/Documents/R/myrepo/")
 library(dplyr)
 library(lubridate)
@@ -25,7 +23,7 @@ rainPortland[rainPortland == -9999] <- NA
 rainPortland[ , 2 ] <- ymd(rainPortland[, 2])
 rainPortland <- rainPortland %>% select(STATION_NAME,Date = DATE, InchesRain = PRCP, SnowDepth = SNWD, Snow = SNOW)
 rainPortland <- rainPortland %>%  mutate(WasThereRain = ifelse(InchesRain > 0, 1,0))
-
+#updatedRain <- as.Date()
 ```
 
 Plot to look for anything interesting
@@ -34,7 +32,7 @@ Plot to look for anything interesting
 rain.ts <- ts(rainPortland$InchesRain, start = 2014, frequency = 360)
 
 canadaQuad1 <- tslm(rain.ts ~ trend + I(trend^2) + I(trend^3))
-plot(rain.ts)
+plot(canadaQuad1)
 lines(canadaQuad1$fitted.values, col = "red")
 rainMonthly <- aggregate.ts(rain.ts, nfrequency = 12, FUN = sum)
 plot(rainMonthly)
@@ -80,6 +78,9 @@ Log Reg Model
 ```{r}
 trainOut <- rainVersion2[1:730, ]
 outLogReg <- glm(WasThereRain ~ RainLag1 + seasonalSine + seasonalCosine, family = "binomial", data = trainOut)
+
+
+
 summary(outLogReg)
 predictions <- predict(outLogReg, rainVersion2[731:1198, ], type = "response")
 ```
@@ -91,7 +92,7 @@ Forecast
 
 ```{r}
 predictions1 <- (ifelse(predictions > 0.5, 1,0))
-predictions[190]
+
 ```
 
 Accuracy
@@ -117,16 +118,7 @@ summer2016 %>% filter(WasTheForecastRight == "Not Quite") %>% select(Date, WasTh
 
 
 
-```{r}
 
-```
-
-
-```{r}
-logRegression <- glm(WasThereRain ~ RainLag1 + seasonalSine + seasonalCosine, family = "binomial", data = rainVersion2)
-summary(logRegression)
-predictions <- predict(logRegression, 21, type = "response")
-```
 
 
 
@@ -210,7 +202,7 @@ Got it wrong 39% in October
 ```{r}
 October <- summer2016[154:184,]
 October
-October <- summer2016[154:184,] %>% filter(WasTheForecastRight == "Not Quite") %>% select(Date, WasThereRain, WasTheForecastRight)
+October <- summer2016[154:184,] %>% filter(WasTheForecastRight == "Not Quite") %>% select(Date, WasThereRain, WasTheForecastRight, willThereBeRain1)
 
 October %>% filter(willThereBeRain1 == 1)
 ```
@@ -235,15 +227,17 @@ x <- summer2016 %>% filter(WasThereRain == 1 && willThereBeRain1 == 1) %>% selec
 x
 ```
 **This is the same test with the lag removed**
+This performs slightly worse,
+
 ```{r}
 trainOut <- rainVersion2[1:730, ]
 outLogReg1 <- glm(WasThereRain ~ seasonalSine + seasonalCosine, family = "binomial", data = trainOut)
 summary(outLogReg1)
 predictions2 <- predict(outLogReg1, rainVersion2[731:1198, ], type = "response")
 head(predictions2)
-predictions3 <- (ifelse(predictions2 > 0.5, 1,0))
+predictions3 <- (ifelse(predictions2 > 0.44, 1,0))
 head(predictions3)
-confusionMatrix(ifelse(predictions2 > 0.5, 1,0), rainPortland[731:1198, ]$WasThereRain, positive = c("1"))
+confusionMatrix(ifelse(predictions2 > 0.4, 1,0), rainPortland[731:1198, ]$WasThereRain, positive = c("1"))
 ```
 
 Spring and Summer months
@@ -261,9 +255,7 @@ april16
   aprils
   aprils.ts <- ts(aprils$InchesRain, start = 2014, frequency = 12)
   ggseasonplot(aprils.ts, xaxt = "n", yaxt = "n", xlab = "Year", ylab = "Souvenir Sales (thousands)", main = "Daily Rain")
-axis(1, at=seq(1,12,1), labels=format(seq(1,12,1)))
-# Add the y-axis
-axis(2, at = seq(7, 11, 1), labels = format(round(exp(seq(7, 11, 1)), digits = 0), las = 2))
+
 kable(head(rainPortland))
 dim(rainPortland)
 ```
@@ -271,29 +263,69 @@ dim(rainPortland)
 
 **Try the melbourne**
 
-```{r}
-setwd("/Users/Chris Iyer/Documents/")
+```{r, echo=TRUE}
+setwd("/Users/Chris Iyer/Documents/R/myrepo/")
 melbourseRain <- read.csv("MelbourneRainfall.csv", header = TRUE, stringsAsFactors = FALSE)
-rain.ts <- ts(melbourseRain$mmRain, start = c(2000,1), frequency = 360)
+head(melbourseRain)
+
 melbourseRain <- melbourseRain %>% mutate(rainy = ifelse(Rainfall.amount..millimetres. > 0, 1,0)) %>% rename(mmRain = Rainfall.amount..millimetres.)
 head(melbourseRain)
-rainMonthly <- aggregate.ts(rain.ts, nfrequency = 12, FUN = sum)
-ggseasonplot(rainMonthly, lwd = 2)
+melbourseRain$Date <- as.Date(melbourseRain$Date, format = "%m/%d/%Y")
+head(melbourseRain)
+
 plot(rainMonthly)
 melbourseRain$time <- seq.int(1:4322)
 melbourneRain2 <- melbourseRain %>% mutate(seasonalSine = sin(2*pi*melbourseRain$time/365.25), seasonalCosine = cos(2*pi*melbourseRain$time/365.25))
+
+
 
 melbourneRain2 <- melbourneRain2 %>% mutate(RainLag = lag(mmRain, value = 1))
 melbourneRain2 <- melbourneRain2 %>% mutate(RainLag1 = lag(rainy, value = 1))
 head(melbourneRain2, 15)
 
-dim(melbourseRain)
-trainOut <- melbourneRain2[1:3653,]
+dim(melbourneRain2)
+train.df <- melbourneRain2[melbourneRain2$Date <= as.Date("2009-12-31", format="%Y-%m-%d"), ]
+tail(train.df)
+train.df <- train.df[-1,]
+
+valid.df <- melbourneRain2[melbourseRain$Date > as.Date("2009-12-31", format="%Y-%m-%d"), ]
+head(valid.df)
+xvalid <- valid.df[, c(3,5,6)]
+tail(xvalid)
+
 
 x <- glm(rainy ~ RainLag1 + seasonalSine + seasonalCosine, family = "binomial", data = trainOut )
 summary(x)
 predictions <- predict(x, melbourneRain2[3654:4322 ,], type = "response")
 #this is for the validation period
 confusionMatrix(ifelse(predictions > 0.5,1,0), melbourneRain2[3654:4322, ]$RainLag1, positive = c("1"))
+```
+
+**Running the model on the whole data set for a forecast of this summe**
+
+```{r}
+newTrainOut <- rainVersion2[1:1197, ]
+newOutLogReg <- glm(WasThereRain ~ RainLag1 + seasonalSine + seasonalCosine, family = "binomial", data = newTrainOut)
+
+
+
+summary(newOutLogReg)
+predictions <- predict(newOutLogReg, rainVersion2[1197:1198, ], type = "response")
+predictions
+
+
+#predict.glm(logRegression, newdata = NULL, type = "response")
+#predictions <- predict(logRegression, 21, type = "response")
+```
+
+```{r}
+newRain <- read.csv("NewRainWithBlanks.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c(""))
+head(newRain)
+library(Amelia)
+library(Rcpp)
+missmap(newRain, main = "Missing values vs observed")
+
+dim(newRain)
+
 ```
 
