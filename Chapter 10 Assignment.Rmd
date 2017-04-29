@@ -1,0 +1,116 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Forecasting Australian Wine Sales: Figure 6.15 shows time plots of monthly sales of six types of Australian wines (red, rose, sweet white, dry white, sparkling, and fortified) for 1980-1994. Data available in AustralianWines.xls. 10 The units are thousands of 10 Source: R. J. Hyndman Time Series Data Library, http://data.is/TSDLdemo; accessed on Mar 28, 2016 liters. You are hired to obtain short-term forecasts (2-3 months ahead) for each of the six series, and this task will be repeated every month. 
+
+```{r}
+library(forecast)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+wine <- read.csv("AustralianWines.csv", header = T)
+head(wine)
+
+```
+
+```{r}
+#read in each as a time series and partition
+#fortified
+Fortified.ts <- ts(wine$Fortified, start = c(1980, 1), frequency = 12)
+FortifiedvalidLength <- 12
+FortifiedtrainLength <- length(Fortified.ts) - FortifiedvalidLength
+FortifiedsalesTrain <- window(Fortified.ts, end = c(1980, FortifiedtrainLength))
+FortifiedsalesValid <- window(Fortified.ts, start = c(1980, FortifiedtrainLength + 1))
+#Red
+Red.ts <- ts(wine$Red, start = c(1980, 1), frequency = 12)
+RedvalidLength <- 12
+RedtrainLength <- length(Red.ts) - RedvalidLength
+RedsalesTrain <- window(Red.ts, end = c(1980, RedtrainLength))
+RedsalesValid <- window(Red.ts, start = c(1980, RedtrainLength + 1))
+#Rose
+Rose.ts <- ts(wine$Rose, start = c(1980, 1), frequency = 12)
+RosevalidLength <- 12
+RosetrainLength <- length(Rose.ts) - RosevalidLength
+RosesalesTrain <- window(Rose.ts, end = c(1980, RosetrainLength))
+RosesalesValid <- window(Rose.ts, start = c(1980, RosetrainLength + 1))
+#parkling
+Sparkling.ts <- ts(wine$sparkling, start = c(1980, 1), frequency = 12)
+SparklingvalidLength <- 12
+SparklingtrainLength <- length(Sparkling.ts) - SparklingvalidLength
+SparklingsalesTrain <- window(Sparkling.ts, end = c(1980, SparklingtrainLength))
+SparklingsalesValid <- window(Sparkling.ts, start = c(1980, SparklingtrainLength + 1))
+#Sweet
+Sweet.white.ts <- ts(wine$Sweet.white, start = c(1980, 1), frequency = 12)
+SweetvalidLength <- 12
+SweettrainLength <- length(Sweet.white.ts) - SweetvalidLength
+SweetsalesTrain <- window(Sweet.white.ts, end = c(1980, SweettrainLength))
+SweetsalesValid <- window(Sweet.white.ts, start = c(1980, SweettrainLength + 1))
+#Dry
+Dry.white.ts <- ts(wine$Dry.white, start = c(1980, 1), frequency = 12)
+DryvalidLength <- 12
+DrytrainLength <- length(Dry.white.ts) - DryvalidLength
+DrysalesTrain <- window(Dry.white.ts, end = c(1980, DrytrainLength))
+DrysalesValid <- window(Dry.white.ts, start = c(1980, DrytrainLength + 1))
+
+#plots
+par(mfrow = c(2,3))
+plot(Fortified.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Fortified Wine Sales")
+plot(Red.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Red Wine Sales")
+plot(Rose.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Rose Sales")
+plot(Sparkling.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Sparkling Sales")
+plot(Sweet.white.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Sweet Wine Sales")
+plot(Dry.white.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Dry Wine Sales")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+1. Would you consider neural networks for this task? Explain why. 
+
+2. Use neural networks to forecast fortified wine sales, as follows: 
+
+* Partition the data using the period until December 1993 as the training period.
+
+* Run a neural network using R’s nnetar with 11 nonseasonal lags (i.e., p = 11). Leave all other arguments at their default. 
+
+  (a) Create a time plot for the actual and forecasted series over the training period. Create also a time plot of the forecast errors for the training period. Interpret what you see in the plots. 
+  
+  (b) Use the neural network to forecast sales for each month in the validation period (January 1994 to December 1994). 
+  
+3. Compare your neural network to an exponential smoothing model used to forecast fortified wine sales. 
+
+  (a) Use R’s ets function to automatically select and fit an exponential smoothing model to the training period until December 1993. Which model did ets fit?
+  
+  (b) Use this exponential smoothing model to forecast sales for each month in 1994. 
+  
+  (c) How does the neural network compare to the exponential smoothing model in terms of predictive performance in the training period? In the validation period?
+
+
+
