@@ -7,12 +7,17 @@ Forecasting Australian Wine Sales: Figure 6.15 shows time plots of monthly sales
 
 ```{r}
 library(forecast)
+library(pander)
+library(knitr)
 ```
 
 
 ```{r, message=FALSE, warning=FALSE}
-wine <- read.csv("AustralianWines.csv", header = T)
+wine <- read.csv("AustralianWines.csv", header = T, stringsAsFactors = F)
+wine <- wine[1:180, ]
 head(wine)
+dim(wine)
+tail(wine, 20)
 
 ```
 
@@ -65,32 +70,8 @@ plot(Sweet.white.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4
 plot(Dry.white.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4", main = "Dry Wine Sales")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```
+
 
 1. Would you consider neural networks for this task? Explain why. 
 
@@ -98,19 +79,84 @@ plot(Dry.white.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4",
 
 * Partition the data using the period until December 1993 as the training period.
 
+```{r}
+Fortified.ts <- ts(wine$Fortified, start = c(1980, 1), frequency = 12)
+FortifiedvalidLength <- 12
+FortifiedtrainLength <- length(Fortified.ts) - FortifiedvalidLength
+FortifiedsalesTrain <- window(Fortified.ts, end = c(1980, FortifiedtrainLength))
+FortifiedsalesValid <- window(Fortified.ts, start = c(1980, FortifiedtrainLength + 1))
+```
+
+
 * Run a neural network using R’s nnetar with 11 nonseasonal lags (i.e., p = 11). Leave all other arguments at their default. 
 
+```{r}
+fortified.nn <- nnetar(FortifiedsalesTrain, p = 11)
+fortified.nn
+summary(fortified.nn$model[[1]])
+```
+
+
   (a) Create a time plot for the actual and forecasted series over the training period. Create also a time plot of the forecast errors for the training period. Interpret what you see in the plots. 
+
+```{r, fig.height=4, fig.width=7}
+fortifiedForecast <- forecast(fortified.nn, h = FortifiedvalidLength)
+range(wine$Fortified)
+plot(c(1980, 1995), c(1000, 6000), type = "n", xlab = "Year", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
+lines(Fortified.ts, col = "blue", lwd = 2)
+axis(1, at = seq(1980, 1995, 1))
+axis(2, at = seq(1000, 6000, 500), labels = format(seq(1000, 6000, 500)))
+lines(fortified.nn$fitted, lty = 2, col = "red", lwd = 2)
+lines(fortifiedForecast$mean, lty = 2, col = "red", lwd = 2)
+legend(1990, 5900, c("Actual Sales", "NN Model"), lty = c(1, 2), lwd = c(1,2), col = c("blue", "red"))
+```
+
   
+
   (b) Use the neural network to forecast sales for each month in the validation period (January 1994 to December 1994). 
+  
+```{r}
+fortifiedForecast
+```  
   
 3. Compare your neural network to an exponential smoothing model used to forecast fortified wine sales. 
 
+```{r}
+fortified.ets <- ets(FortifiedsalesTrain, model = "ZZZ", restrict = FALSE)
+fortified.ets
+
+```
+
+
+
+
   (a) Use R’s ets function to automatically select and fit an exponential smoothing model to the training period until December 1993. Which model did ets fit?
+  
+
+
+  
   
   (b) Use this exponential smoothing model to forecast sales for each month in 1994. 
   
-  (c) How does the neural network compare to the exponential smoothing model in terms of predictive performance in the training period? In the validation period?
+```{r}
+fortified.ets.forecast <- forecast(fortified.ets, h = FortifiedvalidLength)
+fortified.ets.forecast
 
+
+```
+  
+  (c) How does the neural network compare to the exponential smoothing model in terms of predictive performance in the training period? In the validation period?
+  
+  * **Neural Network**
+  
+```{r}
+accuracy(fortifiedForecast, FortifiedsalesValid)
+```
+
+  * **ETS Model**
+  
+```{r}
+accuracy(fortified.ets.forecast, FortifiedsalesValid)
+```
 
 
