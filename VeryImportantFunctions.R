@@ -33,3 +33,9 @@ summary(rainNN$model[[1]])
 rainPredict <- forecast(rainNN, h = validLength)
 head(rainPredict$mean)
 accuracy(rainPredict, rainValidWindow)
+
+#horizontal line on a plot
+plot(rainPredict$mean)
+plot(rainPredict$residuals)
+abline(h = 2)
+abline(v = 2015)
