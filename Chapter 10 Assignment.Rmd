@@ -5,7 +5,7 @@ output: html_notebook
 
 Forecasting Australian Wine Sales: Figure 6.15 shows time plots of monthly sales of six types of Australian wines (red, rose, sweet white, dry white, sparkling, and fortified) for 1980-1994. Data available in AustralianWines.xls. 10 The units are thousands of 10 Source: R. J. Hyndman Time Series Data Library, http://data.is/TSDLdemo; accessed on Mar 28, 2016 liters. You are hired to obtain short-term forecasts (2-3 months ahead) for each of the six series, and this task will be repeated every month. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(forecast)
 library(pander)
 library(knitr)
@@ -102,16 +102,20 @@ summary(fortified.nn$model[[1]])
 ```{r, fig.height=4, fig.width=7}
 fortifiedForecast <- forecast(fortified.nn, h = FortifiedvalidLength)
 range(wine$Fortified)
-plot(c(1980, 1995), c(1000, 6000), type = "n", xlab = "Year", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
-lines(Fortified.ts, col = "blue", lwd = 2)
-axis(1, at = seq(1980, 1995, 1))
+plot(c(1980, 1994), c(1000, 6000), type = "n", xlab = "Year", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
+lines(FortifiedsalesTrain, col = "blue", lwd = 2)
+axis(1, at = seq(1980, 1994, 1))
 axis(2, at = seq(1000, 6000, 500), labels = format(seq(1000, 6000, 500)))
 lines(fortified.nn$fitted, lty = 2, col = "red", lwd = 2)
-lines(fortifiedForecast$mean, lty = 2, col = "red", lwd = 2)
-legend(1990, 5900, c("Actual Sales", "NN Model"), lty = c(1, 2), lwd = c(1,2), col = c("blue", "red"))
+legend(1989, 5900, c("Actual Sales", "NN Model"), lty = c(1, 2), lwd = c(1,2), col = c("blue", "red"))
+abline(v = 1994)
 ```
 
   
+```{r}
+plot(fortified.nn$residuals, col = "deeppink4", main = "Residuals from Neural Net Model", xlab = "Year", ylab = "Residuals")
+abline(h = 0)
+```
 
   (b) Use the neural network to forecast sales for each month in the validation period (January 1994 to December 1994). 
   
@@ -124,6 +128,7 @@ fortifiedForecast
 ```{r}
 fortified.ets <- ets(FortifiedsalesTrain, model = "ZZZ", restrict = FALSE)
 fortified.ets
+fortified.ets.forecast <- forecast(fortified.ets, h = FortifiedvalidLength)
 
 ```
 
@@ -132,6 +137,19 @@ fortified.ets
 
   (a) Use R’s ets function to automatically select and fit an exponential smoothing model to the training period until December 1993. Which model did ets fit?
   
+```{r}
+
+plot(c(1994, 1995), c(1000, 6000), type = "n", xlab = "Month", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
+lines(FortifiedsalesValid, col = "blue")
+
+axis(1, at=seq(1994,1995,1/11),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul", "Aug","Sep","Oct","Nov","Dec"))
+ 
+axis(2, at = seq(1000, 6000, 500), labels = format(seq(1000, 6000, 500)))
+lines(fortifiedForecast$mean, lty = 2, col = "red", lwd = 2)
+lines(fortified.ets.forecast$mean, lty = 2)
+legend(1994+1/11, 5900, c("Actual Sales", "NN Model Forecast", "Smoothing Forecast"), lty = c(1, 2, 2), lwd = c(1,2, 1), col = c("blue", "red", "black"), bty = "n")
+
+```
 
 
   
@@ -139,10 +157,7 @@ fortified.ets
   (b) Use this exponential smoothing model to forecast sales for each month in 1994. 
   
 ```{r}
-fortified.ets.forecast <- forecast(fortified.ets, h = FortifiedvalidLength)
 fortified.ets.forecast
-
-
 ```
   
   (c) How does the neural network compare to the exponential smoothing model in terms of predictive performance in the training period? In the validation period?
