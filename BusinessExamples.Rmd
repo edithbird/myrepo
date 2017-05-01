@@ -35,3 +35,11 @@ mean(sales_ad_nature$sales)
 mean(sales_ad_family$sales)
 ```
 
+```{r}
+library(BTYD)
+setwd("/Users/Chris Iyer/Documents/R/win-library/3.4/BTYD/data/")
+chow <- read.csv("cdnowElog.csv")
+head(chow)
+str(chow)
+```
+
