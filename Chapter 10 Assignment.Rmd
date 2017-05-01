@@ -18,7 +18,7 @@ dim(wine)
 wine <- wine[1:180, ]
 head(wine)
 dim(wine)
-tail(wine, 20)
+tail(wine)
 
 ```
 
@@ -103,19 +103,17 @@ summary(fortified.nn$model[[1]])
 
 ```{r, fig.height=4, fig.width=7}
 fortifiedForecast <- forecast(fortified.nn, h = FortifiedvalidLength)
-range(wine$Fortified)
 plot(c(1980, 1994), c(1000, 6000), type = "n", xlab = "Year", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
 lines(FortifiedsalesTrain, col = "blue", lwd = 2)
 axis(1, at = seq(1980, 1994, 1))
 axis(2, at = seq(1000, 6000, 500), labels = format(seq(1000, 6000, 500)))
-lines(fortified.nn$fitted, lty = 2, col = "red", lwd = 2)
-legend(1989, 5900, c("Actual Sales", "NN Model"), lty = c(1, 2), lwd = c(1,2), col = c("blue", "red"))
-abline(v = 1994)
+lines(fortified.nn$fitted, lty = 2, col = "deeppink4", lwd = 2)
+legend(1987, 5900, c("Actual Sales", "NN Model MAPE = 2.06%"), lty = c(1, 2), lwd = c(1,2), col = c("blue", "deeppink4"), bty = "n")
 ```
 
   
 ```{r, fig.height=4, fig.width=7}
-plot(fortified.nn$residuals, col = "deeppink4", main = "Residuals from Neural Net Model", xlab = "Year", ylab = "Residuals")
+plot(fortified.nn$residuals, col = "deeppink4", main = "Residuals from Neural Net Model", xlab = "Year", ylab = "Residuals", bty = "l")
 abline(h = 0)
 ```
 
@@ -141,15 +139,14 @@ fortified.ets.forecast <- forecast(fortified.ets, h = FortifiedvalidLength)
   
 ```{r, fig.height=4, fig.width=7}
 
-plot(c(1994, 1995), c(1000, 6000), type = "n", xlab = "Month", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
-lines(FortifiedsalesValid, col = "blue")
+plot(c(1994, 1995), c(1000, 6000), type = "n", xlab = "Month", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n", main = "Air Travel in 1994 \nActual and Forecasted Values")
+lines(FortifiedsalesValid, col = "blue", lwd = 2)
 
-axis(1, at=seq(1994,1995,1/11),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul", "Aug","Sep","Oct","Nov","Dec"))
- 
+axis(1, at=seq(1994,1995,1/11),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul", "Aug","Sep","Oct","Nov","Dec"), xaxs = "r")
 axis(2, at = seq(1000, 6000, 500), labels = format(seq(1000, 6000, 500)))
-lines(fortifiedForecast$mean, lty = 2, col = "red", lwd = 2)
-lines(fortified.ets.forecast$mean, lty = 2)
-legend(1994+1/11, 5900, c("Actual Sales", "NN Model Forecast", "Smoothing Forecast"), lty = c(1, 2, 2), lwd = c(1,2, 1), col = c("blue", "red", "black"), bty = "n")
+lines(fortifiedForecast$mean, lty = 2, col = "deeppink4", lwd = 2)
+lines(fortified.ets.forecast$mean, lty = 3, lwd = 3)
+legend(1994+1/11, 5900, c("Actual Sales", "NN Model Forecast", "Smoothing Forecast"), lty = c(2, 2, 3), lwd = c(1,2, 3), col = c("blue", "deeppink4", "black"), bty = "n")
 
 ```
 
