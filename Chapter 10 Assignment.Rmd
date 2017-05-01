@@ -14,6 +14,7 @@ library(knitr)
 
 ```{r, message=FALSE, warning=FALSE}
 wine <- read.csv("AustralianWines.csv", header = T, stringsAsFactors = F)
+dim(wine)
 wine <- wine[1:180, ]
 head(wine)
 dim(wine)
@@ -81,6 +82,7 @@ plot(Dry.white.ts, xlab = "Year", ylab = "Sales (thousands)", col = "deeppink4",
 
 ```{r}
 Fortified.ts <- ts(wine$Fortified, start = c(1980, 1), frequency = 12)
+length(Fortified.ts)
 FortifiedvalidLength <- 12
 FortifiedtrainLength <- length(Fortified.ts) - FortifiedvalidLength
 FortifiedsalesTrain <- window(Fortified.ts, end = c(1980, FortifiedtrainLength))
@@ -112,7 +114,7 @@ abline(v = 1994)
 ```
 
   
-```{r}
+```{r, fig.height=4, fig.width=7}
 plot(fortified.nn$residuals, col = "deeppink4", main = "Residuals from Neural Net Model", xlab = "Year", ylab = "Residuals")
 abline(h = 0)
 ```
@@ -137,7 +139,7 @@ fortified.ets.forecast <- forecast(fortified.ets, h = FortifiedvalidLength)
 
   (a) Use R’s ets function to automatically select and fit an exponential smoothing model to the training period until December 1993. Which model did ets fit?
   
-```{r}
+```{r, fig.height=4, fig.width=7}
 
 plot(c(1994, 1995), c(1000, 6000), type = "n", xlab = "Month", ylab = "Sales", bty = "l", xaxt = "n", yaxt = "n")
 lines(FortifiedsalesValid, col = "blue")
