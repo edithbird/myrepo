@@ -37,9 +37,26 @@ mean(sales_ad_family$sales)
 
 ```{r}
 library(BTYD)
+library(dplyr)
+library(ggvis)
 setwd("/Users/Chris Iyer/Documents/R/win-library/3.4/BTYD/data/")
 chow <- read.csv("cdnowElog.csv")
 head(chow)
 str(chow)
+chow %>% ggvis(~cds, ~ sales) %>% layer_points()
+library(Amelia)
+library(Rcpp)
+missmap(chow, main = "Missing values vs observed")
+sapply(chow, function(x) sum(is.na(x)))
+#a way to deal with NA is to substitute the mean
+chow$PRCP[is.na(chow$sales)] <- mean(chow$sales, na.rm = T)
+sapply(chow, function(x) sum(is.na(x)))
+par(mfrow = c(1,2))
+boxplot(chow$sales, horizontal = T, xlab = "Sales")
+#histogram(juice$sales, main = "Distribution Type", prob = T, xlab = "Sales", ylab = "Percent of Total")
+lines(density(chow$sales, lty = "dashed", lwd = 2.5, col = "blue"))
+hist(chow$sales, main = "Distribution of Sales", xlab= "Sales", prob=T, col = "blue")
+lines(density(chow$sales), lty = 2, lwd = 2.5)
+
 ```
 
