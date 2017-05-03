@@ -18,4 +18,17 @@ function(input, output) {
     read.csv(inFile$datapath, header=input$header, sep=input$sep, 
              quote=input$quote)
   })
+  
+  datasetInput <- reactive({
+    switch(input$file1)
+    
+    
+  })
+  
+  output$summary <- renderPrint({
+    dataset <- input$file1
+    summary(input$file1)
+    
+    head(input$file1, n = input$obs)
+  })
 }

@@ -9,6 +9,10 @@ fluidPage(
                          'text/comma-separated-values,text/plain', 
                          '.csv')),
       tags$hr(),
+      uiOutput("fromCol"), 
+      uiOutput("toCol"), 
+      
+      
       checkboxInput('header', 'Header', TRUE),
       radioButtons('sep', 'Separator',
                    c(Comma=',',
@@ -19,10 +23,14 @@ fluidPage(
                    c(None='',
                      'Double Quote'='"',
                      'Single Quote'="'"),
-                   '"')
+                   '"'), 
+      textInput("caption", "Caption:", "Data Summary"),
+      numericInput("obs", "Number of observations to view:", min = 5, max = 10, value = 6)
     ),
     mainPanel(
-      tableOutput('contents')
+      tableOutput('contents'), 
+      verbatimTextOutput("summary"), 
+      tableOutput("view")
     )
   )
 )
