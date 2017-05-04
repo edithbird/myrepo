@@ -20,6 +20,7 @@ library(forecast)
 ItemstoUse = c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
 
 ```{r}
+#Good
 #wide to long 2012
 Stock12 <- read.csv("Inventory12.csv", header = T, stringsAsFactors = F)
 head(Stock12)
@@ -38,11 +39,13 @@ dim(Stock12)
 ItemstoUse <-  c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
 
 Stock12 <- Stock12 %>% filter(Item_Code %in% ItemstoUse)
-
+dim(Stock12)
+head(Stock12)
 ```
 
 
 ```{r}
+#Good
 #wide to long 2013
 Stock13 <- read.csv("Inventory13.csv", header = T, stringsAsFactors = F)
 names(Stock13)
@@ -59,12 +62,13 @@ dim(Stock13)
 kable(head(Stock13))
 
 dim(Stock13)
-# head(Stock12)
+
 ```
 
 
 
 ```{r}
+#Good
 #wide to long 2014
 Stock14 <- read.csv("Inventory14.csv", header = T, stringsAsFactors = F)
 head(Stock14)
@@ -88,6 +92,7 @@ dim(Stock14)
 
 
 ```{r}
+#Good
 #wide to long 2015
 Stock15 <- read.csv("Inventory15.csv", header = T, stringsAsFactors = F)
 head(Stock15)
@@ -110,6 +115,7 @@ dim(Stock15)
 ```
 
 ```{r}
+#Good
 #wide to long 2016
 Stock16 <- read.csv("Inventory16.csv", header = T, stringsAsFactors = F)
 head(Stock16)
@@ -132,6 +138,7 @@ dim(Stock16)
 ```
 
 ```{r}
+#Good
 #wide to long 2017
 Stock17 <- read.csv("Inventory17.csv", header = T, stringsAsFactors = F)
 
@@ -157,17 +164,264 @@ dim(Stock17)
 
 ```{r}
 library(reshape2)
-x <- rbind.data.frame(Stock17, Stock16, Stock15, Stock14, Stock13, Stock12)
+x <- rbind.data.frame(Stock12, Stock13, Stock14, Stock15, Stock16, Stock17)
 dim(x)
 head(x)
-dim(x)
-xx <- recast(x, Month~Item_Code)
-head(xx)
-dim(xx)
+
+```
+
+```{r}
+a <- x %>% filter(Item_Code == "SS02CLR7284")
+a$Used <- as.numeric(a$Used)
+a.ts <- ts(a$Used, start = c(2012,1), frequency = 12)
+plot(a.ts, ylim = c(0, 2000))
+```
+
+```{r}
+b <- x %>% filter(Item_Code == "SS02LOE7284")
+b$Used <- as.numeric(b$Used)
+b.ts <- ts(b$Used, start = c(2012,1), frequency = 12)
+plot(b.ts)
+```
+
+```{r}
+c <- x %>% filter(Item_Code == "SS03CLR96130")
+c$Used <- as.numeric(c$Used)
+c.ts <- ts(c$Used, start = c(2012,1), frequency = 12)
+plot(c.ts)
 ```
 
 
 ```{r}
+d <- x %>% filter(Item_Code == "SS02CLR7284")
+d$Used <- as.numeric(d$Used)
+d.ts <- ts(d$Used, start = c(2012,1), frequency = 12)
+plot(d.ts)
+```
+
+```{r}
+e <- x %>% filter(Item_Code == "SS06S6T100144")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+f <- x %>% filter(Item_Code == "SS10CLR96130")
+f$Used <- as.numeric(f$Used)
+f.ts <- ts(f$Used, start = c(2012,1), frequency = 12)
+plot(f.ts)
+```
+
+```{r}
+g <- x %>% filter(Item_Code == "SS05CLR96130")
+g$Used <- as.numeric(g$Used)
+g.ts <- ts(g$Used, start = c(2012,1), frequency = 12)
+plot(g.ts)
+```
+
+```{r}
+h <- x %>% filter(Item_Code == "SS06MCL96130")
+h$Used <- as.numeric(h$Used)
+h.ts <- ts(h$Used, start = c(2012,1), frequency = 12)
+plot(h.ts)
+```
+
+```{r}
+i <- x %>% filter(Item_Code == "SS06S6A100144")
+i$Used <- as.numeric(i$Used)
+i.ts <- ts(i$Used, start = c(2012,1), frequency = 12)
+plot(i.ts)
+```
+
+```{r}
+j <- x %>% filter(Item_Code == "SS10SHG96130")
+j$Used <- as.numeric(j$Used)
+j.ts <- ts(j$Used, start = c(2012,1), frequency = 12)
+plot(j.ts)
+```
+
+
+```{r}
+k <- x %>% filter(Item_Code == "SS03LOE7284")
+k$Used <- as.numeric(k$Used)
+k.ts <- ts(k$Used, start = c(2012,1), frequency = 12)
+plot(k.ts)
+```
+
+```{r}
+l <- x %>% filter(Item_Code == "SS03LOE728")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+
+```{r}
+m <- x %>% filter(Item_Code == "SS03S6T7284")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+n <- x %>% filter(Item_Code == "SS04CLR96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+
+o <- x %>% filter(Item_Code == "SS06LOE96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+p <- x %>% filter(Item_Code == "SS02LOE7284")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+
+```
+
+```{r}
+q <- x %>% filter(Item_Code == "SS06S7T100144")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+r <- x %>% filter(Item_Code == "SS05S6T96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+s <- x %>% filter(Item_Code == "SS06BRN96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+t <- x %>% filter(Item_Code == "SS06GRY96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+u <- x %>% filter(Item_Code == "SS06STP96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+v <- x %>% filter(Item_Code == "SS03S6A7284")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+```
+
+```{r}
+w <- x %>% filter(Item_Code == "SS10SUW96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+
+```
+
+
+```{r}
+v <- x %>% filter(Item_Code == "SS0LCLR7284")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+
+```
+
+```{r}
+y <- x %>% filter(Item_Code == "SS05LOE96130")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+plot(e.ts)
+
+```
+
+
+```{r}
+z <- x %>% filter(Item_Code == "SS12SHG96130")
+z$Used <- as.numeric(z$Used)
+z.ts <- ts(z$Used, start = c(2012,1), frequency = 12)
+plot(z.ts)
+```
+
+```{r}
+aa <- x %>% filter(Item_Code == "SS06STC102144")
+aa$Used <- as.numeric(aa$Used)
+aa.ts <- ts(aa$Used, start = c(2012,1), frequency = 12)
+plot(aa.ts)
+
+```
+
+```{r}
+bb <- x %>% filter(Item_Code == "SS12STP96130")
+bb$Used <- as.numeric(bb$Used)
+bb.ts <- ts(bb$Used, start = c(2012,1), frequency = 12)
+plot(bb.ts)
+
+```
+
+```{r}
+cc <- x %>% filter(Item_Code == "SS06S6G96130")
+cc$Used <- as.numeric(cc$Used)
+cc.ts <- ts(cc$Used, start = c(2012,1), frequency = 12)
+plot(cc.ts)
+
+```
+
+
+```{r}
+dd <- x %>% filter(Item_Code == "SS10STP96130")
+dd$Used <- as.numeric(dd$Used)
+dd.ts <- ts(dd$Used, start = c(2012,1), frequency = 12)
+plot(dd.ts)
+
+```
+
+```{r}
+ee <- x %>% filter(Item_Code == "SS03CLR96130")
+ee$Used <- as.numeric(ee$Used)
+ee.ts <- ts(ee$Used, start = c(2012,1), frequency = 12)
+plot(ee.ts)
+
+```
+
+
+
+
+
+
+
+
+# bound <- cbind(a,b,c)
+# head(bound)
+# dim(x)
+# xx <- recast(x, Month~Item_Code)
+# head(xx, 36)
+# dim(xx)
+
+
+
+
+
+```{r, eval=FALSE, include=FALSE}
 #Not good
 SS02CLR7284 <- ts(xx$SS02CLR7284, start = c(2012,1), frequency = 12)
 plot(SS02CLR7284)
@@ -190,10 +444,125 @@ SS05CLR96130
 SS03S6A7284 <- ts(xx$SS03S6A7284, start = c(2012,1), frequency = 12)
 plot(SS03S6A7284)
 SS03S6A7284
-#Next
-SS03S6A7284 <- ts(xx$SS03S6A7284, start = c(2012,1), frequency = 12)
-plot(SS03S6A7284)
-SS03S6A7284
+#Good
+SS03S6T7284 <- ts(xx$SS03S6T7284, start = c(2012,1), frequency = 12)
+plot(SS03S6T7284)
+SS03S6T7284
+#Good
+SS04CLR96130 <- ts(xx$SS04CLR96130, start = c(2012,1), frequency = 12)
+plot(SS04CLR96130)
+SS04CLR96130
+
+#Good
+SS05CLR96130 <- ts(xx$SS05CLR96130, start = c(2012,1), frequency = 12)
+plot(SS05CLR96130)
+SS05CLR96130
+
+#Not Good
+SS05LOE96130 <- ts(xx$SS05LOE96130, start = c(2012,1), frequency = 12)
+plot(SS05LOE96130)
+SS05LOE96130
+
+
+#Good
+SS05S6T96130 <- ts(xx$SS05S6T96130, start = c(2012,1), frequency = 12)
+plot(SS05S6T96130)
+SS05S6T96130
+
+#Good
+SS06GRY96130 <- ts(xx$SS06GRY96130, start = c(2012,1), frequency = 12)
+plot(SS06GRY96130)
+SS06GRY96130
+
+#Good
+SS06LOE96130 <- ts(xx$SS06LOE96130, start = c(2012,1), frequency = 12)
+plot(SS06LOE96130)
+SS06LOE96130
+
+#Not Good
+SS06MCL96130 <- ts(xx$SS06MCL96130, start = c(2012,1), frequency = 12)
+plot(SS06MCL96130)
+SS06MCL96130
+
+#Good
+SS06S6A100144 <- ts(xx$SS06S6A100144, start = c(2012,1), frequency = 12)
+plot(SS06S6A100144)
+SS06S6A100144
+
+# Not Good
+SS06S6G96130 <- ts(xx$SS06S6G96130, start = c(2012,1), frequency = 12)
+plot(SS06S6G96130)
+SS06S6G96130
+
+#Good
+SS06S6T100144 <- ts(xx$SS06S6T100144, start = c(2012,1), frequency = 12)
+plot(SS06S6T100144)
+SS06S6T100144
+
+#Not Good
+SS06S7T100144 <- ts(xx$SS06S7T100144, start = c(2012,1), frequency = 12)
+plot(SS06S7T100144)
+SS06S7T100144
+
+# Not Good
+SS06STC102144 <- ts(xx$SS06STC102144, start = c(2012,1), frequency = 12)
+plot(SS06STC102144)
+SS06STC102144
+
+#Good
+SS06STP96130 <- ts(xx$SS06STP96130, start = c(2012,1), frequency = 12)
+plot(SS06STP96130)
+SS06STP96130
+
+#NoT Good
+SS0LCLR7284 <- ts(xx$SS0LCLR7284, start = c(2012,1), frequency = 12)
+plot(SS0LCLR7284)
+SS0LCLR7284
+
+#Good
+SS10CLR96130 <- ts(xx$SS10CLR96130, start = c(2012,1), frequency = 12)
+plot(SS10CLR96130)
+SS10CLR96130
+
+#start at 25
+
+#Good
+SS10SHG96130 <- ts(xx$SS10SHG96130, start = c(2012,1), frequency = 12)
+plot(SS10SHG96130)
+SS10SHG96130
+
+
+#Good
+SS10STP96130 <- ts(xx$SS10STP96130, start = c(2012,1), frequency = 12)
+plot(SS10STP96130)
+SS10STP96130
+
+
+#Not Good
+SS10SUW96130 <- ts(xx$SS10SUW96130, start = c(2012,1), frequency = 12)
+plot(SS10SUW96130)
+SS10SUW96130
+
+
+#Good
+SS12CLR102130 <- ts(xx$SS12CLR102130, start = c(2012,1), frequency = 12)
+plot(SS12CLR102130)
+SS12CLR102130
+
+
+#Good
+SS12SHG96130 <- ts(xx$SS12SHG96130, start = c(2012,1), frequency = 12)
+plot(SS12SHG96130)
+SS12SHG96130
+
+#Good
+SS12STP96130 <- ts(xx$SS12STP96130, start = c(2012,1), frequency = 12)
+plot(SS12STP96130)
+SS12STP96130
+
+```
+
+```{r}
 
 ```
 
