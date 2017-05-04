@@ -1,0 +1,66 @@
+---
+title: "Final Project"
+author: "Christine Iyer"
+date: "May 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(knitr)
+library(dplyr)
+library(lubridate)
+
+```
+
+
+
+```{r}
+#setwd("/Users/Chris Iyer/Documents/AirTravel/data/")
+crash <- read.csv("airAccs.csv", header = T, stringsAsFactors = F)
+str(crash)
+#crash$Date <- as.POSIXct(crash$Date, format = "%m/%d/%Y")
+str(crash)
+library(tidyr)
+library(stringr)
+#crash[ , 2 ] <- ymd(crash[, 2])
+crash$EventID <- crash$X
+airTravel <- read.csv("AirMiles1.csv", header = T, stringsAsFactors = F)
+crashUnitedStates <- crash %>% filter(grepl("United States",operator))
+crashAmerica <- crash %>% filter(grepl("America", operator))
+crashDelta <- crash %>% filter(grepl("Delta", operator))
+crashHawaii <- crash %>% filter(grepl("Hawaii", operator))
+crashSouthWest <- crash %>% filter(grepl("Southwest", operator))
+crashAlaska <- crash %>% filter(grepl("Alaska", operator))
+kable(head(crash))
+kable(head(airTravel))
+kable(tail(airTravel))
+crash <- crash %>% filter(Date >= "1990-01-01")
+kable(head(crash))
+crashDate2012 <- crash %>% filter(grepl("2012", Date))
+crashDate2013 <- crash %>% filter(grepl("2013", Date))
+crashDate2014 <- crash %>% filter(grepl("2014", Date))
+tail(crashDate2014)
+```
+
+```{r}
+accidents <- read.csv("Accidents.csv",  header = TRUE, stringsAsFactors = FALSE)
+kable(head(accidents))
+```
+
+Project Idea
+10% of your overall course grade is determined by a written narrative describing an “interesting and important time series forecasting problem” that you believe could be tackled by the tools and techniques covered in this class. While there is no specific minimum or maximum length of this written assignment, you should be able to effectively convey your idea succinctly. You may wish to use the following multi-step process to help you write the paper. 
+
+
+First, what is the “problem or question” you are trying to solve or answer? You should be able to put this idea into a single sentence. 
+
+Second, why is this problem both important and interesting? The problem should be based on a real struggle or “pain point” of a business or an organization. 
+
+Third, because everything we do in the class relies on data, where and how do you expect to obtain the necessary time series data to utilize the tools and models we covered in class? 
+
+Fourth, has a similar problem been solved by others? If yes, then please cite those sources. If no, then you just might be one of the most innovative problem solvers of your generation. 
+
+You do not have to perform any analysis, but rather describe the proper process that would be necessary if you were tasked with generating the forecasts.
