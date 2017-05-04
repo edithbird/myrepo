@@ -1,0 +1,172 @@
+---
+title: "FinalPredictive"
+author: "Christine Iyer"
+date: "May 4, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+itemsToUse = c(SS06CLR96130,SS03CLR96130,SS12CLR102130,SS02CLR7284,SS06S6T100144,SS10CLR96130,SS05CLR96130,SS06MCL96130,SS06S6A100144,SS10SHG96130,SS03LOE7284,SS03S6T7284,SS04CLR96130,SS06LOE96130,SS02LOE7284,SS06S7T100144,SS05S6T96130,SS06BRN96130,SS06GRY96130,SS06STP96130)
+```{r}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(forecast)
+```
+
+ItemstoUse = c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
+
+```{r}
+#wide to long 2012
+Stock12 <- read.csv("Inventory12.csv", header = T, stringsAsFactors = F)
+head(Stock12)
+names(Stock12)
+Stock12 <- Stock12 %>% select(-Description)
+
+
+dim(Stock12)
+head(Stock12)
+names(Stock12) <- c("Item_Code", "01-12", "02-12", "03-12", "04-12", "05-12", "06-12", "07-12", "08-12", "09-12", "10-12", "11-12", "12-12")
+names(Stock12)
+Stock12 <- gather(Stock12, Month, Used,c(2:13))
+kable(head(Stock12))
+dim(Stock12)
+
+ItemstoUse <-  c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
+
+Stock12 <- Stock12 %>% filter(Item_Code %in% ItemstoUse)
+
+```
+
+
+```{r}
+#wide to long 2013
+Stock13 <- read.csv("Inventory13.csv", header = T, stringsAsFactors = F)
+names(Stock13)
+Stock13 <- Stock13 %>% select(-Description)
+
+dim(Stock13)
+head(Stock13)
+names(Stock13) <- c("Item_Code", "01-13", "02-13", "03-13", "04-13", "05-13", "06-13", "07-13", "08-13", "09-13", "10-13", "11-13", "12-13")
+names(Stock13)
+Stock13 <- gather(Stock13, Month, Used,c(2:13))
+head(Stock13)
+Stock13 <- Stock13 %>% filter(Item_Code %in% ItemstoUse)
+dim(Stock13)
+kable(head(Stock13))
+
+dim(Stock13)
+# head(Stock12)
+```
+
+
+
+```{r}
+#wide to long 2014
+Stock14 <- read.csv("Inventory14.csv", header = T, stringsAsFactors = F)
+head(Stock14)
+names(Stock14)
+Stock14 <- Stock14 %>% select(-Description)
+
+dim(Stock14)
+head(Stock14)
+names(Stock14) <- c("Item_Code", "01-14", "02-14", "03-14", "04-14", "05-14", "06-14", "07-14", "08-14", "09-14", "10-14", "11-14", "12-14")
+names(Stock14)
+Stock14 <- gather(Stock14, Month, Used,c(2:13))
+kable(head(Stock14))
+Stock14 <- Stock14 %>% filter(Item_Code %in% ItemstoUse)
+dim(Stock14)
+
+
+dim(Stock14)
+# head(Stock12)
+```
+
+
+
+```{r}
+#wide to long 2015
+Stock15 <- read.csv("Inventory15.csv", header = T, stringsAsFactors = F)
+head(Stock15)
+Stock15 <- Stock15[-1,]
+names(Stock15)
+Stock15 <- Stock15 %>% select(-Description)
+
+dim(Stock15)
+head(Stock15)
+names(Stock15) <- c("Item_Code", "01-15", "02-15", "03-15", "04-15", "05-15", "06-15", "07-15", "08-15", "09-15", "10-15", "11-15", "12-15")
+names(Stock15)
+Stock15 <- gather(Stock15, Month, Used,c(2:13))
+head(Stock15)
+Stock15 <- Stock15 %>% filter(Item_Code %in% ItemstoUse)
+dim(Stock15)
+kable(head(Stock15))
+
+dim(Stock15)
+# head(Stock12)
+```
+
+```{r}
+#wide to long 2016
+Stock16 <- read.csv("Inventory16.csv", header = T, stringsAsFactors = F)
+head(Stock16)
+Stock16 <- Stock16[-1,]
+names(Stock16)
+Stock16 <- Stock16 %>% select(-Description)
+
+dim(Stock16)
+head(Stock16)
+names(Stock16) <- c("Item_Code", "01-16", "02-16", "03-16", "04-16", "05-16", "06-16", "07-16", "08-16", "09-16", "10-16", "11-16", "12-16")
+names(Stock16)
+Stock16 <- gather(Stock16, Month, Used,c(2:13))
+head(Stock16)
+Stock16 <- Stock16 %>% filter(Item_Code %in% ItemstoUse)
+dim(Stock16)
+kable(head(Stock16))
+
+dim(Stock16)
+# head(Stock12)
+```
+
+```{r}
+#wide to long 2017
+Stock17 <- read.csv("Inventory17.csv", header = T, stringsAsFactors = F)
+
+head(Stock17)
+names(Stock17)
+Stock17 <- Stock17 %>% select(-Description)
+
+dim(Stock17)
+head(Stock17)
+names(Stock17) <- c("Item_Code", "01-17", "02-17", "03-17", "04-17")
+names(Stock17)
+Stock17 <- gather(Stock17, Month, Used,c(2:5))
+head(Stock17)
+Stock17 <- Stock17 %>% filter(Item_Code %in% ItemstoUse)
+dim(Stock17)
+kable(head(Stock17))
+
+dim(Stock17)
+# head(Stock12)
+```
+
+```{r}
+x <- inner_join(Stock12, Stock13, by = "Item_Code")
+head(x)
+dim(x)
+x[16000,]
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+write.csv(Stock12, "Stock12.csv", row.names = F)
+write.csv(Stock13, "Stock13.csv", row.names = F)
+write.csv(Stock14, "Stock14.csv", row.names = F)
+write.csv(Stock15, "Stock15.csv", row.names = F)
+write.csv(Stock16, "Stock16.csv", row.names = F)
+write.csv(Stock17, "Stock17.csv", row.names = F)
+```
+
