@@ -144,6 +144,8 @@ head(Stock17)
 names(Stock17) <- c("Item_Code", "01-17", "02-17", "03-17", "04-17")
 names(Stock17)
 Stock17 <- gather(Stock17, Month, Used,c(2:5))
+
+
 head(Stock17)
 Stock17 <- Stock17 %>% filter(Item_Code %in% ItemstoUse)
 dim(Stock17)
@@ -154,19 +156,44 @@ dim(Stock17)
 ```
 
 ```{r}
-x <- inner_join(Stock12, Stock13, by = "Item_Code")
+library(reshape2)
+x <- rbind.data.frame(Stock17, Stock16, Stock15, Stock14, Stock13, Stock12)
+dim(x)
 head(x)
 dim(x)
-x[16000,]
+xx <- recast(x, Month~Item_Code)
+head(xx)
+dim(xx)
 ```
 
 
-```{r, eval=FALSE, include=FALSE}
-write.csv(Stock12, "Stock12.csv", row.names = F)
-write.csv(Stock13, "Stock13.csv", row.names = F)
-write.csv(Stock14, "Stock14.csv", row.names = F)
-write.csv(Stock15, "Stock15.csv", row.names = F)
-write.csv(Stock16, "Stock16.csv", row.names = F)
-write.csv(Stock17, "Stock17.csv", row.names = F)
+```{r}
+#Not good
+SS02CLR7284 <- ts(xx$SS02CLR7284, start = c(2012,1), frequency = 12)
+plot(SS02CLR7284)
+SS02CLR7284
+names(xx)
+
+#good
+SS02LOE7284 <- ts(xx$SS02LOE7284, start = c(2012,1), frequency = 12)
+plot(SS02LOE7284)
+SS02LOE7284
+#Not Good
+SS03CLR96130 <- ts(xx$SS03CLR96130, start = c(2012,1), frequency = 12)
+SS03CLR96130
+plot(SS03CLR96130)
+#Good
+SS05CLR96130 <- ts(xx$SS05CLR96130, start = c(2012,1), frequency = 12)
+plot(SS05CLR96130)
+SS05CLR96130
+#Good
+SS03S6A7284 <- ts(xx$SS03S6A7284, start = c(2012,1), frequency = 12)
+plot(SS03S6A7284)
+SS03S6A7284
+#Next
+SS03S6A7284 <- ts(xx$SS03S6A7284, start = c(2012,1), frequency = 12)
+plot(SS03S6A7284)
+SS03S6A7284
+
 ```
 
