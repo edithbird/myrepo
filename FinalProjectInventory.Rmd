@@ -6,28 +6,46 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
-itemsToUse = c(SS06CLR96130,SS03CLR96130,SS12CLR102130,SS02CLR7284,SS06S6T100144,SS10CLR96130,SS05CLR96130,SS06MCL96130,SS06S6A100144,SS10SHG96130,SS03LOE7284,SS03S6T7284,SS04CLR96130,SS06LOE96130,SS02LOE7284,SS06S7T100144,SS05S6T96130,SS06BRN96130,SS06GRY96130,SS06STP96130)
-```{r}
+
+Sigco, Inc is a glass and architectural metal fabricator/distributor in Westbrook, ME and serves much New England. They manufacture a number of glass products and think the demand for these products is seasonal. 
+
+Inventory management is a major challenge. It is predominantly manual - inventory is counted three times a week to ensure accuracy, demand is forecasted just one week in advance and quantities to order for replenishment (including safety stock levels) are very subjective.  In particular, safety stock is computed by assigning an extra percentage of product to keep on hand of some of the products, but not all, and the percentage used varies by product. There is opportunity for analysis and improvement in the forecasting of demand using historical seasonal data.  Further, safety stock could be calculated to ensure greater efficiency of their inventory - maintaining or improving their service level while minimizing too much stock on hand.
+
+Last semester, in Supply Chain with Professor Kohli, my team tackled inventory management. We attempted to build a system using historical data to forecast several months out. With the forecasted values we used the Economic Order Quantity (EOQ) model to calculate safety stock and reorder points. I was taked with the forecasting and EOQ calculations. I am a little embarrassed to tell exactly how I did this, but now, armed with Predictive Analytics, I feel I can revisit the material for find the best forecasting model. 
+
+There are roughly 200 SKUs in Sigco's inventory, and I have choen to look at the 25 most utilized items and forecast their use. 
+
+
+
+
+
+
+
+
+
+
+```{r, libraries, message=FALSE, warning=FALSE, include=FALSE}
 library(knitr)
 library(dplyr)
 library(tidyr)
 library(forecast)
+library(pander)
 ```
 
-ItemstoUse = c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
-
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #Good
 #wide to long 2012
 Stock12 <- read.csv("Inventory12.csv", header = T, stringsAsFactors = F)
 head(Stock12)
 names(Stock12)
 Stock12 <- Stock12 %>% select(-Description)
-
-
 dim(Stock12)
 head(Stock12)
 names(Stock12) <- c("Item_Code", "01-12", "02-12", "03-12", "04-12", "05-12", "06-12", "07-12", "08-12", "09-12", "10-12", "11-12", "12-12")
@@ -35,22 +53,19 @@ names(Stock12)
 Stock12 <- gather(Stock12, Month, Used,c(2:13))
 kable(head(Stock12))
 dim(Stock12)
-
-ItemstoUse <-  c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
-
+ItemstoUse <-  c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
 Stock12 <- Stock12 %>% filter(Item_Code %in% ItemstoUse)
 dim(Stock12)
 head(Stock12)
 ```
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #Good
 #wide to long 2013
 Stock13 <- read.csv("Inventory13.csv", header = T, stringsAsFactors = F)
 names(Stock13)
 Stock13 <- Stock13 %>% select(-Description)
-
 dim(Stock13)
 head(Stock13)
 names(Stock13) <- c("Item_Code", "01-13", "02-13", "03-13", "04-13", "05-13", "06-13", "07-13", "08-13", "09-13", "10-13", "11-13", "12-13")
@@ -60,14 +75,13 @@ head(Stock13)
 Stock13 <- Stock13 %>% filter(Item_Code %in% ItemstoUse)
 dim(Stock13)
 kable(head(Stock13))
-
 dim(Stock13)
 
 ```
 
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #Good
 #wide to long 2014
 Stock14 <- read.csv("Inventory14.csv", header = T, stringsAsFactors = F)
@@ -82,16 +96,9 @@ names(Stock14)
 Stock14 <- gather(Stock14, Month, Used,c(2:13))
 kable(head(Stock14))
 Stock14 <- Stock14 %>% filter(Item_Code %in% ItemstoUse)
-dim(Stock14)
-
-
-dim(Stock14)
-# head(Stock12)
 ```
 
-
-
-```{r}
+```{r, include=FALSE}
 #Good
 #wide to long 2015
 Stock15 <- read.csv("Inventory15.csv", header = T, stringsAsFactors = F)
@@ -110,11 +117,9 @@ Stock15 <- Stock15 %>% filter(Item_Code %in% ItemstoUse)
 dim(Stock15)
 kable(head(Stock15))
 
-dim(Stock15)
-# head(Stock12)
 ```
 
-```{r}
+```{r, include=FALSE}
 #Good
 #wide to long 2016
 Stock16 <- read.csv("Inventory16.csv", header = T, stringsAsFactors = F)
@@ -122,9 +127,6 @@ head(Stock16)
 Stock16 <- Stock16[-1,]
 names(Stock16)
 Stock16 <- Stock16 %>% select(-Description)
-
-dim(Stock16)
-head(Stock16)
 names(Stock16) <- c("Item_Code", "01-16", "02-16", "03-16", "04-16", "05-16", "06-16", "07-16", "08-16", "09-16", "10-16", "11-16", "12-16")
 names(Stock16)
 Stock16 <- gather(Stock16, Month, Used,c(2:13))
@@ -132,258 +134,245 @@ head(Stock16)
 Stock16 <- Stock16 %>% filter(Item_Code %in% ItemstoUse)
 dim(Stock16)
 kable(head(Stock16))
-
-dim(Stock16)
-# head(Stock12)
 ```
 
-```{r}
+```{r, include=FALSE}
 #Good
 #wide to long 2017
 Stock17 <- read.csv("Inventory17.csv", header = T, stringsAsFactors = F)
-
-head(Stock17)
-names(Stock17)
 Stock17 <- Stock17 %>% select(-Description)
-
-dim(Stock17)
-head(Stock17)
 names(Stock17) <- c("Item_Code", "01-17", "02-17", "03-17", "04-17")
 names(Stock17)
 Stock17 <- gather(Stock17, Month, Used,c(2:5))
-
-
-head(Stock17)
 Stock17 <- Stock17 %>% filter(Item_Code %in% ItemstoUse)
-dim(Stock17)
-kable(head(Stock17))
-
-dim(Stock17)
-# head(Stock12)
 ```
 
-```{r}
+```{r, include=FALSE}
 library(reshape2)
 x <- rbind.data.frame(Stock12, Stock13, Stock14, Stock15, Stock16, Stock17)
 dim(x)
+x[x == 0] <- NA
 head(x)
 
 ```
 
+
 ```{r}
-a <- x %>% filter(Item_Code == "SS02CLR7284")
+a <- x %>% filter(Item_Code == "SS06CLR96130")
 a$Used <- as.numeric(a$Used)
 a.ts <- ts(a$Used, start = c(2012,1), frequency = 12)
-plot(a.ts, ylim = c(0, 2000))
+ggseasonplot(a.ts)
+```
+
+```{r}
+validLength <- 4
+trainLength <- length(a.ts) - validLength
+salesTrain <- window(a.ts, end = c(2012, trainLength))
+salesValid <- window(a.ts, start = c(2012, trainLength + 1))
 ```
 
 ```{r}
 b <- x %>% filter(Item_Code == "SS02LOE7284")
 b$Used <- as.numeric(b$Used)
 b.ts <- ts(b$Used, start = c(2012,1), frequency = 12)
-plot(b.ts)
+ggseasonplot(b.ts)
 ```
 
 ```{r}
 c <- x %>% filter(Item_Code == "SS03CLR96130")
 c$Used <- as.numeric(c$Used)
 c.ts <- ts(c$Used, start = c(2012,1), frequency = 12)
-plot(c.ts)
+ggseasonplot(c.ts)
 ```
-
 
 ```{r}
 d <- x %>% filter(Item_Code == "SS02CLR7284")
 d$Used <- as.numeric(d$Used)
 d.ts <- ts(d$Used, start = c(2012,1), frequency = 12)
-plot(d.ts)
+ggseasonplot(d.ts)
 ```
 
 ```{r}
 e <- x %>% filter(Item_Code == "SS06S6T100144")
 e$Used <- as.numeric(e$Used)
 e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+ggseasonplot(e.ts)
 ```
 
 ```{r}
 f <- x %>% filter(Item_Code == "SS10CLR96130")
 f$Used <- as.numeric(f$Used)
 f.ts <- ts(f$Used, start = c(2012,1), frequency = 12)
-plot(f.ts)
+ggseasonplot(f.ts)
 ```
 
 ```{r}
 g <- x %>% filter(Item_Code == "SS05CLR96130")
 g$Used <- as.numeric(g$Used)
 g.ts <- ts(g$Used, start = c(2012,1), frequency = 12)
-plot(g.ts)
+ggseasonplot(g.ts)
 ```
 
 ```{r}
 h <- x %>% filter(Item_Code == "SS06MCL96130")
 h$Used <- as.numeric(h$Used)
 h.ts <- ts(h$Used, start = c(2012,1), frequency = 12)
-plot(h.ts)
+ggseasonplot(h.ts)
 ```
 
 ```{r}
 i <- x %>% filter(Item_Code == "SS06S6A100144")
 i$Used <- as.numeric(i$Used)
 i.ts <- ts(i$Used, start = c(2012,1), frequency = 12)
-plot(i.ts)
+ggseasonplot(i.ts)
 ```
 
 ```{r}
 j <- x %>% filter(Item_Code == "SS10SHG96130")
 j$Used <- as.numeric(j$Used)
 j.ts <- ts(j$Used, start = c(2012,1), frequency = 12)
-plot(j.ts)
+ggseasonplot(j.ts)
 ```
 
 
+
 ```{r}
-k <- x %>% filter(Item_Code == "SS03LOE7284")
+k <- x %>% filter(Item_Code == "SS12CLR102130")
 k$Used <- as.numeric(k$Used)
 k.ts <- ts(k$Used, start = c(2012,1), frequency = 12)
-plot(k.ts)
+ggseasonplot(k.ts)
 ```
 
 ```{r}
-l <- x %>% filter(Item_Code == "SS03LOE728")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+l <- x %>% filter(Item_Code == "SS03LOE7284")
+l$Used <- as.numeric(l$Used)
+l.ts <- ts(l$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(l.ts)
 ```
-
 
 ```{r}
 m <- x %>% filter(Item_Code == "SS03S6T7284")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+m$Used <- as.numeric(m$Used)
+m.ts <- ts(m$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(m.ts)
 ```
 
 ```{r}
 n <- x %>% filter(Item_Code == "SS04CLR96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+n$Used <- as.numeric(n$Used)
+n.ts <- ts(n$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(n.ts)
 ```
 
 ```{r}
 
 o <- x %>% filter(Item_Code == "SS06LOE96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+o$Used <- as.numeric(o$Used)
+o.ts <- ts(o$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(o.ts)
 ```
 
 ```{r}
 p <- x %>% filter(Item_Code == "SS02LOE7284")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+p$Used <- as.numeric(p$Used)
+p.ts <- ts(p$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(p.ts)
 
 ```
 
 ```{r}
 q <- x %>% filter(Item_Code == "SS06S7T100144")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+q$Used <- as.numeric(q$Used)
+q.ts <- ts(q$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(q.ts)
 ```
 
 ```{r}
 r <- x %>% filter(Item_Code == "SS05S6T96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+r$Used <- as.numeric(r$Used)
+r.ts <- ts(r$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(r.ts)
 ```
 
 ```{r}
 s <- x %>% filter(Item_Code == "SS06BRN96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+s$Used <- as.numeric(s$Used)
+s.ts <- ts(s$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(s.ts)
 ```
 
 ```{r}
 t <- x %>% filter(Item_Code == "SS06GRY96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+t$Used <- as.numeric(t$Used)
+t.ts <- ts(t$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(t.ts)
 ```
 
 ```{r}
 u <- x %>% filter(Item_Code == "SS06STP96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+u$Used <- as.numeric(u$Used)
+u.ts <- ts(u$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(u.ts)
 ```
 
 ```{r}
 v <- x %>% filter(Item_Code == "SS03S6A7284")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+v$Used <- as.numeric(v$Used)
+v.ts <- ts(v$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(v.ts)
 ```
 
 ```{r}
 w <- x %>% filter(Item_Code == "SS10SUW96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
-
-```
-
-
-```{r}
-v <- x %>% filter(Item_Code == "SS0LCLR7284")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+w$Used <- as.numeric(w$Used)
+w.ts <- ts(w$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(w.ts)
 
 ```
 
 ```{r}
+xx <- x %>% filter(Item_Code == "SS0LCLR7284")
+xx$Used <- as.numeric(xx$Used)
+xx.ts <- ts(xx$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(xx.ts)
+
+```
+
+```{r, echo=TRUE}
 y <- x %>% filter(Item_Code == "SS05LOE96130")
-e$Used <- as.numeric(e$Used)
-e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
-plot(e.ts)
+y$Used <- as.numeric(y$Used)
+y.ts <- ts(y$Used, start = c(2013,10), frequency = 12)
+ggseasonplot(y.ts)
 
 ```
 
 
-```{r}
+```{r, echo=TRUE}
 z <- x %>% filter(Item_Code == "SS12SHG96130")
 z$Used <- as.numeric(z$Used)
 z.ts <- ts(z$Used, start = c(2012,1), frequency = 12)
-plot(z.ts)
+ggseasonplot(z.ts)
 ```
 
 ```{r}
 aa <- x %>% filter(Item_Code == "SS06STC102144")
 aa$Used <- as.numeric(aa$Used)
 aa.ts <- ts(aa$Used, start = c(2012,1), frequency = 12)
-plot(aa.ts)
-
+ggseasonplot(aa.ts)
 ```
 
 ```{r}
 bb <- x %>% filter(Item_Code == "SS12STP96130")
 bb$Used <- as.numeric(bb$Used)
 bb.ts <- ts(bb$Used, start = c(2012,1), frequency = 12)
-plot(bb.ts)
-
+ggseasonplot(bb.ts)
 ```
 
 ```{r}
 cc <- x %>% filter(Item_Code == "SS06S6G96130")
 cc$Used <- as.numeric(cc$Used)
 cc.ts <- ts(cc$Used, start = c(2012,1), frequency = 12)
-plot(cc.ts)
-
+ggseasonplot(cc.ts)
 ```
 
 
@@ -391,178 +380,183 @@ plot(cc.ts)
 dd <- x %>% filter(Item_Code == "SS10STP96130")
 dd$Used <- as.numeric(dd$Used)
 dd.ts <- ts(dd$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(dd.ts)
+
+```
+
+
+```{r}
+par(mfrow = c(2,3))
+plot(a.ts)
+plot(b.ts)
+plot(d.ts)
+plot(e.ts)
+plot(f.ts)
+plot(o.ts)
+
+par(mfrow = c(2,3))
+plot(m.ts)
+plot(n.ts)
+plot(g.ts)
+plot(i.ts)
+plot(j.ts)
+plot(s.ts)
+
+par(mfrow = c(2,3))
+plot(t.ts)
+plot(u.ts)
+plot(p.ts)
+plot(q.ts)
+plot(r.ts)
 plot(dd.ts)
 
+par(mfrow = c(2,3))
+plot(v.ts)
+plot(w.ts)
+plot(z.ts)
+plot(bb.ts)
+plot(l.ts)
+
+
 ```
+
+**Items introduced later**
 
 ```{r}
-ee <- x %>% filter(Item_Code == "SS03CLR96130")
-ee$Used <- as.numeric(ee$Used)
-ee.ts <- ts(ee$Used, start = c(2012,1), frequency = 12)
-plot(ee.ts)
+par(mfrow = c(2,3))
+
+plot(y.ts)
+plot(aa.ts)
+plot(xx.ts)
+plot(c.ts)
+plot(cc.ts)
+plot(h.ts)
+```
+
+
+###Example Item_Code = SS12SHG96130
+
+**Partition**
+
+
+```{r}
+#didn't carry in 2016
+validLengthZ <- 16
+trainLengthZ <- length(z.ts) - validLengthZ
+salesTrainZ <- window(z.ts, end = c(2012, trainLengthZ))
+salesValidZ <- window(z.ts, start = c(2012, trainLengthZ + 1))
+```
+
+**GeneralPlot**
+
+```{r}
+plot(z.ts, main = "Item SS12SHG96130 \n2012-22017", xlab = "Year", ylab = "Quantity Used")
+```
+
+
+**Quarterly Plots**
+
+```{r}
+#Quarterly rail
+quarterlyZ <- aggregate(z.ts, nfrequency=4)
+plot(quarterlyZ,  main = "Item SS12SHG96130 \n2012-2017", xlab = "Year", ylab = "Quantity Used")
+```
+
+**Is it a random walk?**
+To test whether this series is a random walk, the 
+$\beta_1 = 1$. We can determine this by performing an hypothesis test where the $H_0:\beta_1 = 1$ and $H_1:\beta_1 \neq 0$
+The p value is calculated using the coefficient and standard error output from the AR(1) model. At $\alpha=0.01$, 
+the AR(1) data indicates the Inventory usage data series is not a random walk; we reject the null hypothesis because 
+$p<\alpha$ using both the t distribution and the normal distribution. Rejectingthe $H_0$ can conclude that we can  ultimately use a forecasting technique beyond the naive method.
+
+```{r}
+zRW <- arima(salesTrainZ, order = c(1,0,0))
+zRW
+
+#Calculate the two-tailed p-value from a t-distribution, p = 0.00136
+pander(2*pt(-abs((1 - zRW$coef["ar1"]) / 0.1140), df=length(salesTrainZ)-1))
+
+
+#The p-value using a normal distribution
+#Now calculate it using the normal distribution, p = 0.0006597
+pander(2*pnorm(-abs((1 - zRW$coef["ar1"]) / 0.1140)))
 
 ```
 
 
+**Components**
+Using the Acf function, we see we should account for trend when choosing a model. 
 
-
-
-
-
-
-# bound <- cbind(a,b,c)
-# head(bound)
-# dim(x)
-# xx <- recast(x, Month~Item_Code)
-# head(xx, 36)
-# dim(xx)
-
-
-
-
-
-```{r, eval=FALSE, include=FALSE}
-#Not good
-SS02CLR7284 <- ts(xx$SS02CLR7284, start = c(2012,1), frequency = 12)
-plot(SS02CLR7284)
-SS02CLR7284
-names(xx)
-
-#good
-SS02LOE7284 <- ts(xx$SS02LOE7284, start = c(2012,1), frequency = 12)
-plot(SS02LOE7284)
-SS02LOE7284
-#Not Good
-SS03CLR96130 <- ts(xx$SS03CLR96130, start = c(2012,1), frequency = 12)
-SS03CLR96130
-plot(SS03CLR96130)
-#Good
-SS05CLR96130 <- ts(xx$SS05CLR96130, start = c(2012,1), frequency = 12)
-plot(SS05CLR96130)
-SS05CLR96130
-#Good
-SS03S6A7284 <- ts(xx$SS03S6A7284, start = c(2012,1), frequency = 12)
-plot(SS03S6A7284)
-SS03S6A7284
-#Good
-SS03S6T7284 <- ts(xx$SS03S6T7284, start = c(2012,1), frequency = 12)
-plot(SS03S6T7284)
-SS03S6T7284
-#Good
-SS04CLR96130 <- ts(xx$SS04CLR96130, start = c(2012,1), frequency = 12)
-plot(SS04CLR96130)
-SS04CLR96130
-
-#Good
-SS05CLR96130 <- ts(xx$SS05CLR96130, start = c(2012,1), frequency = 12)
-plot(SS05CLR96130)
-SS05CLR96130
-
-#Not Good
-SS05LOE96130 <- ts(xx$SS05LOE96130, start = c(2012,1), frequency = 12)
-plot(SS05LOE96130)
-SS05LOE96130
-
-
-#Good
-SS05S6T96130 <- ts(xx$SS05S6T96130, start = c(2012,1), frequency = 12)
-plot(SS05S6T96130)
-SS05S6T96130
-
-#Good
-SS06GRY96130 <- ts(xx$SS06GRY96130, start = c(2012,1), frequency = 12)
-plot(SS06GRY96130)
-SS06GRY96130
-
-#Good
-SS06LOE96130 <- ts(xx$SS06LOE96130, start = c(2012,1), frequency = 12)
-plot(SS06LOE96130)
-SS06LOE96130
-
-#Not Good
-SS06MCL96130 <- ts(xx$SS06MCL96130, start = c(2012,1), frequency = 12)
-plot(SS06MCL96130)
-SS06MCL96130
-
-#Good
-SS06S6A100144 <- ts(xx$SS06S6A100144, start = c(2012,1), frequency = 12)
-plot(SS06S6A100144)
-SS06S6A100144
-
-# Not Good
-SS06S6G96130 <- ts(xx$SS06S6G96130, start = c(2012,1), frequency = 12)
-plot(SS06S6G96130)
-SS06S6G96130
-
-#Good
-SS06S6T100144 <- ts(xx$SS06S6T100144, start = c(2012,1), frequency = 12)
-plot(SS06S6T100144)
-SS06S6T100144
-
-#Not Good
-SS06S7T100144 <- ts(xx$SS06S7T100144, start = c(2012,1), frequency = 12)
-plot(SS06S7T100144)
-SS06S7T100144
-
-# Not Good
-SS06STC102144 <- ts(xx$SS06STC102144, start = c(2012,1), frequency = 12)
-plot(SS06STC102144)
-SS06STC102144
-
-#Good
-SS06STP96130 <- ts(xx$SS06STP96130, start = c(2012,1), frequency = 12)
-plot(SS06STP96130)
-SS06STP96130
-
-#NoT Good
-SS0LCLR7284 <- ts(xx$SS0LCLR7284, start = c(2012,1), frequency = 12)
-plot(SS0LCLR7284)
-SS0LCLR7284
-
-#Good
-SS10CLR96130 <- ts(xx$SS10CLR96130, start = c(2012,1), frequency = 12)
-plot(SS10CLR96130)
-SS10CLR96130
-
-#start at 25
-
-#Good
-SS10SHG96130 <- ts(xx$SS10SHG96130, start = c(2012,1), frequency = 12)
-plot(SS10SHG96130)
-SS10SHG96130
-
-
-#Good
-SS10STP96130 <- ts(xx$SS10STP96130, start = c(2012,1), frequency = 12)
-plot(SS10STP96130)
-SS10STP96130
-
-
-#Not Good
-SS10SUW96130 <- ts(xx$SS10SUW96130, start = c(2012,1), frequency = 12)
-plot(SS10SUW96130)
-SS10SUW96130
-
-
-#Good
-SS12CLR102130 <- ts(xx$SS12CLR102130, start = c(2012,1), frequency = 12)
-plot(SS12CLR102130)
-SS12CLR102130
-
-
-#Good
-SS12SHG96130 <- ts(xx$SS12SHG96130, start = c(2012,1), frequency = 12)
-plot(SS12SHG96130)
-SS12SHG96130
-
-#Good
-SS12STP96130 <- ts(xx$SS12STP96130, start = c(2012,1), frequency = 12)
-plot(SS12STP96130)
-SS12STP96130
-
+```{r}
+#examine for autocorrelation
+AcfZ <- Acf(salesTrainZ, main = "Auto Correlation \nInventory")
+#lag 1 takes care of a lot of the problems
+Acf(diff(salesTrainZ, lag = 1, main = "Trend Autocorrelation"))
+#autocorrelation with lag = 12 also takes care of problems
+Acf(diff(salesTrainZ, lag = 12, main = "Seasonal Auto Correlation \nInventory"))
+#Double Differencing Acf is worse
+Acf(diff(diff(salesTrainZ, lag = 1),lag = 12), main = "Trend and Seasonality \nAuto Correlation \nInventory")
 ```
 
 ```{r}
 
 ```
 
+
+**Models**
+
+
+```{r}
+#naive
+naiveZ <- snaive(salesTrainZ)
+summary(naiveZ)
+#smoothing
+etsZ <- ets(salesTrainZ, model = "MAA")
+etsZ
+summary(etsZ)
+forecastZETS <- forecast(etsZ, h = validLengthZ)
+accuracy(forecastZETS, salesValidZ)
+#linear
+linearZ <- tslm(salesTrainZ ~ trend)
+summary(linearZ)
+#quadratic
+quadZ <- tslm(salesTrainZ ~ trend + I(trend^2))
+summary(quadZ)
+#trend and seasonal
+seasonZ <- tslm(salesTrainZ ~ trend + season)
+summary(seasonZ)
+forecastZTS <- forecast(seasonZ, h = validLengthZ)
+accuracy(forecastZTS, salesValidZ)
+#moving average
+
+#Neural Networks
+set.seed(201)
+zNN <- nnetar(salesTrainZ, p = 11)
+zNN
+summary(zNN)
+#linear and seasonal forecast
+zForecast <- forecast(zNN, h = validLengthZ)
+accuracy(zForecast, salesValidZ)
+
+
+
+
+
+plot(salesTrainZ)
+lines(linearZ$fitted, col = "blue")
+lines(quadZ$fitted.values, col = "green")
+lines(seasonZ$fitted.values, col = "orange")
+lines(naiveZ$fitted, col = "red")
+lines(etsZ$fitted, col = "purple")
+
+
+```
+
+
+
+
+```{r}
+#Quarterly rail
+quarterlyB <- aggregate(b.ts, nfrequency=4)
+plot(quarterlyB)
+```
