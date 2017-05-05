@@ -39,8 +39,7 @@ library(forecast)
 library(pander)
 ```
 
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-#Good
+```{r, 2012, message=FALSE, warning=FALSE, include=FALSE}
 #wide to long 2012
 Stock12 <- read.csv("Inventory12.csv", header = T, stringsAsFactors = F)
 head(Stock12)
@@ -60,7 +59,7 @@ head(Stock12)
 ```
 
 
-```{r, message=FALSE, warning=FALSE, include=FALSE}
+```{r, 2013 message=FALSE, warning=FALSE, include=FALSE}
 #Good
 #wide to long 2013
 Stock13 <- read.csv("Inventory13.csv", header = T, stringsAsFactors = F)
