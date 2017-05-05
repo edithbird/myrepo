@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_notebook: default
+---
+
+Sigco, Inc is a glass and architectural metal fabricator/distributor in Westbrook, ME and serves much New England. They manufacture a number of glass products and think the demand for these products is seasonal. 
+
+Inventory management is a major challenge. It is predominantly manual - inventory is counted three times a week to ensure accuracy, demand is forecasted just one week in advance and quantities to order for replenishment (including safety stock levels) are very subjective.  In particular, safety stock is computed by assigning an extra percentage of product to keep on hand of some of the products, but not all, and the percentage used varies by product. There is opportunity for analysis and improvement in the forecasting of demand using historical seasonal data.  Further, safety stock could be calculated to ensure greater efficiency of their inventory - maintaining or improving their service level while minimizing too much stock on hand.
+
+The **goal** of this project is to build a systematic forecasting model evaluation tool for the company to use in its calculations for safety stock and reorder points using the EOQ model. An interactive forecasting tool, such as an R Shiny app, provides a simple means for management to upload data sets, visualize the historical use of products in graphical form, determine components inherent in the data, partition the data into training and validation sets, run a few different fit models , evaluate the performance of the models, choose the best model to deploy a forecast, and use that forecast in the calculation of the safety stock and reorder points. 
+
+**Everything we do in the class relies on data, where and how do you expect to obtain the necessary time series data to utilize the tools and models we covered in class?** 
+
+The data is easy to come by. The historical use of each item is documented on annual Excel spreadsheets that the company keeps. There are roughly 200 SKUs in Sigco's inventory, and I have choen to look at the 25 most utilized items and forecast their use. 
+
+**Step 1**
+
+Import the company spreadsheets into R, clean them up, and combine them into a single time series data set starting from January, 2012. Not all items have been in the company's inventory since then, but the majority have. 
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(forecast)
+library(pander)
+library(reshape2)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+Stock12 <- read.csv("Inventory12.csv", header = T, stringsAsFactors = F)
+Stock12 <- Stock12 %>% select(-Description)
+names(Stock12) <- c("Item_Code", "01-12", "02-12", "03-12", "04-12", "05-12", "06-12", "07-12", "08-12", "09-12", "10-12", "11-12", "12-12")
+Stock12 <- gather(Stock12, Month, Used,c(2:13))
+ItemstoUse <-  c("SS06CLR96130","SS03CLR96130" , "SS12CLR102130", "SS02CLR7284", "SS06S6T100144", "SS10CLR96130", "SS05CLR96130", "SS06MCL96130", "SS06S6A100144" , "SS10SHG96130", "SS03LOE7284", "SS03LOE728", "SS03S6T7284", "SS04CLR96130", "SS06LOE96130", "SS02LOE7284", "SS06S7T100144", "SS05S6T96130", "SS06BRN96130","SS06GRY96130","SS06STP96130","SS03S6A7284","SS10SUW96130","SS0LCLR7284","SS05LOE96130","SS12SHG96130","SS06STC102144","SS12STP96130","SS06S6G96130","SS10STP96130")
+Stock12 <- Stock12 %>% filter(Item_Code %in% ItemstoUse)
+#pander(head(Stock12))
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+Stock13 <- read.csv("Inventory13.csv", header = T, stringsAsFactors = F)
+Stock13 <- Stock13 %>% select(-Description)
+names(Stock13) <- c("Item_Code", "01-13", "02-13", "03-13", "04-13", "05-13", "06-13", "07-13", "08-13", "09-13", "10-13", "11-13", "12-13")
+Stock13 <- gather(Stock13, Month, Used,c(2:13))
+Stock13 <- Stock13 %>% filter(Item_Code %in% ItemstoUse)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#wide to long 2014
+Stock14 <- read.csv("Inventory14.csv", header = T, stringsAsFactors = F)
+Stock14 <- Stock14 %>% select(-Description)
+names(Stock14) <- c("Item_Code", "01-14", "02-14", "03-14", "04-14", "05-14", "06-14", "07-14", "08-14", "09-14", "10-14", "11-14", "12-14")
+Stock14 <- gather(Stock14, Month, Used,c(2:13))
+Stock14 <- Stock14 %>% filter(Item_Code %in% ItemstoUse)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#wide to long 2015
+Stock15 <- read.csv("Inventory15.csv", header = T, stringsAsFactors = F)
+Stock15 <- Stock15[-1,]
+Stock15 <- Stock15 %>% select(-Description)
+names(Stock15) <- c("Item_Code", "01-15", "02-15", "03-15", "04-15", "05-15", "06-15", "07-15", "08-15", "09-15", "10-15", "11-15", "12-15")
+Stock15 <- gather(Stock15, Month, Used,c(2:13))
+Stock15 <- Stock15 %>% filter(Item_Code %in% ItemstoUse)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+Stock16 <- read.csv("Inventory16.csv", header = T, stringsAsFactors = F)
+Stock16 <- Stock16[-1,]
+Stock16 <- Stock16 %>% select(-Description)
+names(Stock16) <- c("Item_Code", "01-16", "02-16", "03-16", "04-16", "05-16", "06-16", "07-16", "08-16", "09-16", "10-16", "11-16", "12-16")
+Stock16 <- gather(Stock16, Month, Used,c(2:13))
+Stock16 <- Stock16 %>% filter(Item_Code %in% ItemstoUse)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+Stock17 <- read.csv("Inventory17.csv", header = T, stringsAsFactors = F)
+Stock17 <- Stock17 %>% select(-Description)
+names(Stock17) <- c("Item_Code", "01-17", "02-17", "03-17", "04-17")
+Stock17 <- gather(Stock17, Month, Used,c(2:5))
+Stock17 <- Stock17 %>% filter(Item_Code %in% ItemstoUse)
+```
+
+The final data set will look something like this: 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+x <- rbind.data.frame(Stock12, Stock13, Stock14, Stock15, Stock16, Stock17)
+x[x == 0] <- NA
+head(x, 20)
+```
+
+
+
+**Step 2**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+a <- x %>% filter(Item_Code == "SS06CLR96130")
+a$Used <- as.numeric(a$Used)
+a.ts <- ts(a$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(a.ts)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLength <- 4
+trainLength <- length(a.ts) - validLength
+salesTrain <- window(a.ts, end = c(2012, trainLength))
+salesValid <- window(a.ts, start = c(2012, trainLength + 1))
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+b <- x %>% filter(Item_Code == "SS02LOE7284")
+b$Used <- as.numeric(b$Used)
+b.ts <- ts(b$Used, start = c(2012,1), frequency = 12)
+ggseasonplot(b.ts)
+```
+
+**Has a similar problem been solved by others? If yes, then please cite those sources.**
+
+Last semester, in Supply Chain with Professor Kohli, my team tackled inventory management. We attempted to build a system using historical data to forecast several months out. With the forecasted values we used the Economic Order Quantity (EOQ) model to calculate safety stock and reorder points. I was taked with the forecasting and EOQ calculations. I am a little embarrassed to tell exactly how I did this, but now, armed with Predictive Analytics, I feel I can revisit the material for find the best forecasting model. 
+
