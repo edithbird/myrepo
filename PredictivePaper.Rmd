@@ -1,8 +1,9 @@
 ---
 title: "R Notebook"
 output:
-  word_document: default
+  html_document: default
   html_notebook: default
+  word_document: default
 ---
 
 Sigco, Inc is a glass and architectural metal fabricator/distributor in Westbrook, ME and serves much New England. They manufacture a number of glass products and think the demand for these products is seasonal. 
@@ -16,6 +17,8 @@ The **goal** of this project is to build a systematic forecasting model evaluati
 The data is easy to come by. The historical use of each item is documented on annual Excel spreadsheets that the company keeps. There are roughly 200 SKUs in Sigco's inventory, and I have choen to look at the 25 most utilized items and forecast their use. 
 
 **Step 1**
+
+Visualization
 
 Import the company spreadsheets into R, clean them up, and combine them into a single time series data set starting from January, 2012. Not all items have been in the company's inventory since then, but the majority have. 
 
@@ -89,21 +92,21 @@ The final data set will look something like this:
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 x <- rbind.data.frame(Stock12, Stock13, Stock14, Stock15, Stock16, Stock17)
 x[x == 0] <- NA
-head(x, 20)
+kable(head(x, 20))
 ```
-
-
 
 **Step 2**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+Visualize the data. I have chosen 2 different Items. 
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 a <- x %>% filter(Item_Code == "SS06CLR96130")
 a$Used <- as.numeric(a$Used)
 a.ts <- ts(a$Used, start = c(2012,1), frequency = 12)
 ggseasonplot(a.ts)
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 validLength <- 4
 trainLength <- length(a.ts) - validLength
 salesTrain <- window(a.ts, end = c(2012, trainLength))
@@ -114,8 +117,423 @@ salesValid <- window(a.ts, start = c(2012, trainLength + 1))
 b <- x %>% filter(Item_Code == "SS02LOE7284")
 b$Used <- as.numeric(b$Used)
 b.ts <- ts(b$Used, start = c(2012,1), frequency = 12)
-ggseasonplot(b.ts)
+
 ```
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+#out of use
+c <- x %>% filter(Item_Code == "SS03CLR96130")
+c$Used <- as.numeric(c$Used)
+c.ts <- ts(c$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r clearly seasonal, message=FALSE, warning=FALSE, include=FALSE}
+d <- x %>% filter(Item_Code == "SS02CLR7284")
+d$Used <- as.numeric(d$Used)
+d.ts <- ts(d$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+e <- x %>% filter(Item_Code == "SS06S6T100144")
+e$Used <- as.numeric(e$Used)
+e.ts <- ts(e$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+f <- x %>% filter(Item_Code == "SS10CLR96130")
+f$Used <- as.numeric(f$Used)
+f.ts <- ts(f$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+g <- x %>% filter(Item_Code == "SS05CLR96130")
+g$Used <- as.numeric(g$Used)
+g.ts <- ts(g$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r}
+h <- x %>% filter(Item_Code == "SS06MCL96130")
+h$Used <- as.numeric(h$Used)
+h.ts <- ts(h$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+i <- x %>% filter(Item_Code == "SS06S6A100144")
+i$Used <- as.numeric(i$Used)
+i.ts <- ts(i$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+j <- x %>% filter(Item_Code == "SS10SHG96130")
+j$Used <- as.numeric(j$Used)
+j.ts <- ts(j$Used, start = c(2012,1), frequency = 12)
+
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+k <- x %>% filter(Item_Code == "SS12CLR102130")
+k$Used <- as.numeric(k$Used)
+k.ts <- ts(k$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+l <- x %>% filter(Item_Code == "SS03LOE7284")
+l$Used <- as.numeric(l$Used)
+l.ts <- ts(l$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+m <- x %>% filter(Item_Code == "SS03S6T7284")
+m$Used <- as.numeric(m$Used)
+m.ts <- ts(m$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+n <- x %>% filter(Item_Code == "SS04CLR96130")
+n$Used <- as.numeric(n$Used)
+n.ts <- ts(n$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+
+o <- x %>% filter(Item_Code == "SS06LOE96130")
+o$Used <- as.numeric(o$Used)
+o.ts <- ts(o$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+p <- x %>% filter(Item_Code == "SS02LOE7284")
+p$Used <- as.numeric(p$Used)
+p.ts <- ts(p$Used, start = c(2012,1), frequency = 12)
+
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+q <- x %>% filter(Item_Code == "SS06S7T100144")
+q$Used <- as.numeric(q$Used)
+q.ts <- ts(q$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+r <- x %>% filter(Item_Code == "SS05S6T96130")
+r$Used <- as.numeric(r$Used)
+r.ts <- ts(r$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+s <- x %>% filter(Item_Code == "SS06BRN96130")
+s$Used <- as.numeric(s$Used)
+s.ts <- ts(s$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+t <- x %>% filter(Item_Code == "SS06GRY96130")
+t$Used <- as.numeric(t$Used)
+t.ts <- ts(t$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+u <- x %>% filter(Item_Code == "SS06STP96130")
+u$Used <- as.numeric(u$Used)
+u.ts <- ts(u$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+v <- x %>% filter(Item_Code == "SS03S6A7284")
+v$Used <- as.numeric(v$Used)
+v.ts <- ts(v$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+w <- x %>% filter(Item_Code == "SS10SUW96130")
+w$Used <- as.numeric(w$Used)
+w.ts <- ts(w$Used, start = c(2012,1), frequency = 12)
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+xx <- x %>% filter(Item_Code == "SS0LCLR7284")
+xx$Used <- as.numeric(xx$Used)
+xx.ts <- ts(xx$Used, start = c(2012,1), frequency = 12)
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+y <- x %>% filter(Item_Code == "SS05LOE96130")
+y$Used <- as.numeric(y$Used)
+y.ts <- ts(y$Used, start = c(2013,10), frequency = 12)
+
+
+```
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+z <- x %>% filter(Item_Code == "SS12SHG96130")
+z$Used <- as.numeric(z$Used)
+z.ts <- ts(z$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+aa <- x %>% filter(Item_Code == "SS06STC102144")
+aa$Used <- as.numeric(aa$Used)
+aa.ts <- ts(aa$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+bb <- x %>% filter(Item_Code == "SS12STP96130")
+bb$Used <- as.numeric(bb$Used)
+bb.ts <- ts(bb$Used, start = c(2012,1), frequency = 12)
+
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+cc <- x %>% filter(Item_Code == "SS06S6G96130")
+cc$Used <- as.numeric(cc$Used)
+cc.ts <- ts(cc$Used, start = c(2012,1), frequency = 12)
+
+```
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+dd <- x %>% filter(Item_Code == "SS10STP96130")
+dd$Used <- as.numeric(dd$Used)
+dd.ts <- ts(dd$Used, start = c(2012,1), frequency = 12)
+
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+par(mfrow = c(2,3))
+plot(a.ts)
+plot(b.ts)
+plot(d.ts)
+plot(e.ts)
+plot(f.ts)
+plot(o.ts)
+
+par(mfrow = c(2,3))
+plot(m.ts)
+plot(n.ts)
+plot(g.ts)
+plot(i.ts)
+plot(j.ts)
+plot(s.ts)
+
+par(mfrow = c(2,3))
+plot(t.ts)
+plot(u.ts)
+plot(p.ts)
+plot(q.ts)
+plot(r.ts)
+plot(dd.ts)
+
+par(mfrow = c(2,3))
+plot(v.ts)
+plot(w.ts)
+plot(z.ts)
+plot(bb.ts)
+plot(l.ts)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#colors <- rainbow(6, start = .7, end = 0.9)
+colors <- c("violetred", "turquoise3", "tomato", "skyblue2", "seagreen3","goldenrod1" )
+#colors <- terrain.colors(6)
+
+par(mfrow = c(2,3))
+seasonplot(a.ts, col = colors)
+seasonplot(b.ts, col = colors)
+seasonplot(d.ts, col = colors)
+seasonplot(e.ts, col = colors)
+seasonplot(f.ts, col = colors)
+seasonplot(o.ts, col = colors)
+
+par(mfrow = c(2,3))
+
+seasonplot(m.ts, col = colors)
+seasonplot(n.ts, col = colors)
+seasonplot(g.ts, col = colors)
+seasonplot(i.ts, col = colors)
+seasonplot(j.ts, col = colors)
+seasonplot(s.ts, col = colors)
+
+par(mfrow = c(2,3))
+
+seasonplot(t.ts, col = colors)
+seasonplot(u.ts, col = colors)
+seasonplot(p.ts, col = colors)
+seasonplot(q.ts, col = colors)
+seasonplot(r.ts, col = colors)
+seasonplot(dd.ts, col = colors)
+
+par(mfrow = c(2,3))
+
+seasonplot(v.ts, col = colors)
+seasonplot(w.ts, col = colors)
+seasonplot(z.ts, col = colors)
+seasonplot(bb.ts, col = colors)
+seasonplot(l.ts, col = colors)
+```
+
+For brevity's sake, I'll narrow the scope to 6 SKUs, e,f,m,n,o,s because, as a group, I can illustrate how the company can model data that exhibits differing components.
+
+Trend
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthM <- 4
+trainLengthM <- length(m.ts) - validLengthM
+salesTrainM <- window(m.ts, end = c(2012, trainLengthM))
+salesValidM <- window(m.ts, start = c(2012, trainLengthM + 1))
+LinearM <- tslm(m.ts ~ trend)
+polyLinearM <- tslm(m.ts ~ trend + I(trend^2))
+seasonTrendM <- tslm(m.ts ~ trend + season)
+summary(LinearM)
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthN <- 4
+trainLengthN <- length(n.ts) - validLengthN
+salesTrainN <- window(n.ts, end = c(2012, trainLengthN))
+salesValidN <- window(n.ts, start = c(2012, trainLengthN + 1))
+LinearN <- tslm(n.ts ~ trend)
+polyLinearN <- tslm(n.ts ~ trend + I(trend^2))
+seasonTrendN <- tslm(n.ts ~ trend + season)
+summary(LinearN)
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthS <- 4
+trainLengthS <- length(s.ts) - validLengthS
+salesTrainS <- window(s.ts, end = c(2012, trainLengthS))
+salesValidS <- window(s.ts, start = c(2012, trainLengthS + 1))
+LinearS <- tslm(s.ts ~ trend)
+polyLinearS <- tslm(s.ts ~ trend + I(trend^2))
+seasonTrendS <- tslm(s.ts ~ trend + season)
+summary(LinearS)
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthE <- 4
+trainLengthE <- length(e.ts) - validLengthE
+salesTrainE <- window(e.ts, end = c(2012, trainLengthE))
+salesValidE <- window(e.ts, start = c(2012, trainLengthE + 1))
+LinearE <- tslm(e.ts ~ trend)
+polyLinearE <- tslm(e.ts ~ trend + I(trend^2))
+seasonTrendE <- tslm(e.ts ~ trend + season)
+summary(LinearE)
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthF <- 4
+trainLengthF <- length(f.ts) - validLengthF
+salesTrainF <- window(f.ts, end = c(2012, trainLengthF))
+salesValidF <- window(f.ts, start = c(2012, trainLengthF + 1))
+LinearF <- tslm(f.ts ~ trend)
+polyLinearF <- tslm(f.ts ~ trend + I(trend^2))
+seasonTrendF <- tslm(f.ts ~ trend + season)
+summary(LinearF)
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthO <- 4
+trainLengthO <- length(o.ts) - validLengthO
+salesTrainO <- window(o.ts, end = c(2012, trainLengthO))
+salesValidO <- window(o.ts, start = c(2012, trainLengthO + 1))
+LinearO <- tslm(o.ts ~ trend)
+polyLinearO <- tslm(o.ts ~ trend + I(trend^2))
+seasonTrendO <- tslm(o.ts ~ trend + season)
+summary(LinearO)
+
+```
+
+```{r}
+par(mfrow = c(3,2))
+plot(e.ts, main = "E")
+lines(LinearE$fitted, col = "blue")
+lines(polyLinearE$fitted, col = "green")
+lines(seasonTrendE$fitted, col = "orange")
+plot(f.ts, main = "F")
+lines(LinearF$fitted, col = "blue")
+lines(polyLinearF$fitted, col = "green")
+lines(seasonTrendF$fitted, col = "orange")
+
+plot(m.ts, main = "M")
+lines(LinearM$fitted, col = "blue")
+lines(polyLinearM$fitted, col = "green")
+lines(seasonTrendM$fitted, col = "orange")
+plot(n.ts, main = "N")
+lines(LinearN$fitted, col = "blue")
+lines(polyLinearN$fitted, col = "green")
+lines(seasonTrendN$fitted, col = "orange")
+plot(o.ts, main = "O")
+lines(LinearO$fitted, col = "blue")
+lines(polyLinearO$fitted, col = "green")
+lines(seasonTrendO$fitted, col = "orange")
+plot(s.ts, main = "S")
+lines(LinearS$fitted, col = "blue")
+lines(polyLinearS$fitted, col = "green")
+lines(seasonTrendS$fitted, col = "orange")
+
+
+
+```
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+s.ts
+
+
+```
+
+
+```{r}
+
+# par(oma = c(0,0,0,2))
+# xrange <- c(1,7)
+# yrange <- range(a.ts)
+# 
+# plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+# colors <- rainbow(12)
+# linetype <- c(1:12)
+# plotchar <- c(1:12)
+# for(i in 1:12){
+# 
+#   currentMonth <- subset(a.ts, cycle(a.ts) == i)
+#   lines(currentMonth, type = "b", lwd = 1.5,
+#   lty = linetype[i], col =colors[i], pch = plotchar[i])
+# }
+# title("Inventory Used Broken out by Month")
+# legend(7,2800, 1:12, cex = 0.8, col = colors,pch = plotchar, lty = linetype, title = "Month", xpd = NA)
+
+```
+
 
 **Has a similar problem been solved by others? If yes, then please cite those sources.**
 
