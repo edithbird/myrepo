@@ -31,6 +31,7 @@ library(forecast)
 library(pander)
 library(reshape2)
 library(zoo)
+library(forecastHybrid)
 ```
 
 
@@ -728,9 +729,9 @@ salesValidE <- window(e.ts, start = c(2012, trainLengthE + 1))
 #naive
 naiveE <- snaive(salesTrainE, h = validLengthE)
 #pointFC snaive 42/28 naive 29/14
-naiveE$mean
+pander(naiveE$mean)
 #accuracy 43/21
-accuracy(naiveE, salesValidE)
+kable(accuracy(naiveE, salesValidE))
 ```
 
 Exponential Smoothing
@@ -741,9 +742,9 @@ etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
 etsE
 summary(etsE)
 etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
-etsForecastE
+pander(etsForecastE)
 #accuracy 35/18
-accuracy(etsForecastE, salesValidE)
+kable(accuracy(etsForecastE, salesValidE))
 ```
 
 Regression
@@ -754,9 +755,9 @@ seasonTrendE <- tslm(salesTrainE ~ trend + season)
 summary(seasonTrendE)
 #forecasting Regression Models
 seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
-seasonRegEForecast
+pander(seasonRegEForecast)
 #accuracy 33/21
-accuracy(seasonRegEForecast, salesValidE)
+kable(accuracy(seasonRegEForecast, salesValidE))
 ```
 
 An Acf plot of the regression model shows some uncaptured trend and seasonality which we can further model. 
@@ -775,18 +776,18 @@ ARModel$coef["ar1"] / 0.1316
 Acf(ARModel$residuals)
 #forecast residuals
 errorForecast <- forecast(ARModel, h = validLengthE)
-errorForecast
+pander(errorForecast)
 #improved Forecast MAPE = 20.22199
 adjustedForecast <- seasonRegEForecast$mean + errorForecast$mean
-adjustedForecast
-accuracy(adjustedForecast, salesValidE)
+pander(adjustedForecast)
+kable(accuracy(adjustedForecast, salesValidE))
 ```
 
 This is the adjusted regression forecast and its accuracy. It's not much of an improvement, but since it appeared that there was more data to capture, it's important to try. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 adjustedForecast
-accuracy(adjustedForecast, salesValidE)
+kable(accuracy(adjustedForecast, salesValidE))
 ```
 
 
@@ -808,7 +809,7 @@ The neural net has given the best MAPE scores during the test and the validation
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 neuralForecast$mean
 #p=11, MAPE = 0.74/16.05
-accuracy(neuralForecast, salesValidE)
+kable(accuracy(neuralForecast, salesValidE))
 ```
 
 Further modeling may be warranted
@@ -826,14 +827,14 @@ ARModel$coef["ar2"] / 0.1389
 Acf(ARModel$residuals)
 #forecast residuals
 errorForecast <- forecast(ARModel, h = validLengthE)
-errorForecast
+pander(errorForecast)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #improved Forecast MAPE = 16.05
 adjustedForecast <- neuralForecast$mean + errorForecast$mean
-adjustedForecast
-accuracy(adjustedForecast, salesValidE)
+pander(adjustedForecast)
+kable(accuracy(adjustedForecast, salesValidE))
 ```
 
 However, we see the forecast accuracy is the same after working in the Acf residuals. This means the original model captured all the trend and seasonality. 
@@ -846,17 +847,31 @@ Other Considerations
 As we read earlier in the course, forecasts can be improved by averaging the forecasted valued from various models. Below is the average and the accuracy metrics. Although the accuracy is not ideal and not as good as the neural network, it would be interesting to test the model. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-allForecasts <- (naiveE$mean + etsForecastE$mean +seasonRegEForecast$mean + seasonRegEForecast$mean + neuralForecast$mean)/5
-allForecasts
+allForecasts <- (naiveE$mean + etsForecastE$mean + seasonRegEForecast$mean + neuralForecast$mean)/4
+#pander(allForecasts)
 #MAPE of the averaged forecasts = 20.23421
 accuracy(allForecasts, salesValidE)
 ```
 
+Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+fit1 <- hybridModel(salesTrainE, weights = "equal")
+fc1 <- forecast(fit1, h = validLengthE <- 12 )
+pander(fc1)
+kable(accuracy(fc1$mean, salesValidE))
+autoplot(fc1) + ggtitle("Hybrid Forecast Item E \nwith Confidence Intervals") + xlab("Year") +  
+  ylab("Item E Use")
+df <- cbind(Data=e.ts, Hybrid1=fc1$mean)
+autoplot(df) +
+xlab("Year") + ylab(expression("Item E Use"))+ ggtitle("Hybrid Forecast Item E \nwith Confidence Intervals")
+```
+
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-plot(f.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 ")
+plot(f.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 - Item E", ylim = c(0,800))
 lines(naiveE$fitted, col = "blue")
 lines(naiveE$mean, col = "blue", lty = 2)
 lines(etsE$fitted, col = "green")
@@ -868,7 +883,7 @@ lines(neuralForecast$mean, col = "red",lty = 5)
 lines(allForecasts, col = "purple")
 
 
-legend(2012, 800, c("Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1), lwd = c(1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+legend(2012, 800, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1, 1), lwd = c(1,1,1,1,1, 1), bty = "n", col = c("black", "blue", "green", "orange", "red", "purple"))
 ```
 
 
@@ -878,172 +893,7 @@ legend(2012, 800, c("Naive", "ETS", "Regression", "Neural Net", "Average"), lty 
 Yes. Last semester, in Supply Chain with Professor Kohli, my team tackled inventory management at Sigco. We attempted to build a system using historical data to forecast several months out. With the forecasted values we used the Economic Order Quantity (EOQ) model to calculate safety stock and reorder points. I was tasked with the forecasting and EOQ calculations. I am a little embarrassed to tell exactly how I did this last semester, but the process was abbreviated, but now, armed with Predictive Analytics, I wanted to revisit the material for find the best forecasting model and I wanted to try and develop a systematic workflow to tackling various forecasting problems.
 
 
-
-
-
-
-
-
-```{r, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-validLengthM <- 12
-trainLengthM <- length(m.ts) - validLengthM
-salesTrainM <- window(m.ts, end = c(2012, trainLengthM))
-salesValidM <- window(m.ts, start = c(2012, trainLengthM + 1))
-
-summary(LinearM)
-
-#naive
-naiveM <- snaive(salesTrainM, h = validLengthM)
-#pointFC
-naiveM$mean
-#accuracy 81/34
-accuracy(naiveM, salesValidM)
-
-
-```
-
-```{r, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-validLengthN <- 12
-trainLengthN <- length(n.ts) - validLengthN
-salesTrainN <- window(n.ts, end = c(2012, trainLengthN))
-salesValidN <- window(n.ts, start = c(2012, trainLengthN + 1))
-
-summary(LinearN)
-#naive
-naiveN <- snaive(salesTrainN, h = validLengthN)
-#pointFC
-naiveN$mean
-#accuracy 17/13
-accuracy(naiveN, salesValidN)
-
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-validLengthS <- 12
-trainLengthS <- length(s.ts) - validLengthS
-salesTrainS <- window(s.ts, end = c(2012, trainLengthS))
-salesValidS <- window(s.ts, start = c(2012, trainLengthS + 1))
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-
-summary(seasonTrendS)
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-#Autocorrelation
-AcfS <- Acf(s.ts)
-#Acf for Differenced and there appears to be some uncaptured seasonality
-Acf(diff(s.ts, lag = 1), lag.max = 12, main = "Acf Plot for Differenced Item S")
-plot(diff(s.ts, lag = 1, bty = "l", main = "Uncaptured Seasonality in Differenced \nItem S Monthly Data"))
-abline(h = 0)
-#test for a random walk
-fitS <- Arima(s.ts, order = c(1,0,0))
-fitS
-2*pt(-abs((1-fitS$coef["ar1"]) / 0.1239), df = length(s.ts)-1)
-#normal distribution
-2*pnorm(-abs((1 - fitS$coef["ar1"]) / 0.1239))
-
-#Since $p<\alpha$ we know this series is not a random walk
-```
-
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-
-#naive
-naiveS <- snaive(salesTrainS, h = validLengthS)
-#pointFC
-naiveS$mean
-#accuracy 43/21
-accuracy(naiveS, salesValidS)
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-#trailing
-trailMAS <- rollmean(salesTrainS, k = 12, align = "right")
-trailSForecast <- trailMAS[1]
-trailSForecast
-accuracy(trailSForecast, salesValidS[1])
-#look for trend and seasonality with Acf
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-#best smoothing model, it chooses an ANN model with a very small alpha meaning it's a slow learner.
-etsS <- ets(salesTrainS, model = "ZZZ", restrict = FALSE)
-etsS
-summary(etsS)
-etsForecastS <- forecast(etsS, h = validLengthS, level = 0)
-etsForecastS
-#accuracy 42/24
-accuracy(etsForecastS, salesValidS)
-plot(s.ts, main = "Smoothing Model S", bty = "l")
-lines(etsS$fitted, col = "blue", lty = 1,lwd = 2)
-#lines(etsSANN$fitted, col = "green", lty = 1,lwd = 2)
-```
-
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-seasonTrendS <- tslm(salesTrainS ~ trend + season)
-#summary
-summary(seasonTrendS)
-#forecasting Regression Models
-seasonRegSForecast <- forecast(seasonTrendS, h = validLengthS)
-seasonRegSForecast
-#accuracy 30/25
-accuracy(seasonRegSForecast, salesValidS)
-```
-
-
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-residualsseasonTrendS <- Acf(seasonTrendS$residuals)
-```
-
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-ARModel <- Arima(seasonTrendS$residuals, order = c(1,0,0))
-ARModel
-#calculate t stat, see it's not statistically significant
-ARModel$coef["ar1"] / 0.1359
-#residuals of residuals
-Acf(ARModel$residuals)
-#forecast residuals
-errorForecast <- forecast(ARModel, h = validLengthS)
-errorForecast
-#improved Forecast MAPE = 25.27023
-adjustedForecast <- seasonRegSForecast$mean + errorForecast$mean
-adjustedForecast
-accuracy(adjustedForecast, salesValidS)
-```
-
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-set.seed(201)
-
-neuralS <- nnetar(salesTrainS, p = 11)
-
-neuralForecast <- forecast(neuralS, h = validLengthS)
-neuralForecast$mean
-accuracy(neuralForecast, salesValidS)
-neuralSP <- nnetar(salesTrainS, P = 1)
-
-neuralForecastSP <- forecast(neuralSP, h = validLengthS)
-neuralForecastSP$mean
-accuracy(neuralForecastSP, salesValidS)
-
-
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-allForecasts <- (neuralForecastSP$mean + seasonRegSForecast$mean + etsForecastS$mean + naiveS$mean)/4
-allForecasts
-accuracy(allForecasts, salesValidS)
-
-allForecasts <- as.numeric(allForecasts)
-
-```
-
-
+**SS10CLR96130 - Item F**
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 validLengthE <- 12
@@ -1118,55 +968,46 @@ adjustedForecast
 accuracy(adjustedForecast, salesValidE)
 ```
 
-**SS10CLR96130 - Item F**
-
 Naive
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(naiveE, salesValidE)
+kable(accuracy(naiveE, salesValidE))
 ```
 
 
 Smoothing
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(etsForecastE, salesValidE)
+kable(accuracy(etsForecastE, salesValidE))
 ```
 
 Regression 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(seasonRegEForecast, salesValidE)
-```
-
-Adjusted Regression
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(adjustedForecast, salesValidE)
-adjustedForecast
+kable(accuracy(seasonRegEForecast, salesValidE))
 ```
 
 Neural Net
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(neuralForecast, salesValidE)
+kable(accuracy(neuralForecast, salesValidE))
 ```
 
 
-A forecast averaged from the forecastscreated shows a slight improvement for Item F with a MAPE = 11.82 %
+A forecast of the validation period averaged from the forecasts created shows a slight improvement for Item F with a MAPE = 11.82 %. I did not include AR as an improvement because the the AR-1 was not statistically significant. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-allForecasts <- (naiveE$mean + etsForecastE$mean + adjustedForecast +seasonRegEForecast$mean + seasonRegEForecast$mean + neuralForecast$mean)/6
-allForecasts
-#MAPE of the averaged forecasts = 11.87
-accuracy(allForecasts, salesValidE)
+allForecasts <- (naiveE$mean + etsForecastE$mean  + seasonRegEForecast$mean + neuralForecast$mean)/4
+kable(allForecasts)
+#MAPE of the averaged forecasts = 11.73
+kable(accuracy(allForecasts, salesValidE))
 ```
 
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-plot(f.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 ")
+plot(f.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS10CLR96130 Item F ", ylim = c(0,700))
 lines(naiveE$fitted, col = "blue")
 lines(naiveE$mean, col = "blue", lty = 2)
 lines(etsE$fitted, col = "green")
@@ -1178,31 +1019,34 @@ lines(neuralForecast$mean, col = "red",lty = 5)
 lines(allForecasts, col = "purple")
 
 
-legend(2012, 800, c("Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1), lwd = c(1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+legend(2012, 800, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red", "purple"))
 ```
 
 
+**SS06S6A100144 - Item I**
 
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 validLengthE <- 12
-trainLengthE <- length(f.ts) - validLengthE
-salesTrainE <- window(f.ts, end = c(2012, trainLengthE))
-salesValidE <- window(f.ts, start = c(2012, trainLengthE + 1))
+trainLengthE <- length(i.ts) - validLengthE
+salesTrainE <- window(i.ts, end = c(2012, trainLengthE))
+salesValidE <- window(i.ts, start = c(2012, trainLengthE + 1))
 #naive
 naiveE <- snaive(salesTrainE, h = validLengthE)
 #pointFC snaive 22/13 naive 21/14
 naiveE$mean
-#accuracy 43/21
+#accuracy 43/24
 accuracy(naiveE, salesValidE)
 
-#best smoothing model, it chooses an MNN model with an alpha = 0.4392.
+#best smoothing model, it chooses an AAN model with an alpha = 0.1e-04 and beta = 1e-04.
 etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
 etsE
 summary(etsE)
 etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
 etsForecastE
-#accuracy 18/11.5
+#forecat accuracy 15.38072%
+accuracy(etsForecastE$mean, salesValidE)
+
 
 seasonTrendE <- tslm(salesTrainE ~ trend + season)
 #summary
@@ -1210,15 +1054,15 @@ summary(seasonTrendE)
 #forecasting Regression Models
 seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
 seasonRegEForecast
-#accuracy 17/12
+#accuracy 28/18
 accuracy(seasonRegEForecast, salesValidE)
 
 residualsseasonTrendE <- Acf(seasonTrendE$residuals, main = "Some Seasonality \nLeft to Capture")
 
 ARModel <- Arima(seasonTrendE$residuals, order = c(1,0,0))
 ARModel
-#calculate t stat, see it's significant, ar1 > 2
-ARModel$coef["ar1"] / 0.1277
+#calculate t stat, see it's not significant, ar1 < 2 and >-2
+ARModel$coef["ar1"] / 0.1349
 #residuals of residuals
 Acf(ARModel$residuals)
 #forecast residuals
@@ -1229,8 +1073,6 @@ adjustedForecast <- seasonRegEForecast$mean + errorForecast$mean
 adjustedForecast
 accuracy(adjustedForecast, salesValidE)
 
-adjustedForecast
-
 set.seed(201)
 
 neuralE <- nnetar(salesTrainE, p = 11)
@@ -1238,12 +1080,13 @@ neuralE <- nnetar(salesTrainE, p = 11)
 neuralForecast <- forecast(neuralE, h = validLengthE)
 
 neuralForecast$mean
-#p=11, MAPE = 0.166/15.876
+accuracy(neuralForecast, salesValidE)
+#p=11, MAPE = 0.33/22.88
 
 ARModel <- Arima(neuralE$residuals, order = c(1,0,0))
 ARModel
 #calculate t stat, see it's not statistically significant, ar1 <2
-ARModel$coef["ar1"] / 0.1979
+ARModel$coef["ar1"] / 0.1524
 
 #residuals of residuals
 Acf(ARModel$residuals)
@@ -1251,61 +1094,53 @@ Acf(ARModel$residuals)
 errorForecast <- forecast(ARModel, h = validLengthE)
 errorForecast
 
-# Not improved Forecast MAPE = 15.87759
+# Not improved Forecast MAPE = 22.89
 adjustedForecast <- neuralForecast$mean + errorForecast$mean
 adjustedForecast
 accuracy(adjustedForecast, salesValidE)
 ```
 
-**SS10CLR96130 - Item F**
-
 Naive
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(naiveE, salesValidE)
+kable(accuracy(naiveE, salesValidE))
 ```
 
 
 Smoothing
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(etsForecastE, salesValidE)
+kable(accuracy(etsForecastE, salesValidE))
 ```
 
 Regression 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(seasonRegEForecast, salesValidE)
+kable(accuracy(seasonRegEForecast, salesValidE))
 ```
 
-Adjusted Regression
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(adjustedForecast, salesValidE)
-adjustedForecast
-```
 
 Neural Net
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-accuracy(neuralForecast, salesValidE)
+kable(accuracy(neuralForecast, salesValidE))
 ```
 
 
-A forecast averaged from the forecastscreated shows a slight improvement for Item F with a MAPE = 11.82 %
+A forecast of the validation period averaged from the forecasts created shows a MAPE = 17.3 % for Item F.The validation forcast generated with the ets() function has a slightly lower MAPE. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-allForecasts <- (naiveE$mean + etsForecastE$mean + adjustedForecast +seasonRegEForecast$mean + seasonRegEForecast$mean + neuralForecast$mean)/6
-allForecasts
-#MAPE of the averaged forecasts = 11.87
-accuracy(allForecasts, salesValidE)
+allForecasts <- (naiveE$mean + etsForecastE$mean  + seasonRegEForecast$mean + neuralForecast$mean)/4
+kable(allForecasts)
+#MAPE of the averaged forecasts = 17.3
+kable(accuracy(allForecasts, salesValidE))
 ```
 
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-plot(f.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 ")
+plot(i.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6A100144 Item I ")
 lines(naiveE$fitted, col = "blue")
 lines(naiveE$mean, col = "blue", lty = 2)
 lines(etsE$fitted, col = "green")
@@ -1317,9 +1152,407 @@ lines(neuralForecast$mean, col = "red",lty = 5)
 lines(allForecasts, col = "purple")
 
 
-legend(2012, 800, c("Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1), lwd = c(1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+legend(2012, 500, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
 ```
 
 
+**SS03S6T7284 - Item M**
+
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+validLengthE <- 12
+trainLengthE <- length(m.ts) - validLengthE
+salesTrainE <- window(m.ts, end = c(2012, trainLengthE))
+salesValidE <- window(m.ts, start = c(2012, trainLengthE + 1))
+#naive
+naiveE <- snaive(salesTrainE, h = validLengthE)
+#pointFC snaive 22/13 naive 21/14
+naiveE$mean
+#accuracy 43/24
+accuracy(naiveE, salesValidE)
+
+#best smoothing model, it chooses an MAN model with an alpha = 0.1e-04 and beta = 1e-04.
+etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
+etsE
+summary(etsE)
+etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
+etsForecastE
+#forecat accuracy 15.38072%
+accuracy(etsForecastE$mean, salesValidE)
+
+
+seasonTrendE <- tslm(salesTrainE ~ trend + season)
+#summary
+summary(seasonTrendE)
+#forecasting Regression Models
+seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
+seasonRegEForecast
+#accuracy 28/18
+accuracy(seasonRegEForecast, salesValidE)
+
+residualsseasonTrendE <- Acf(seasonTrendE$residuals, main = "Some Seasonality \nLeft to Capture")
+#There's uncaptured T/S
+ARModel <- Arima(seasonTrendE$residuals, order = c(1,0,0))
+ARModel
+#calculate t stat, see it's significant, ar1 > 2, ar-1 = 3.539817
+ARModel$coef["ar1"] / 0.1247
+#residuals of residuals
+Acf(ARModel$residuals)
+#forecast residuals
+errorForecast <- forecast(ARModel, h = validLengthE)
+errorForecast
+#improved Forecast MAPE = 28.51856
+adjustedForecast <- seasonRegEForecast$mean + errorForecast$mean
+adjustedForecast
+accuracy(adjustedForecast, salesValidE)
+
+set.seed(201)
+
+neuralE <- nnetar(salesTrainE, p = 11)
+
+neuralForecast <- forecast(neuralE, h = validLengthE)
+
+neuralForecast$mean
+accuracy(neuralForecast, salesValidE)
+#p=11, MAPE = 1.82/23
+
+ARModel <- Arima(neuralE$residuals, order = c(1,0,0))
+ARModel
+#calculate t stat, see it's statistically significant, ar1 < - 2
+ARModel$coef["ar1"] / 0.1528
+
+#residuals of residuals
+Acf(ARModel$residuals)
+#forecast residuals
+errorForecastN <- forecast(ARModel, h = validLengthE)
+errorForecastN
+
+# Not much improved Forecast MAPE = 22.92979
+adjustedForecastN <- neuralForecast$mean + errorForecast$mean
+adjustedForecastN
+accuracy(adjustedForecastN, salesValidE)
+```
+
+Naive
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(naiveE, salesValidE))
+```
+
+
+Smoothing
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(etsForecastE, salesValidE))
+```
+
+Regression 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(seasonRegEForecast, salesValidE))
+```
+
+Adjusted Regression, 2nd layer
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(adjustedForecast, salesValidE))
+```
+
+Neural Net
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(neuralForecast, salesValidE))
+```
+
+Adjusted Neural Net 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(adjustedForecastN, salesValidE))
+```
+
+
+A forecast of the validation period averaged from the forecasts created shows a MAPE = 28.46 % for Item M. The validation forcast generated using a neural net has a lower MAPE. 
+
+Average
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+allForecasts <- (naiveE$mean + etsForecastE$mean  + seasonRegEForecast$mean + neuralForecast$mean)/4
+pander(allForecasts)
+#MAPE of the averaged forecasts = 17.3
+kable(accuracy(allForecasts, salesValidE))
+```
+
+This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. All validation forecasts under forecast. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+plot(m.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS03S6T7284 Item M ", ylim = c(0,300))
+lines(naiveE$fitted, col = "blue")
+lines(naiveE$mean, col = "blue", lty = 2)
+lines(etsE$fitted, col = "green")
+lines(etsForecastE$mean, col = "green", lty = 3)
+lines(seasonTrendE$fitted, col = "orange")
+lines(seasonRegEForecast$mean, col = "orange", lty = 4)
+lines(neuralE$fitted, col = "red")
+lines(neuralForecast$mean, col = "red",lty = 5)
+lines(allForecasts, col = "purple")
+
+
+legend(2012, 300, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+```
+
+
+**SS04CLR96130 Item N**
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+validLengthE <- 12
+trainLengthE <- length(n.ts) - validLengthE
+salesTrainE <- window(n.ts, end = c(2012, trainLengthE))
+salesValidE <- window(n.ts, start = c(2012, trainLengthE + 1))
+#naive
+naiveE <- snaive(salesTrainE, h = validLengthE)
+#pointFC snaive 17/13 naive 21/14
+naiveE$mean
+#accuracy 43/24
+accuracy(naiveE, salesValidE)
+
+#best smoothing model, it chooses an MNA model with an alpha = 0.1757  and gamma = 2e-04.
+etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
+etsE
+summary(etsE)
+etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
+etsForecastE
+#forecat accuracy 10.75%
+accuracy(etsForecastE$mean, salesValidE)
+
+seasonTrendE <- tslm(salesTrainE ~ trend + season)
+#summary
+summary(seasonTrendE)
+#forecasting Regression Models
+seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
+seasonRegEForecast
+#accuracy 11.64/10.38
+accuracy(seasonRegEForecast, salesValidE)
+
+residualsseasonTrendE <- Acf(seasonTrendE$residuals, main = "Some Seasonality \nLeft to Capture")
+#There's uncaptured T/S
+ARModel <- Arima(seasonTrendE$residuals, order = c(1,0,0))
+ARModel
+#calculate t stat, see it's significant, ar1 > 2, ar-1 = 2.452
+ARModel$coef["ar1"] / 0.1305
+#residuals of residuals
+Acf(ARModel$residuals)
+#forecast residuals
+errorForecast <- forecast(ARModel, h = validLengthE)
+errorForecast
+#improved Forecast MAPE = 10.34
+adjustedForecast <- seasonRegEForecast$mean + errorForecast$mean
+adjustedForecast
+accuracy(adjustedForecast, salesValidE)
+
+set.seed(201)
+
+neuralE <- nnetar(salesTrainE, p = 11)
+
+neuralForecast <- forecast(neuralE, h = validLengthE)
+
+neuralForecast$mean
+accuracy(neuralForecast, salesValidE)
+#p=11, MAPE = 0.13/13.01
+
+ARModelN <- Arima(neuralE$residuals, order = c(1,0,0))
+ARModelN
+#calculate t stat, see it's statistically significant, ar1 < - 2
+ARModelN$coef["ar1"] / 0.1562
+
+#residuals of residuals
+Acf(ARModel$residuals)
+#forecast residuals
+errorForecastN <- forecast(ARModel, h = validLengthE)
+errorForecastN
+
+# Not much improved Forecast MAPE = 13.12
+adjustedForecastN <- neuralForecast$mean + errorForecast$mean
+adjustedForecastN
+accuracy(adjustedForecastN, salesValidE)
+```
+
+Naive
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(naiveE, salesValidE))
+```
+
+
+Smoothing
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(etsForecastE, salesValidE))
+```
+
+Regression 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(seasonRegEForecast, salesValidE))
+```
+
+Adjusted Regression, 2nd layer
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(adjustedForecast, salesValidE))
+```
+
+Neural Net
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(neuralForecast, salesValidE))
+```
+
+Adjusted Neural Net 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(adjustedForecastN, salesValidE))
+```
+
+
+A forecast of the validation period averaged from the forecasts created shows a MAPE = 9.23 % for Item N. The validation forcast generated using a neural net has a lower MAPE. 
+
+Average
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+allForecasts <- (naiveE$mean + etsForecastE$mean  + seasonRegEForecast$mean + neuralForecast$mean)/4
+pander(allForecasts)
+#MAPE of the averaged forecasts = 9.23
+kable(accuracy(allForecasts, salesValidE))
+```
+
+This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. All validation forecasts under forecast. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+plot(n.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS03S6T7284 Item M ", xlim = c(2012,2019))
+lines(naiveE$fitted, col = "blue")
+lines(naiveE$mean, col = "blue", lty = 2)
+lines(etsE$fitted, col = "green")
+lines(etsForecastE$mean, col = "green", lty = 3)
+lines(seasonTrendE$fitted, col = "orange")
+lines(seasonRegEForecast$mean, col = "orange", lty = 4)
+lines(neuralE$fitted, col = "red")
+lines(neuralForecast$mean, col = "red",lty = 5)
+lines(allForecasts, col = "purple")
+
+
+legend(2017, 350, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+```
+
+
+**SS06BRN96130 Item S**
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+validLengthE <- 12
+trainLengthE <- length(s.ts) - validLengthE
+salesTrainE <- window(s.ts, end = c(2012, trainLengthE))
+salesValidE <- window(s.ts, start = c(2012, trainLengthE + 1))
+#naive
+naiveE <- snaive(salesTrainE, h = validLengthE)
+#pointFC snaive 43/21
+naiveE$mean
+#accuracy 43/24
+accuracy(naiveE, salesValidE)
+
+#best smoothing model, it chooses an ANN model with an alpha = 1e-04 .
+etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
+etsE
+summary(etsE)
+etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
+etsForecastE
+#forecat accuracy 24%
+accuracy(etsForecastE$mean, salesValidE)
+
+seasonTrendE <- tslm(salesTrainE ~ trend + season)
+#summary
+summary(seasonTrendE)
+#forecasting Regression Models
+seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
+seasonRegEForecast
+#accuracy 29/24
+accuracy(seasonRegEForecast, salesValidE)
+
+residualsseasonTrendE <- Acf(seasonTrendE$residuals, main = "Some Seasonality \nLeft to Capture")
+#T/S all captured
+
+set.seed(201)
+
+neuralE <- nnetar(salesTrainE, p = 11)
+
+neuralForecast <- forecast(neuralE, h = validLengthE)
+
+neuralForecast$mean
+accuracy(neuralForecast, salesValidE)
+#p=11, MAPE = 0.09/35
+
+```
+
+Naive
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(naiveE, salesValidE))
+```
+
+
+Smoothing
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(etsForecastE, salesValidE))
+```
+
+Regression 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(seasonRegEForecast, salesValidE))
+```
+
+
+Neural Net
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+kable(accuracy(neuralForecast, salesValidE))
+```
+
+
+A forecast of the validation period averaged from the forecasts created shows a MAPE = 21.26671 % for Item S. The validation forcast generated using a neural net has a lower MAPE. 
+
+Average
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+allForecasts <- (naiveE$mean + etsForecastE$mean  + seasonRegEForecast$mean + neuralForecast$mean)/4
+pander(allForecasts)
+#MAPE of the averaged forecasts = 9.23
+kable(accuracy(allForecasts, salesValidE))
+```
+
+```{r}
+
+```
+
+
+This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. All validation forecasts under forecast. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+plot(s.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS03S6T7284 Item M ", xlim = c(2012,2019))
+lines(naiveE$fitted, col = "blue")
+lines(naiveE$mean, col = "blue", lty = 2)
+lines(etsE$fitted, col = "green")
+lines(etsForecastE$mean, col = "green", lty = 3)
+lines(seasonTrendE$fitted, col = "orange")
+lines(seasonRegEForecast$mean, col = "orange", lty = 4)
+lines(neuralE$fitted, col = "red")
+lines(neuralForecast$mean, col = "red",lty = 5)
+lines(allForecasts, col = "purple")
+
+
+legend(2017, 150, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+```
 
 
