@@ -742,7 +742,7 @@ etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
 etsE
 summary(etsE)
 etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
-pander(etsForecastE)
+etsForecastE
 #accuracy 35/18
 kable(accuracy(etsForecastE, salesValidE))
 ```
@@ -755,7 +755,7 @@ seasonTrendE <- tslm(salesTrainE ~ trend + season)
 summary(seasonTrendE)
 #forecasting Regression Models
 seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
-pander(seasonRegEForecast)
+seasonRegEForecast
 #accuracy 33/21
 kable(accuracy(seasonRegEForecast, salesValidE))
 ```
@@ -776,10 +776,10 @@ ARModel$coef["ar1"] / 0.1316
 Acf(ARModel$residuals)
 #forecast residuals
 errorForecast <- forecast(ARModel, h = validLengthE)
-pander(errorForecast)
+errorForecast
 #improved Forecast MAPE = 20.22199
 adjustedForecast <- seasonRegEForecast$mean + errorForecast$mean
-pander(adjustedForecast)
+adjustedForecast
 kable(accuracy(adjustedForecast, salesValidE))
 ```
 
@@ -827,13 +827,13 @@ ARModel$coef["ar2"] / 0.1389
 Acf(ARModel$residuals)
 #forecast residuals
 errorForecast <- forecast(ARModel, h = validLengthE)
-pander(errorForecast)
+errorForecast
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #improved Forecast MAPE = 16.05
 adjustedForecast <- neuralForecast$mean + errorForecast$mean
-pander(adjustedForecast)
+adjustedForecast
 kable(accuracy(adjustedForecast, salesValidE))
 ```
 
@@ -848,9 +848,9 @@ As we read earlier in the course, forecasts can be improved by averaging the for
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 allForecasts <- (naiveE$mean + etsForecastE$mean + seasonRegEForecast$mean + neuralForecast$mean)/4
-#pander(allForecasts)
+pander(allForecasts)
 #MAPE of the averaged forecasts = 20.23421
-accuracy(allForecasts, salesValidE)
+kable(accuracy(allForecasts, salesValidE))
 ```
 
 Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
@@ -858,7 +858,7 @@ Using the hybridForecasting package in R, we can get an average. I've tried this
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 fit1 <- hybridModel(salesTrainE, weights = "equal")
 fc1 <- forecast(fit1, h = validLengthE <- 12 )
-pander(fc1)
+fc1
 kable(accuracy(fc1$mean, salesValidE))
 autoplot(fc1) + ggtitle("Hybrid Forecast Item E \nwith Confidence Intervals") + xlab("Year") +  
   ylab("Item E Use")
@@ -871,7 +871,7 @@ This plot shows the original series in black; it is obscured by the neural net f
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-plot(f.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 - Item E", ylim = c(0,800))
+plot(e.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 - Item E", ylim = c(0,800))
 lines(naiveE$fitted, col = "blue")
 lines(naiveE$mean, col = "blue", lty = 2)
 lines(etsE$fitted, col = "green")
@@ -880,7 +880,7 @@ lines(seasonTrendE$fitted, col = "orange")
 lines(seasonRegEForecast$mean, col = "orange", lty = 4)
 lines(neuralE$fitted, col = "red")
 lines(neuralForecast$mean, col = "red",lty = 5)
-lines(allForecasts, col = "purple")
+lines(fc1$mean, col = "purple")
 
 
 legend(2012, 800, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1, 1), lwd = c(1,1,1,1,1, 1), bty = "n", col = c("black", "blue", "green", "orange", "red", "purple"))
@@ -1003,6 +1003,21 @@ kable(allForecasts)
 kable(accuracy(allForecasts, salesValidE))
 ```
 
+
+Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+fit1 <- hybridModel(salesTrainE, weights = "equal")
+fc1 <- forecast(fit1, h = validLengthE <- 12 )
+fc1
+kable(accuracy(fc1$mean, salesValidE))
+autoplot(fc1) + ggtitle("Hybrid Forecast Item F \nwith Confidence Intervals") + xlab("Year") +  
+  ylab("Item F Use")
+df <- cbind(Data=f.ts, Hybrid1=fc1$mean)
+autoplot(df) +
+xlab("Year") + ylab(expression("Item F Use"))+ ggtitle("Hybrid Forecast Item F \nwith Confidence Intervals")
+```
+
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1016,7 +1031,7 @@ lines(seasonTrendE$fitted, col = "orange")
 lines(seasonRegEForecast$mean, col = "orange", lty = 4)
 lines(neuralE$fitted, col = "red")
 lines(neuralForecast$mean, col = "red",lty = 5)
-lines(allForecasts, col = "purple")
+lines(fc1$mean, col = "purple")
 
 
 legend(2012, 800, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red", "purple"))
@@ -1136,6 +1151,20 @@ kable(allForecasts)
 kable(accuracy(allForecasts, salesValidE))
 ```
 
+Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+fit1 <- hybridModel(salesTrainE, weights = "equal")
+fc1 <- forecast(fit1, h = validLengthE <- 12 )
+fc1
+kable(accuracy(fc1$mean, salesValidE))
+autoplot(fc1) + ggtitle("Hybrid Forecast Item I \nwith Confidence Intervals") + xlab("Year") +  
+  ylab("Item I Use")
+df <- cbind(Data=i.ts, Hybrid1=fc1$mean)
+autoplot(df) +
+xlab("Year") + ylab(expression("Item I Use"))+ ggtitle("Hybrid Forecast Item I \nwith Confidence Intervals")
+```
+
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1149,7 +1178,7 @@ lines(seasonTrendE$fitted, col = "orange")
 lines(seasonRegEForecast$mean, col = "orange", lty = 4)
 lines(neuralE$fitted, col = "red")
 lines(neuralForecast$mean, col = "red",lty = 5)
-lines(allForecasts, col = "purple")
+lines(fc1$mean, col = "purple")
 
 
 legend(2012, 500, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
@@ -1282,6 +1311,20 @@ pander(allForecasts)
 kable(accuracy(allForecasts, salesValidE))
 ```
 
+Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+fit1 <- hybridModel(salesTrainE, weights = "equal")
+fc1 <- forecast(fit1, h = validLengthE <- 12 )
+fc1
+kable(accuracy(fc1$mean, salesValidE))
+autoplot(fc1) + ggtitle("Hybrid Forecast Item M \nwith Confidence Intervals") + xlab("Year") +  
+  ylab("Item M Use")
+df <- cbind(Data=m.ts, Hybrid1=fc1$mean)
+autoplot(df) +
+xlab("Year") + ylab(expression("Item E Use"))+ ggtitle("Hybrid Forecast Item M \nwith Confidence Intervals")
+```
+
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. All validation forecasts under forecast. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1295,7 +1338,7 @@ lines(seasonTrendE$fitted, col = "orange")
 lines(seasonRegEForecast$mean, col = "orange", lty = 4)
 lines(neuralE$fitted, col = "red")
 lines(neuralForecast$mean, col = "red",lty = 5)
-lines(allForecasts, col = "purple")
+lines(fc1$mean, col = "purple")
 
 
 legend(2012, 300, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
@@ -1426,6 +1469,20 @@ pander(allForecasts)
 kable(accuracy(allForecasts, salesValidE))
 ```
 
+
+Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+fit1 <- hybridModel(salesTrainE, weights = "equal")
+fc1 <- forecast(fit1, h = validLengthE <- 12 )
+fc1
+kable(accuracy(fc1$mean, salesValidE))
+autoplot(fc1) + ggtitle("Hybrid Forecast Item N \nwith Confidence Intervals") + xlab("Year") +  
+  ylab("Item N Use")
+df <- cbind(Data=n.ts, Hybrid1=fc1$mean)
+autoplot(df) +
+xlab("Year") + ylab(expression("Item N Use"))+ ggtitle("Hybrid Forecast Item N \nwith Confidence Intervals")
+```
 This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. All validation forecasts under forecast. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1439,7 +1496,7 @@ lines(seasonTrendE$fitted, col = "orange")
 lines(seasonRegEForecast$mean, col = "orange", lty = 4)
 lines(neuralE$fitted, col = "red")
 lines(neuralForecast$mean, col = "red",lty = 5)
-lines(allForecasts, col = "purple")
+lines(fc1$mean, col = "purple")
 
 
 legend(2017, 350, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
@@ -1531,8 +1588,18 @@ pander(allForecasts)
 kable(accuracy(allForecasts, salesValidE))
 ```
 
-```{r}
+Using the hybridForecasting package in R, we can get an average. I've tried this using equal weights. 
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+fit1 <- hybridModel(salesTrainE, weights = "equal")
+fc1 <- forecast(fit1, h = validLengthE <- 12 )
+fc1
+kable(accuracy(fc1$mean, salesValidE))
+autoplot(fc1) + ggtitle("Hybrid Forecast Item S \nwith Confidence Intervals") + xlab("Year") +  
+  ylab("Item S Use")
+df <- cbind(Data=s.ts, Hybrid1=fc1$mean)
+autoplot(df) +
+xlab("Year") + ylab(expression("Item S Use"))+ ggtitle("Hybrid Forecast Item S \nwith Confidence Intervals")
 ```
 
 
@@ -1549,7 +1616,7 @@ lines(seasonTrendE$fitted, col = "orange")
 lines(seasonRegEForecast$mean, col = "orange", lty = 4)
 lines(neuralE$fitted, col = "red")
 lines(neuralForecast$mean, col = "red",lty = 5)
-lines(allForecasts, col = "purple")
+lines(fc1$mean, col = "purple")
 
 
 legend(2017, 150, c("Actual", "Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1,1), lwd = c(1,1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
