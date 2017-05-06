@@ -447,14 +447,14 @@ salesTrainS <- window(s.ts, end = c(2012, trainLengthS))
 salesValidS <- window(s.ts, start = c(2012, trainLengthS + 1))
 ```
 
-```{r, trend and seasonality}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 LinearS <- tslm(s.ts ~ trend)
 polyLinearS <- tslm(s.ts ~ trend + I(trend^2))
 seasonTrendS <- tslm(s.ts ~ trend + season)
 summary(seasonTrendS)
 ```
 
-```{r, Acf Trend and Seasonality}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #Autocorrelation
 AcfS <- Acf(s.ts)
 AcfS
@@ -472,7 +472,42 @@ fitS
 
 Since $p<\alpha$ we know this series is not a random walk
 
-```{r, forecast regression}
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#naive
+naiveS <- snaive(salesTrainS, h = validLengthS)
+#pointFC
+naiveS$mean
+#accuracy 43/21
+accuracy(naiveS, salesValidS)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#trailing
+trailMAS <- rollmean(salesTrainS, k = 12, align = "right")
+trailSForecast <- trailMAS[1]
+trailSForecast
+accuracy(trailSForecast, salesValidS[1])
+#look for trend and seasonality with Acf
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#best smoothing model, it chooses an ANN model with a very small alpha meaning it's a slow learner.
+etsS <- ets(salesTrainS, model = "ZZZ", restrict = FALSE)
+etsS
+summary(etsS)
+etsForecastS <- forecast(etsS, h = validLengthS, level = 0)
+etsForecastS
+#accuracy 42/24
+accuracy(etsForecastS, salesValidS)
+plot(s.ts, main = "Smoothing Model S", bty = "l")
+lines(etsS$fitted, col = "blue", lty = 1,lwd = 2)
+#lines(etsSANN$fitted, col = "green", lty = 1,lwd = 2)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 seasonTrendS <- tslm(salesTrainS ~ trend + season)
 #summary
 summary(seasonTrendS)
@@ -485,13 +520,13 @@ accuracy(seasonRegSForecast, salesValidS)
 
 **Shows not much left to model**
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 residualsseasonTrendS <- Acf(seasonTrendS$residuals)
 ```
 
 **If more to model, follow this process**
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 ARModel <- Arima(seasonTrendS$residuals, order = c(1,0,0))
 ARModel
 #calculate t stat, see it's not statistically significant
@@ -507,38 +542,38 @@ adjustedForecast
 accuracy(adjustedForecast, salesValidS)
 ```
 
+**Use a Neural Network**
 
 ```{r}
-#naive
-naiveS <- snaive(salesTrainS, h = validLengthS)
-#pointFC
-naiveS$mean
-#accuracy 43/21
-accuracy(naiveS, salesValidS)
+set.seed(201)
+
+neuralS <- nnetar(salesTrainS, p = 11)
+
+neuralForecast <- forecast(neuralS, h = validLengthS)
+neuralForecast$mean
+accuracy(neuralForecast, salesValidS)
+neuralSP <- nnetar(salesTrainS, P = 1)
+
+neuralForecastSP <- forecast(neuralSP, h = validLengthS)
+neuralForecastSP$mean
+accuracy(neuralForecastSP, salesValidS)
+
+
 ```
 
 ```{r}
-#trailing
-trailMAS <- rollmean(salesTrainS, k = 12, align = "right")
-trailSForecast <- trailMAS[1]
-trailSForecast
-accuracy(trailSForecast, salesValidS[1])
-#look for trend and seasonality with Acf
+validationPeriod <- as.Date("05-16", "06-16", "07-16", "08-16","09-16", "10-16", "11-16", "12-16","01-17", "02-17", "03-17", "04-17")
+
+allForecasts <- (neuralForecastSP$mean + seasonRegSForecast$mean + etsForecastS$mean + naiveS$mean)/4
+allForecasts
+accuracy(allForecasts, salesValidS)
+
+allForecasts <- as.numeric(allForecasts)
+
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-#best smoothing model, it chooses an ANN model with a very small alpha meaning it's a slow learner.
-etsS <- ets(salesTrainS, model = "ZZZ")
-etsS
-summary(etsS)
-etsForecastS <- forecast(etsS, h = validLengthS, level = 0)
-etsForecastS
-#accuracy 42/24
-accuracy(etsForecastS, salesValidS)
-plot(s.ts, main = "Smoothing Model S", bty = "l")
-lines(etsS$fitted, col = "blue", lty = 1,lwd = 2)
-lines(etsSANN$fitted, col = "green", lty = 1,lwd = 2)
-```
+
+
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 validLengthE <- 12
