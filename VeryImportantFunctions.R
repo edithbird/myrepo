@@ -94,3 +94,10 @@ crash[c(4500:4525),c(2,4)]
 dim(crash)
 library(dplyr)
 crash %>% filter(grepl("Japan",operator))
+library(tidyr)
+#long to wide
+head(x)
+xx <- spread(x, Item_Code, Used)
+head(xx)
+xx <- xx[,-2]
+head(xx)
