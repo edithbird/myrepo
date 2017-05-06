@@ -1,9 +1,9 @@
 ---
-title: "R Notebook"
+title: "Predictive Analytics"
 output:
-  html_document: default
-  html_notebook: default
   word_document: default
+  html_notebook: default
+  html_document: default
 ---
 
 Sigco, Inc is a glass and architectural metal fabricator/distributor in Westbrook, ME and serves much New England. They manufacture a number of glass products and think the demand for these products is seasonal. 
@@ -14,7 +14,7 @@ The **goal** of this project is to build a systematic forecasting model evaluati
 
 **Everything we do in the class relies on data, where and how do you expect to obtain the necessary time series data to utilize the tools and models we covered in class?** 
 
-The data is easy to come by. The historical use of each item is documented on annual Excel spreadsheets that the company keeps. There are roughly 200 SKUs in Sigco's inventory, and I have choen to look at the 25 most utilized items and forecast their use. 
+The data is easy to come by. The historical use of each item is documented on annual Excel spreadsheets that the company keeps. There are roughly 200 SKUs in Sigco's inventory, and I have chosen to look at the 25 most utilized items and forecast their use. 
 
 **Step 1**
 
@@ -575,20 +575,20 @@ plot(e.ts, main = "Monthly Use Item E \nTrend and Seasonality", bty = "l")
 lines(LinearF$fitted, col = "blue", lwd = 2)
 lines(polyLinearE$fitted, col = "green", lwd = 2)
 lines(seasonTrendE$fitted, col = "orange", lwd = 2)
-legend(2012, 850, c("L R-sq = .77 ", "Q R-sq = .76", "S Rs-sq = .77"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+legend(2012, 850, c("L", "Q", "S"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
 
 plot(f.ts, main = "Monthly Use Item F \nTrend and Seasonality", bty = "l")
 lines(LinearF$fitted, col = "blue", lwd = 2)
 lines(polyLinearF$fitted, col = "green", lwd = 2)
 lines(seasonTrendF$fitted, col = "orange", lwd = 2)
-legend(2012, 600, c("L R-sq = .61", "Q R-sq = 62", "S R-sq = .67"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+legend(2012, 600, c("L", "Q", "S"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
 
 par(mfrow = c(1,2))
 plot(i.ts,main = "Monthly Use Item I \nTrend and Seasonality", bty = "l")
 lines(LinearI$fitted, col = "blue", lwd = 2)
 lines(polyLinearI$fitted, col = "green", lwd = 2)
 lines(seasonTrendI$fitted, col = "orange", lwd = 2)
-legend(2012, 425, c("L R-sq = 61", "Q R-sq = 0.60", "S R-sq = 0.68"), 
+legend(2012, 425, c("L", "Q", "S"), 
        lty = c(1,1,1), lwd = c(2,2,2), 
        col = c("blue", "green", "orange"), bty = "n" )
 
@@ -596,7 +596,7 @@ plot(m.ts, main = "Monthly Use Item M \nTrend and Seasonality", bty = "l")
 lines(LinearM$fitted, col = "blue", lwd = 2)
 lines(polyLinearM$fitted, col = "green", lwd = 2)
 lines(seasonTrendM$fitted, col = "orange", lwd = 2)
-legend(2012, 220, c("L R-sq = .73", "Q R-sq = .79", "S R-sq = .74"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+legend(2012, 220, c("L", "Q", "S"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
 
 par(mfrow = c(1,2))
 
@@ -604,7 +604,7 @@ plot(n.ts, main = "Monthly Use Item N \nTrend and Seasonality", bty = "l", xlim 
 lines(LinearN$fitted, col = "blue", lwd = 2)
 lines(polyLinearN$fitted, col = "green", lwd = 2)
 lines(seasonTrendN$fitted, col = "orange", lwd = 2)
-legend(2012, 380, c("L - none", "Q - none", "S R-sq = .78"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+legend(2012, 380, c("L", "Q", "S"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
 
 
 
@@ -612,7 +612,7 @@ plot(s.ts, main = "Monthly Use Item S \nTrend and Seasonality", bty = "l")
 lines(LinearS$fitted, col = "blue", lty = 1,lwd = 2)
 lines(polyLinearS$fitted, col = "green", lty = 1,lwd = 2)
 lines(seasonTrendS$fitted, col = "orange", lty = 1,lwd = 2)
-legend(2012, 200, c("L - none", "Q - none", "S R-sq = 0.2"), 
+legend(2012, 200, c("L", "Q", "S"), 
        lty = c(1,1,1), lwd = c(2,2,2), 
        col = c("blue", "green", "orange"), bty = "n" )
 
@@ -714,13 +714,14 @@ pander(2*pnorm(-abs((1 - fitS$coef["ar1"]) / 0.1239)))
 ```
 
 
-All of this leads us to veer in the direction of choosing forecasting models that accomodate trend and seasonality for all but one of the SKUs, M. However. looking at the M plots that show trend and seasonality, it seems that those components are present and I therefore think it's worth trying to model with methods other than the naive. 
+All of this leads us to veer in the direction of choosing forecasting models that accommodate trend and seasonality for all but one of the SKUs, M. However. Looking at the M plots that show trend and seasonality, it seems that those components are present and I therefore think it would be worth trying to model with methods other than the naive. 
+
 
 ###Step 3 
 
-Forecast with the appropriate models. Also include a naive model to use as a baseline. 
+Forecast with the appropriate models. Also include a naive model to use as a baseline. I will model series and deploy forecasts for item E. The process for the other data sets is the same.  
 
-**SS06S6T100144**
+**SS06S6T100144 - Item E**
 
 Naive
 
@@ -749,9 +750,6 @@ etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
 etsForecastE
 #accuracy 35/18
 accuracy(etsForecastE, salesValidE)
-plot(e.ts, main = "Smoothing Model E", bty = "l")
-lines(etsE$fitted, col = "blue", lty = 1,lwd = 2)
-#lines(etsSANN$fitted, col = "green", lty = 1,lwd = 2)
 ```
 
 Regression
@@ -767,16 +765,14 @@ seasonRegEForecast
 accuracy(seasonRegEForecast, salesValidE)
 ```
 
-
-**Shows not much left to model**
+An Acf plot of the regression model shows some uncaptured trend and seasonality which we can further model. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 residualsseasonTrendE <- Acf(seasonTrendE$residuals, main = "Some Seasonality \nLeft to Capture")
 ```
 
-**If more to model, follow this process**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 ARModel <- Arima(seasonTrendE$residuals, order = c(1,0,0))
 ARModel
 #calculate t stat, see it's not statistically significant, ar1 > 2
@@ -792,52 +788,77 @@ adjustedForecast
 accuracy(adjustedForecast, salesValidE)
 ```
 
+This is the adjusted regression forecast and its accuracy. It's not much of an improvement, but since it appeared that there was more data to capture, it's important to try. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+adjustedForecast
+accuracy(adjustedForecast, salesValidE)
+```
+
+
 **Use a Neural Network**
 
 After we get a neural network forecast, we can model for uncaptured components to maybe improve the forecast. In this case, the forecast accuracy is the same. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 set.seed(201)
 
 neuralE <- nnetar(salesTrainE, p = 11)
 
 neuralForecast <- forecast(neuralE, h = validLengthE)
+
+```
+
+The neural net has given the best MAPE scores during the test and the validation periods. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 neuralForecast$mean
 #p=11, MAPE = 0.74/16.05
 accuracy(neuralForecast, salesValidE)
+```
 
+Further modeling may be warranted
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 ARModel <- Arima(neuralE$residuals, order = c(2,0,0))
 ARModel
 #calculate t stat, see it's not statistically significant, ar1 > 2
 ARModel$coef["ar1"] / 0.1438
 ARModel$coef["ar2"] / 0.1389
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #residuals of residuals
 Acf(ARModel$residuals)
 #forecast residuals
 errorForecast <- forecast(ARModel, h = validLengthE)
 errorForecast
-#improved Forecast MAPE = 20.22199
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#improved Forecast MAPE = 16.05
 adjustedForecast <- neuralForecast$mean + errorForecast$mean
 adjustedForecast
 accuracy(adjustedForecast, salesValidE)
-
-
 ```
 
-
-```{r}
-validationPeriod <- as.Date("05-16", "06-16", "07-16", "08-16","09-16", "10-16", "11-16", "12-16","01-17", "02-17", "03-17", "04-17")
+However, we see the forecast accuracy is the same after working in the Acf residuals. This means the original model captured all the trend and seasonality. 
 
 
+###Step 4 
+
+Other Considerations
+
+As we read earlier in the course, forecasts can be improved by averaging the forecasted valued from various models. Below is the average and the accuracy metrics. Although the accuracy is not ideal and not as good as the neural network, it would be interesting to test the model. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 allForecasts <- (naiveE$mean + etsForecastE$mean +seasonRegEForecast$mean + seasonRegEForecast$mean + neuralForecast$mean)/5
 allForecasts
 #MAPE of the averaged forecasts = 20.23421
 accuracy(allForecasts, salesValidE)
-
-allForecasts <- as.numeric(allForecasts)
-
 ```
 
+This plot shows the original series in black; it is obscured by the neural net fit model. The forecasts are in dotted lines. 
 
 ```{r, echo=FALSE}
 
@@ -854,13 +875,13 @@ lines(allForecasts, col = "purple")
 
 
 legend(2012, 800, c("Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1), lwd = c(1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
-
-
-
 ```
 
 
 
+**Has a similar problem been solved by others? If yes, then please cite those sources.**
+
+Yes. Last semester, in Supply Chain with Professor Kohli, my team tackled inventory management at Sigco. We attempted to build a system using historical data to forecast several months out. With the forecasted values we used the Economic Order Quantity (EOQ) model to calculate safety stock and reorder points. I was tasked with the forecasting and EOQ calculations. I am a little embarrassed to tell exactly how I did this last semester, but the process was abbreviated, but now, armed with Predictive Analytics, I wanted to revisit the material for find the best forecasting model and I wanted to try and develop a systematic workflow to tackling various forecasting problems.
 
 
 
@@ -903,19 +924,19 @@ accuracy(naiveN, salesValidN)
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 validLengthS <- 12
 trainLengthS <- length(s.ts) - validLengthS
 salesTrainS <- window(s.ts, end = c(2012, trainLengthS))
 salesValidS <- window(s.ts, start = c(2012, trainLengthS + 1))
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 
 summary(seasonTrendS)
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #Autocorrelation
 AcfS <- Acf(s.ts)
 #Acf for Differenced and there appears to be some uncaptured seasonality
@@ -928,11 +949,13 @@ fitS
 2*pt(-abs((1-fitS$coef["ar1"]) / 0.1239), df = length(s.ts)-1)
 #normal distribution
 2*pnorm(-abs((1 - fitS$coef["ar1"]) / 0.1239))
+
+#Since $p<\alpha$ we know this series is not a random walk
 ```
 
-Since $p<\alpha$ we know this series is not a random walk
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+
 #naive
 naiveS <- snaive(salesTrainS, h = validLengthS)
 #pointFC
@@ -941,7 +964,7 @@ naiveS$mean
 accuracy(naiveS, salesValidS)
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #trailing
 trailMAS <- rollmean(salesTrainS, k = 12, align = "right")
 trailSForecast <- trailMAS[1]
@@ -950,7 +973,7 @@ accuracy(trailSForecast, salesValidS[1])
 #look for trend and seasonality with Acf
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 #best smoothing model, it chooses an ANN model with a very small alpha meaning it's a slow learner.
 etsS <- ets(salesTrainS, model = "ZZZ", restrict = FALSE)
 etsS
@@ -965,7 +988,7 @@ lines(etsS$fitted, col = "blue", lty = 1,lwd = 2)
 ```
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 seasonTrendS <- tslm(salesTrainS ~ trend + season)
 #summary
 summary(seasonTrendS)
@@ -976,15 +999,14 @@ seasonRegSForecast
 accuracy(seasonRegSForecast, salesValidS)
 ```
 
-**Shows not much left to model**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 residualsseasonTrendS <- Acf(seasonTrendS$residuals)
 ```
 
-**If more to model, follow this process**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 ARModel <- Arima(seasonTrendS$residuals, order = c(1,0,0))
 ARModel
 #calculate t stat, see it's not statistically significant
@@ -1000,9 +1022,8 @@ adjustedForecast
 accuracy(adjustedForecast, salesValidS)
 ```
 
-**Use a Neural Network**
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 set.seed(201)
 
 neuralS <- nnetar(salesTrainS, p = 11)
@@ -1019,7 +1040,7 @@ accuracy(neuralForecastSP, salesValidS)
 
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 allForecasts <- (neuralForecastSP$mean + seasonRegSForecast$mean + etsForecastS$mean + naiveS$mean)/4
 allForecasts
 accuracy(allForecasts, salesValidS)
@@ -1031,77 +1052,13 @@ allForecasts <- as.numeric(allForecasts)
 
 
 
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-validLengthF <- 12
-trainLengthF <- length(f.ts) - validLengthF
-salesTrainF <- window(f.ts, end = c(2012, trainLengthF))
-salesValidF <- window(f.ts, start = c(2012, trainLengthF + 1))
-
-summary(LinearF)
-#naive
-naiveF <- snaive(salesTrainF, h = validLengthF)
-#pointFC snaive 22/13 naive 20/14
-naiveF$mean
-#accuracy 43/21
-accuracy(naiveF, salesValidF)
-
-```
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-validLengthO <- 12
-trainLengthO <- length(o.ts) - validLengthO
-salesTrainO <- window(o.ts, end = c(2012, trainLengthO))
-salesValidO <- window(o.ts, start = c(2012, trainLengthO + 1))
 
 
-#naive
-naiveO <- snaive(salesTrainO, h = validLengthO)
-#pointFC snaive 85/40 naive 115/36
-naiveO$mean
-#accuracy 43/21
-accuracy(naiveO, salesValidO)
-```
-
-Naive Forecasting
-
-**Item E Naive**
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-pander(accuracy(naiveE, salesValidE))
-```
-
-**Item F Naive**
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-pander(accuracy(naiveF, salesValidF))
-```
-
-**Item M Naive**
-
-```{r, include=FALSE}
-pander(accuracy(naiveM, salesValidM))
-```
-
-**Item N Naive**
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-pander(accuracy(naiveN, salesValidN))
-```
-
-**Item O Naive**
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-pander(accuracy(naiveO, salesValidO))
-```
-
-**Item S Naive**
-
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-pander(accuracy(naiveS, salesValidS))
-```
 
 
-**Has a similar problem been solved by others? If yes, then please cite those sources.**
 
-Last semester, in Supply Chain with Professor Kohli, my team tackled inventory management. We attempted to build a system using historical data to forecast several months out. With the forecasted values we used the Economic Order Quantity (EOQ) model to calculate safety stock and reorder points. I was taked with the forecasting and EOQ calculations. I am a little embarrassed to tell exactly how I did this, but now, armed with Predictive Analytics, I feel I can revisit the material for find the best forecasting model. 
+
+
+
+
 
