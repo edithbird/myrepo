@@ -98,7 +98,7 @@ kable(head(x, 20))
 
 **Step 2**
 
-Visualize the data. I have chosen 2 different Items. 
+Visualize the data. I have chosen 6 different Items for brevity's sake, I'll narrow the scope to SKU numbers SS06S6T100144, SS10CLR96130,SS06S6A100144, SS03S6T7284, SS04CLR96130, SS06BRN96130. I will refer to them as E, F, I, M, N, and S respectively.   
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 a <- x %>% filter(Item_Code == "SS06CLR96130")
@@ -158,7 +158,7 @@ g.ts <- ts(g$Used, start = c(2012,1), frequency = 12)
 
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 h <- x %>% filter(Item_Code == "SS06MCL96130")
 h$Used <- as.numeric(h$Used)
 h.ts <- ts(h$Used, start = c(2012,1), frequency = 12)
@@ -327,89 +327,554 @@ dd.ts <- ts(dd$Used, start = c(2012,1), frequency = 12)
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 par(mfrow = c(2,3))
-plot(a.ts)
-plot(b.ts)
-plot(d.ts)
-plot(e.ts)
-plot(f.ts)
-plot(o.ts)
-
-par(mfrow = c(2,3))
-plot(m.ts)
-plot(n.ts)
-plot(g.ts)
-plot(i.ts)
-plot(j.ts)
-plot(s.ts)
-
-par(mfrow = c(2,3))
-plot(t.ts)
-plot(u.ts)
-plot(p.ts)
-plot(q.ts)
-plot(r.ts)
-plot(dd.ts)
-
-par(mfrow = c(2,3))
-plot(v.ts)
-plot(w.ts)
-plot(z.ts)
-plot(bb.ts)
-plot(l.ts)
+plot(e.ts, main = "SS06S6T100144")
+plot(f.ts, main = "SS10CLR96130")
+plot(i.ts, main = "SS06S6A100144")
+plot(m.ts, main = "SS03S6T7284")
+plot(n.ts, main = "SS04CLR96130")
+plot(s.ts, main = "SS06BRN96130")
+# 
+# par(mfrow = c(2,3))
+# plot(m.ts)
+# plot(n.ts)
+# plot(g.ts)
+# plot(i.ts)
+# plot(j.ts)
+# plot(s.ts)
+# 
+# par(mfrow = c(2,3))
+# plot(t.ts)
+# plot(u.ts)
+# plot(p.ts)
+# plot(q.ts)
+# plot(r.ts)
+# plot(dd.ts)
+# 
+# par(mfrow = c(2,3))
+# plot(v.ts)
+# plot(w.ts)
+# plot(z.ts)
+# plot(bb.ts)
+# plot(l.ts)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #colors <- rainbow(6, start = .7, end = 0.9)
-colors <- c("violetred", "turquoise3", "tomato", "skyblue2", "seagreen3","goldenrod1" )
-#colors <- terrain.colors(6)
 
-par(mfrow = c(2,3))
-seasonplot(a.ts, col = colors)
-seasonplot(b.ts, col = colors)
-seasonplot(d.ts, col = colors)
-seasonplot(e.ts, col = colors)
-seasonplot(f.ts, col = colors)
-seasonplot(o.ts, col = colors)
-
-par(mfrow = c(2,3))
-
-seasonplot(m.ts, col = colors)
-seasonplot(n.ts, col = colors)
-seasonplot(g.ts, col = colors)
-seasonplot(i.ts, col = colors)
-seasonplot(j.ts, col = colors)
-seasonplot(s.ts, col = colors)
-
-par(mfrow = c(2,3))
-
-seasonplot(t.ts, col = colors)
-seasonplot(u.ts, col = colors)
-seasonplot(p.ts, col = colors)
-seasonplot(q.ts, col = colors)
-seasonplot(r.ts, col = colors)
-seasonplot(dd.ts, col = colors)
-
-par(mfrow = c(2,3))
-
-seasonplot(v.ts, col = colors)
-seasonplot(w.ts, col = colors)
-seasonplot(z.ts, col = colors)
-seasonplot(bb.ts, col = colors)
-seasonplot(l.ts, col = colors)
+# par(mfrow = c(2,3))
+# 
+# seasonplot(m.ts, col = colors)
+# seasonplot(n.ts, col = colors)
+# seasonplot(g.ts, col = colors)
+# seasonplot(i.ts, col = colors)
+# seasonplot(j.ts, col = colors)
+# seasonplot(s.ts, col = colors)
+# 
+# par(mfrow = c(2,3))
+# 
+# seasonplot(t.ts, col = colors)
+# seasonplot(u.ts, col = colors)
+# seasonplot(p.ts, col = colors)
+# seasonplot(q.ts, col = colors)
+# seasonplot(r.ts, col = colors)
+# seasonplot(dd.ts, col = colors)
+# 
+# par(mfrow = c(2,3))
+# 
+# seasonplot(v.ts, col = colors)
+# seasonplot(w.ts, col = colors)
+# seasonplot(z.ts, col = colors)
+# seasonplot(bb.ts, col = colors)
+# seasonplot(l.ts, col = colors)
 ```
 
-For brevity's sake, I'll narrow the scope to 6 SKUs, e,f,m,n,o,s because, as a group, I can illustrate how the company can model data that exhibits differing components.
+I chose these particular SKUs because, as a group, I can illustrate how the company can model data that exhibits differing components. None of the items are simple to model and they each each exhibit non-stationarity. They have varying degrees of seasonality and trend. 
+**Seasonality**
 
-Trend
+Below I show each of the SKU items plotted. The first group are seasonal charts where the months of the year are plotted on the x axis and each colored line represents sales in the data series. We can see varying degrees of seasonality. 
+
+plot(e.ts, main = "SS06S6T100144")
+plot(f.ts, main = "SS10CLR96130")
+plot(i.ts, main = "SS06S6A100144")
+plot(m.ts, main = "SS03S6T7284")
+plot(n.ts, main = "SS04CLR96130")
+plot(s.ts, main = "SS06BRN96130")
+
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+colors <- c("violetred", "turquoise3", "tomato", "skyblue2", "seagreen3","goldenrod1" )
+
+
+par(mfrow = c(2,3))
+seasonplot(e.ts, col = colors, main = "SS06S6T100144")
+seasonplot(f.ts, col = colors, main = "SS10CLR96130")
+seasonplot(i.ts, col = colors, main = "SS06S6A100144")
+seasonplot(m.ts, col = colors, main = "SS03S6T7284")
+seasonplot(n.ts, col = colors, main = "SS04CLR96130")
+seasonplot(s.ts, col = colors, main = "SS06BRN96130")
+```
+
+The six plots below show seasonality differently, with the years represented on the x axis and each line represents the sales in the each month.  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+par(mfrow = c(1,2))
+xrange <- c(1,7)
+yrange <- c(0,1000)
+
+plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+colors <- rainbow(12)
+linetype <- 1
+
+for(i in 1:12){
+
+  currentMonth <- subset(e.ts, cycle(e.ts) == i)
+  lines(currentMonth, type = "l", lwd = 1,
+       
+  col =colors[i]
+ 
+  )
+}
+title("Item E - Inventory Used \nBroken out by Month ")
+
+xrange <- c(1,7)
+yrange <- c(100,600)
+
+plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+colors <- rainbow(12)
+linetype <- 1
+
+for(i in 1:12){
+
+  currentMonth <- subset(f.ts, cycle(f.ts) == i)
+  lines(currentMonth, type = "l", lwd = 1,
+       
+  col =colors[i]
+ 
+  )
+}
+title("Item F - Inventory Used \nBroken out by Month ")
+
+legend(6.5,600, 1:12, cex = 0.8, col = colors,lty = linetype, title = "Month", xpd = NA, bty = "n")
+
+
+par(mfrow = c(1,2))
+xrange <- c(1,7)
+yrange <- c(0,400)
+
+plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+colors <- rainbow(12)
+linetype <- 1
+
+
+for(i in 1:12){
+
+  currentMonth <- subset(i.ts, cycle(i.ts) == i)
+  lines(currentMonth, type = "l", lwd = 1,
+       
+  col =colors[i]
+ 
+  )
+}
+title("Item I - Inventory Used \nBroken out by Month ")
+
+
+xrange <- c(1,7)
+yrange <- c(0,250)
+
+plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+colors <- rainbow(12)
+linetype <- 1
+
+for(i in 1:12){
+
+  currentMonth <- subset(m.ts, cycle(m.ts) == i)
+  lines(currentMonth, type = "l", lwd = 1,
+       
+  col =colors[i]
+ 
+  )
+}
+title("Item M - Inventory Used \nBroken out by Month ")
+legend(6.5,250, 1:12, cex = 0.8, col = colors,lty = linetype, title = "Month", xpd = NA, bty = "n")
+
+
+xrange <- c(1,7)
+yrange <- c(100,400)
+
+plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+colors <- rainbow(12)
+linetype <- 1
+
+for(i in 1:12){
+
+  currentMonth <- subset(n.ts, cycle(n.ts) == i)
+  lines(currentMonth, type = "l", lwd = 1,
+       
+  col =colors[i]
+ 
+  )
+}
+title("Item N - Inventory Used \nBroken out by Month ")
+
+
+
+
+xrange <- c(1,7)
+yrange <- c(0,200)
+
+plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
+colors <- rainbow(12)
+linetype <- 1
+
+for(i in 1:12){
+
+  currentMonth <- subset(s.ts, cycle(s.ts) == i)
+  lines(currentMonth, type = "l", lwd = 1,
+       
+  col =colors[i]
+ 
+  )
+}
+title("Item S - Inventory Used \nBroken out by Month ")
+
+legend(6.5,175, 1:12, cex = 0.8, col = colors,lty = linetype, title = "Month", xpd = NA, bty = "n")
+```
+
+**Trend**
+
+Trend can be visualized in the plots below. 
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+LinearE <- tslm(e.ts ~ trend)
+polyLinearE <- tslm(e.ts ~ trend + I(trend^2))
+#seasonality does not show much significance
+seasonTrendE <- tslm(e.ts ~ trend + season)
+LinearF <- tslm(f.ts ~ trend)
+polyLinearF <- tslm(f.ts ~ trend + I(trend^2))
+seasonTrendF <- tslm(f.ts ~ trend + season)
+LinearI <- tslm(i.ts ~ trend)
+polyLinearI <- tslm(i.ts ~ trend + I(trend^2))
+seasonTrendI <- tslm(i.ts ~ trend + season)
+LinearM <- tslm(m.ts ~ trend)
+polyLinearM <- tslm(m.ts ~ trend + I(trend^2))
+seasonTrendM <- tslm(m.ts ~ trend + season)
+LinearN <- tslm(n.ts ~ trend)
+polyLinearN <- tslm(n.ts ~ trend + I(trend^2))
+seasonTrendN <- tslm(n.ts ~ trend + season)
+LinearS <- tslm(s.ts ~ trend)
+polyLinearS <- tslm(s.ts ~ trend + I(trend^2))
+seasonTrendS <- tslm(s.ts ~ trend + season)
+
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+par(mfrow = c(1,2))
+
+plot(e.ts, main = "Monthly Use Item E \nTrend and Seasonality", bty = "l")
+lines(LinearF$fitted, col = "blue", lwd = 2)
+lines(polyLinearE$fitted, col = "green", lwd = 2)
+lines(seasonTrendE$fitted, col = "orange", lwd = 2)
+legend(2012, 850, c("L R-sq = .77 ", "Q R-sq = .76", "S Rs-sq = .77"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+
+plot(f.ts, main = "Monthly Use Item F \nTrend and Seasonality", bty = "l")
+lines(LinearF$fitted, col = "blue", lwd = 2)
+lines(polyLinearF$fitted, col = "green", lwd = 2)
+lines(seasonTrendF$fitted, col = "orange", lwd = 2)
+legend(2012, 600, c("L R-sq = .61", "Q R-sq = 62", "S R-sq = .67"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+
+par(mfrow = c(1,2))
+plot(i.ts,main = "Monthly Use Item I \nTrend and Seasonality", bty = "l")
+lines(LinearI$fitted, col = "blue", lwd = 2)
+lines(polyLinearI$fitted, col = "green", lwd = 2)
+lines(seasonTrendI$fitted, col = "orange", lwd = 2)
+legend(2012, 425, c("L R-sq = 61", "Q R-sq = 0.60", "S R-sq = 0.68"), 
+       lty = c(1,1,1), lwd = c(2,2,2), 
+       col = c("blue", "green", "orange"), bty = "n" )
+
+plot(m.ts, main = "Monthly Use Item M \nTrend and Seasonality", bty = "l")
+lines(LinearM$fitted, col = "blue", lwd = 2)
+lines(polyLinearM$fitted, col = "green", lwd = 2)
+lines(seasonTrendM$fitted, col = "orange", lwd = 2)
+legend(2012, 220, c("L R-sq = .73", "Q R-sq = .79", "S R-sq = .74"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+
+par(mfrow = c(1,2))
+
+plot(n.ts, main = "Monthly Use Item N \nTrend and Seasonality", bty = "l", xlim = c(2012,2018))
+lines(LinearN$fitted, col = "blue", lwd = 2)
+lines(polyLinearN$fitted, col = "green", lwd = 2)
+lines(seasonTrendN$fitted, col = "orange", lwd = 2)
+legend(2012, 380, c("L - none", "Q - none", "S R-sq = .78"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
+
+
+
+plot(s.ts, main = "Monthly Use Item S \nTrend and Seasonality", bty = "l")
+lines(LinearS$fitted, col = "blue", lty = 1,lwd = 2)
+lines(polyLinearS$fitted, col = "green", lty = 1,lwd = 2)
+lines(seasonTrendS$fitted, col = "orange", lty = 1,lwd = 2)
+legend(2012, 200, c("L - none", "Q - none", "S R-sq = 0.2"), 
+       lty = c(1,1,1), lwd = c(2,2,2), 
+       col = c("blue", "green", "orange"), bty = "n" )
+
+
+```
+
+Finally, we can get an idea if seasonality and/or trend are present by looking at Acf plots. 
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+par(mfrow = c(3,2))
+AcfE <- Acf(e.ts, main = "Acf Plot 'E'")
+AcfF <- Acf(f.ts, main = "Acf Plot 'F'")
+AcfM <- Acf(m.ts, main = "Acf Plot 'M'")
+AcfN <- Acf(n.ts, main = "Acf Plot 'N'")
+AcfO <- Acf(o.ts, main = "Acf Plot 'O'")
+AcfS <- Acf(s.ts, main = "Acf Plot 'S'")
+
+```
+
+All items display stickiness on the Acf plots, meaning that there is some lag-1 trending that can probably be modeled. Additionally we see seasonality that can be modeled. 
+
+**Are these data series random walks?**
+
+We can determine this by hypothesis testing. 
+
+We can say that E is not a random walk if we are using $\alpha = 0.05$
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#test for a random walk
+fitE <- Arima(e.ts, order = c(1,0,0))
+fitE
+2*pt(-abs((1-fitE$coef["ar1"]) / 0.0587), df = length(e.ts)-1)
+#normal distribution
+2*pnorm(-abs((1 - fitE$coef["ar1"]) / 0.0587))
+
+```
+
+
+We can say that F is not a random walk if we are using $\alpha = 0.01$
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#test for a random walk
+fitF <- Arima(f.ts, order = c(1,0,0))
+fitF
+pander(2*pt(-abs((1-fitF$coef["ar1"]) / 0.07996), df = length(f.ts)-1))
+#normal distribution
+pander(2*pnorm(-abs((1 - fitF$coef["ar1"]) / 0.07996)))
+
+```
+
+
+We can say that I is not a random walk if we are using $\alpha = 0.01$
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#test for a random walk
+fitI <- Arima(i.ts, order = c(1,0,0))
+fitI
+pander(2*pt(-abs((1-fitI$coef["ar1"]) / 0.08599), df = length(i.ts)-1))
+#normal distribution
+pander(2*pnorm(-abs((1 - fitI$coef["ar1"]) / 0.08599)))
+```
+
+
+We can say that M IS a random walk if we are using $\alpha = 0.01$ because $p=0.08$ and therefore $p>\alpha$ if  $\alpha = 0.05$. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#test for a random walk
+fitM <- Arima(m.ts, order = c(1,0,0))
+fitM
+pander(2*pt(-abs((1-fitM$coef["ar1"]) / 0.05895), df = length(m.ts)-1))
+#normal distribution
+pander(2*pnorm(-abs((1 - fitM$coef["ar1"]) / 0.05895)))
+
+```
+
+We can say that N is not a random walk if we are using $\alpha = 0.01$
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#test for a random walk
+fitN <- Arima(n.ts, order = c(1,0,0))
+fitN
+pander(2*pt(-abs((1-fitN$coef["ar1"]) / 0.09314), df = length(n.ts)-1))
+#normal distribution
+pander(2*pnorm(-abs((1 - fitN$coef["ar1"]) / 0.09314)))
+
+```
+
+We can say that S is not a random walk if we are using $\alpha = 0.01$
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#test for a random walk
+fitS <- Arima(s.ts, order = c(1,0,0))
+fitS
+pander(2*pt(-abs((1-fitS$coef["ar1"]) / 0.1239), df = length(m.ts)-1))
+#normal distribution
+pander(2*pnorm(-abs((1 - fitS$coef["ar1"]) / 0.1239)))
+
+```
+
+
+All of this leads us to veer in the direction of choosing forecasting models that accomodate trend and seasonality for all but one of the SKUs, M. However. looking at the M plots that show trend and seasonality, it seems that those components are present and I therefore think it's worth trying to model with methods other than the naive. 
+
+###Step 3 
+
+Forecast with the appropriate models. Also include a naive model to use as a baseline. 
+
+**SS06S6T100144**
+
+Naive
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+validLengthE <- 12
+trainLengthE <- length(e.ts) - validLengthE
+salesTrainE <- window(e.ts, end = c(2012, trainLengthE))
+salesValidE <- window(e.ts, start = c(2012, trainLengthE + 1))
+
+#naive
+naiveE <- snaive(salesTrainE, h = validLengthE)
+#pointFC snaive 42/28 naive 29/14
+naiveE$mean
+#accuracy 43/21
+accuracy(naiveE, salesValidE)
+```
+
+Exponential Smoothing
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#best smoothing model, it chooses an ANN model with a very small alpha meaning it's a slow learner.
+etsE <- ets(salesTrainE, model = "ZZZ", restrict = FALSE)
+etsE
+summary(etsE)
+etsForecastE <- forecast(etsE, h = validLengthE, level = 0)
+etsForecastE
+#accuracy 35/18
+accuracy(etsForecastE, salesValidE)
+plot(e.ts, main = "Smoothing Model E", bty = "l")
+lines(etsE$fitted, col = "blue", lty = 1,lwd = 2)
+#lines(etsSANN$fitted, col = "green", lty = 1,lwd = 2)
+```
+
+Regression
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+seasonTrendE <- tslm(salesTrainE ~ trend + season)
+#summary
+summary(seasonTrendE)
+#forecasting Regression Models
+seasonRegEForecast <- forecast(seasonTrendE, h = validLengthE)
+seasonRegEForecast
+#accuracy 33/21
+accuracy(seasonRegEForecast, salesValidE)
+```
+
+
+**Shows not much left to model**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+residualsseasonTrendE <- Acf(seasonTrendE$residuals, main = "Some Seasonality \nLeft to Capture")
+```
+
+**If more to model, follow this process**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+ARModel <- Arima(seasonTrendE$residuals, order = c(1,0,0))
+ARModel
+#calculate t stat, see it's not statistically significant, ar1 > 2
+ARModel$coef["ar1"] / 0.1316
+#residuals of residuals
+Acf(ARModel$residuals)
+#forecast residuals
+errorForecast <- forecast(ARModel, h = validLengthE)
+errorForecast
+#improved Forecast MAPE = 20.22199
+adjustedForecast <- seasonRegEForecast$mean + errorForecast$mean
+adjustedForecast
+accuracy(adjustedForecast, salesValidE)
+```
+
+**Use a Neural Network**
+
+After we get a neural network forecast, we can model for uncaptured components to maybe improve the forecast. In this case, the forecast accuracy is the same. 
+
+```{r}
+set.seed(201)
+
+neuralE <- nnetar(salesTrainE, p = 11)
+
+neuralForecast <- forecast(neuralE, h = validLengthE)
+neuralForecast$mean
+#p=11, MAPE = 0.74/16.05
+accuracy(neuralForecast, salesValidE)
+
+ARModel <- Arima(neuralE$residuals, order = c(2,0,0))
+ARModel
+#calculate t stat, see it's not statistically significant, ar1 > 2
+ARModel$coef["ar1"] / 0.1438
+ARModel$coef["ar2"] / 0.1389
+#residuals of residuals
+Acf(ARModel$residuals)
+#forecast residuals
+errorForecast <- forecast(ARModel, h = validLengthE)
+errorForecast
+#improved Forecast MAPE = 20.22199
+adjustedForecast <- neuralForecast$mean + errorForecast$mean
+adjustedForecast
+accuracy(adjustedForecast, salesValidE)
+
+
+```
+
+
+```{r}
+validationPeriod <- as.Date("05-16", "06-16", "07-16", "08-16","09-16", "10-16", "11-16", "12-16","01-17", "02-17", "03-17", "04-17")
+
+
+allForecasts <- (naiveE$mean + etsForecastE$mean +seasonRegEForecast$mean + seasonRegEForecast$mean + neuralForecast$mean)/5
+allForecasts
+#MAPE of the averaged forecasts = 20.23421
+accuracy(allForecasts, salesValidE)
+
+allForecasts <- as.numeric(allForecasts)
+
+```
+
+
+```{r, echo=FALSE}
+
+plot(e.ts, bty = "n", main = "Actual Use and Forecasting Models \nSS06S6T100144 ")
+lines(naiveE$fitted, col = "blue")
+lines(naiveE$mean, col = "blue", lty = 2)
+lines(etsE$fitted, col = "green")
+lines(etsForecastE$mean, col = "green", lty = 3)
+lines(seasonTrendE$fitted, col = "orange")
+lines(seasonRegEForecast$mean, col = "orange", lty = 4)
+lines(neuralE$fitted, col = "red")
+lines(neuralForecast$mean, col = "red",lty = 5)
+lines(allForecasts, col = "purple")
+
+
+legend(2012, 800, c("Naive", "ETS", "Regression", "Neural Net", "Average"), lty = c(1,1,1,1,1), lwd = c(1,1,1,1,1), bty = "n", col = c("black", "blue", "green", "orange", "red"))
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 validLengthM <- 12
 trainLengthM <- length(m.ts) - validLengthM
 salesTrainM <- window(m.ts, end = c(2012, trainLengthM))
 salesValidM <- window(m.ts, start = c(2012, trainLengthM + 1))
-LinearM <- tslm(m.ts ~ trend)
-polyLinearM <- tslm(m.ts ~ trend + I(trend^2))
-seasonTrendM <- tslm(m.ts ~ trend + season)
+
 summary(LinearM)
 
 #naive
@@ -422,14 +887,12 @@ accuracy(naiveM, salesValidM)
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 validLengthN <- 12
 trainLengthN <- length(n.ts) - validLengthN
 salesTrainN <- window(n.ts, end = c(2012, trainLengthN))
 salesValidN <- window(n.ts, start = c(2012, trainLengthN + 1))
-LinearN <- tslm(n.ts ~ trend)
-polyLinearN <- tslm(n.ts ~ trend + I(trend^2))
-seasonTrendN <- tslm(n.ts ~ trend + season)
+
 summary(LinearN)
 #naive
 naiveN <- snaive(salesTrainN, h = validLengthN)
@@ -440,7 +903,7 @@ accuracy(naiveN, salesValidN)
 
 ```
 
-```{r, partition}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 validLengthS <- 12
 trainLengthS <- length(s.ts) - validLengthS
 salesTrainS <- window(s.ts, end = c(2012, trainLengthS))
@@ -448,16 +911,13 @@ salesValidS <- window(s.ts, start = c(2012, trainLengthS + 1))
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-LinearS <- tslm(s.ts ~ trend)
-polyLinearS <- tslm(s.ts ~ trend + I(trend^2))
-seasonTrendS <- tslm(s.ts ~ trend + season)
+
 summary(seasonTrendS)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #Autocorrelation
 AcfS <- Acf(s.ts)
-AcfS
 #Acf for Differenced and there appears to be some uncaptured seasonality
 Acf(diff(s.ts, lag = 1), lag.max = 12, main = "Acf Plot for Differenced Item S")
 plot(diff(s.ts, lag = 1, bty = "l", main = "Uncaptured Seasonality in Differenced \nItem S Monthly Data"))
@@ -471,8 +931,6 @@ fitS
 ```
 
 Since $p<\alpha$ we know this series is not a random walk
-
-
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #naive
@@ -562,8 +1020,6 @@ accuracy(neuralForecastSP, salesValidS)
 ```
 
 ```{r}
-validationPeriod <- as.Date("05-16", "06-16", "07-16", "08-16","09-16", "10-16", "11-16", "12-16","01-17", "02-17", "03-17", "04-17")
-
 allForecasts <- (neuralForecastSP$mean + seasonRegSForecast$mean + etsForecastS$mean + naiveS$mean)/4
 allForecasts
 accuracy(allForecasts, salesValidS)
@@ -575,33 +1031,12 @@ allForecasts <- as.numeric(allForecasts)
 
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-validLengthE <- 12
-trainLengthE <- length(e.ts) - validLengthE
-salesTrainE <- window(e.ts, end = c(2012, trainLengthE))
-salesValidE <- window(e.ts, start = c(2012, trainLengthE + 1))
-LinearE <- tslm(e.ts ~ trend)
-polyLinearE <- tslm(e.ts ~ trend + I(trend^2))
-#seasonality does not show much significance
-seasonTrendE <- tslm(e.ts ~ trend + season)
-summary(LinearE)
-#naive
-naiveE <- snaive(salesTrainE, h = validLengthE)
-#pointFC snaive 42/28 naive 29/14
-naiveE$mean
-#accuracy 43/21
-accuracy(naiveE, salesValidE)
-
-```
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 validLengthF <- 12
 trainLengthF <- length(f.ts) - validLengthF
 salesTrainF <- window(f.ts, end = c(2012, trainLengthF))
 salesValidF <- window(f.ts, start = c(2012, trainLengthF + 1))
-LinearF <- tslm(f.ts ~ trend)
-polyLinearF <- tslm(f.ts ~ trend + I(trend^2))
-seasonTrendF <- tslm(f.ts ~ trend + season)
+
 summary(LinearF)
 #naive
 naiveF <- snaive(salesTrainF, h = validLengthF)
@@ -612,15 +1047,13 @@ accuracy(naiveF, salesValidF)
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 validLengthO <- 12
 trainLengthO <- length(o.ts) - validLengthO
 salesTrainO <- window(o.ts, end = c(2012, trainLengthO))
 salesValidO <- window(o.ts, start = c(2012, trainLengthO + 1))
-LinearO <- tslm(o.ts ~ trend)
-polyLinearO <- tslm(o.ts ~ trend + I(trend^2))
-seasonTrendO <- tslm(o.ts ~ trend + season)
-summary(LinearO)
+
+
 #naive
 naiveO <- snaive(salesTrainO, h = validLengthO)
 #pointFC snaive 85/40 naive 115/36
@@ -633,208 +1066,38 @@ Naive Forecasting
 
 **Item E Naive**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 pander(accuracy(naiveE, salesValidE))
 ```
 
 **Item F Naive**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 pander(accuracy(naiveF, salesValidF))
 ```
 
 **Item M Naive**
 
-```{r}
+```{r, include=FALSE}
 pander(accuracy(naiveM, salesValidM))
 ```
 
 **Item N Naive**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 pander(accuracy(naiveN, salesValidN))
 ```
 
 **Item O Naive**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 pander(accuracy(naiveO, salesValidO))
 ```
 
 **Item S Naive**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 pander(accuracy(naiveS, salesValidS))
-```
-
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-par(mfrow = c(1,2))
-
-plot(e.ts, main = "Monthly Use Item E \nTrend and Seasonality", bty = "l")
-lines(LinearF$fitted, col = "blue", lwd = 2)
-lines(polyLinearE$fitted, col = "green", lwd = 2)
-lines(seasonTrendE$fitted, col = "orange", lwd = 2)
-legend(2012, 800, c("L R-sq = .77 ", "Q R-sq = .76", "S Rs-sq = .77"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
-
-plot(f.ts, main = "Monthly Use Item F \nTrend and Seasonality", bty = "l")
-lines(LinearF$fitted, col = "blue", lwd = 2)
-lines(polyLinearF$fitted, col = "green", lwd = 2)
-lines(seasonTrendF$fitted, col = "orange", lwd = 2)
-legend(2012, 600, c("L R-sq = .61", "Q R-sq = 62", "S R-sq = .67"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
-
-par(mfrow = c(1,2))
-plot(m.ts, main = "Monthly Use Item M \nTrend and Seasonality", bty = "l")
-lines(LinearM$fitted, col = "blue", lwd = 2)
-lines(polyLinearM$fitted, col = "green", lwd = 2)
-lines(seasonTrendM$fitted, col = "orange", lwd = 2)
-legend(2012, 250, c("L R-sq = .73", "Q R-sq = .79", "S R-sq = .74"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
-
-plot(n.ts, main = "Monthly Use Item N \nTrend and Seasonality", bty = "l", xlim = c(2012,2018))
-lines(LinearN$fitted, col = "blue", lwd = 2)
-lines(polyLinearN$fitted, col = "green", lwd = 2)
-lines(seasonTrendN$fitted, col = "orange", lwd = 2)
-legend(2012, 380, c("L - none", "Q - none", "S R-sq = .78"), lty = c(1,1,1), lwd = c(2,2,2), col = c("blue", "green", "orange"), bty = "n" )
-
-par(mfrow = c(1,2))
-plot(o.ts,main = "Monthly Use Item O \nTrend and Seasonality", bty = "l")
-lines(LinearO$fitted, col = "blue", lwd = 2)
-lines(polyLinearO$fitted, col = "green", lwd = 2)
-lines(seasonTrendO$fitted, col = "orange", lwd = 2)
-legend(2012, 350, c("L R-sq = .52", "Q R-sq = .62", "S R-sq = .52"), 
-       lty = c(1,1,1), lwd = c(2,2,2), 
-       col = c("blue", "green", "orange"), bty = "n" )
-
-plot(s.ts, main = "Monthly Use Item S \nTrend and Seasonality", bty = "l")
-lines(LinearS$fitted, col = "blue", lty = 1,lwd = 2)
-lines(polyLinearS$fitted, col = "green", lty = 1,lwd = 2)
-lines(seasonTrendS$fitted, col = "orange", lty = 1,lwd = 2)
-legend(2012, 200, c("L - none", "Q - none", "S R-sq = 0.2"), 
-       lty = c(1,1,1), lwd = c(2,2,2), 
-       col = c("blue", "green", "orange"), bty = "n" )
-
-
-```
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-par(mfrow = c(1,2))
-xrange <- c(1,7)
-yrange <- c(0,1000)
-
-plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
-colors <- rainbow(12)
-linetype <- 1
-
-for(i in 1:12){
-
-  currentMonth <- subset(e.ts, cycle(e.ts) == i)
-  lines(currentMonth, type = "l", lwd = 1,
-       
-  col =colors[i]
- 
-  )
-}
-title("Item E - Inventory Used \nBroken out by Month ")
-
-xrange <- c(1,7)
-yrange <- c(100,600)
-
-plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
-colors <- rainbow(12)
-linetype <- 1
-
-for(i in 1:12){
-
-  currentMonth <- subset(f.ts, cycle(f.ts) == i)
-  lines(currentMonth, type = "l", lwd = 1,
-       
-  col =colors[i]
- 
-  )
-}
-title("Item F - Inventory Used \nBroken out by Month ")
-
-legend(6.5,600, 1:12, cex = 0.8, col = colors,lty = linetype, title = "Month", xpd = NA, bty = "n")
-
-par(mfrow = c(1,2))
-xrange <- c(1,7)
-yrange <- c(0,250)
-
-plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
-colors <- rainbow(12)
-linetype <- 1
-
-for(i in 1:12){
-
-  currentMonth <- subset(m.ts, cycle(m.ts) == i)
-  lines(currentMonth, type = "l", lwd = 1,
-       
-  col =colors[i]
- 
-  )
-}
-title("Item M - Inventory Used \nBroken out by Month ")
-
-xrange <- c(1,7)
-yrange <- c(100,400)
-
-plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
-colors <- rainbow(12)
-linetype <- 1
-
-for(i in 1:12){
-
-  currentMonth <- subset(n.ts, cycle(n.ts) == i)
-  lines(currentMonth, type = "l", lwd = 1,
-       
-  col =colors[i]
- 
-  )
-}
-title("Item N - Inventory Used \nBroken out by Month ")
-
-legend(6.5,400, 1:12, cex = 0.8, col = colors,lty = linetype, title = "Month", xpd = NA, bty = "n")
-
-par(mfrow = c(1,2))
-xrange <- c(1,7)
-yrange <- c(0,400)
-
-plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
-colors <- rainbow(12)
-linetype <- 1
-
-for(i in 1:12){
-
-  currentMonth <- subset(o.ts, cycle(o.ts) == i)
-  lines(currentMonth, type = "l", lwd = 1,
-       
-  col =colors[i]
- 
-  )
-}
-title("Item O - Inventory Used \nBroken out by Month ")
-
-xrange <- c(1,7)
-yrange <- c(0,200)
-
-plot(xrange, yrange, type = "n", xlab = "Year", ylab = "Inventory Used", bty = "l")
-colors <- rainbow(12)
-linetype <- 1
-
-for(i in 1:12){
-
-  currentMonth <- subset(s.ts, cycle(s.ts) == i)
-  lines(currentMonth, type = "l", lwd = 1,
-       
-  col =colors[i]
- 
-  )
-}
-title("Item S - Inventory Used \nBroken out by Month ")
-
-legend(6.5,175, 1:12, cex = 0.8, col = colors,lty = linetype, title = "Month", xpd = NA, bty = "n")
 ```
 
 
