@@ -1,3 +1,10 @@
+library(dplyr)
+library(tidyr)
+library(data.table)
+library(zoo)
+
+
+
 #Reading in a csv with blanks and want to convert them to NA first
 newRain <- read.csv("NewRainWithBlanks.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c(""))
 head(newRain)
@@ -101,3 +108,29 @@ xx <- spread(x, Item_Code, Used)
 head(xx)
 xx <- xx[,-2]
 head(xx)
+
+#Dates
+setwd("/Users/Chris Iyer/Documents/R/myrepo/Homicide/")
+homicide <- read.csv("Homicide.csv")
+homicide <- as_data_frame(homicide)
+homicide1 <-  homicide %>% select(Month, Year)
+
+
+homicide1 <- homicide1 %>% mutate(month = ifelse(Month == "January", "01",
+ ifelse(Month == "February", "02",ifelse(Month == "March", "03",
+ ifelse(Month == "April", "04",ifelse(Month == "May", "05",
+ ifelse(Month == "June", "06",ifelse(Month == "July", "07",
+ ifelse(Month == "August", "08",ifelse(Month == "September", "09",
+ ifelse(Month == "October", "10",ifelse(Month == "November", "11","12"))))))))))))
+homicide1$Year <- as.character(homicide1$Year)
+homicide1 <- transform(homicide1, newcol = paste(Year,"/", month,"/01", sep = ""))
+head(homicide1)
+homicide1$newcol <-  as.Date(homicide1$newcol, format = "%Y/%m/%d")
+class(homicide1$newcol)
+homicide1 <- homicide1 %>% select(Date = newcol)
+head(homicide1)
+head(homicide)
+Homicide <- cbind.data.frame(homicide1, homicide)
+head(Homicide)
+Homicide <- Homicide %>% select(1, 6:7, 10:23)
+head(Homicide)
