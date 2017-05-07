@@ -44,32 +44,48 @@ homicide1$newcol <-  as.Date(homicide1$newcol, format = "%Y/%m/%d")
 class(homicide1$newcol)
 homicide1 <- homicide1 %>% select(Date = newcol)
 Homicide <- cbind.data.frame(homicide1, homicide)
-Homicide <- Homicide %>% select(1, 6:7, 10:23)
-set.seed(201)
-d <- Homicide[sample(nrow(Homicide), 100), ]
-dim(d)
+Homicide <- Homicide %>% select(1, 6:8, 10:23)
+head(Homicide)
+
+
+
+# set.seed(201)
+# d <- Homicide[sample(nrow(Homicide), 100), ]
+# dim(d)
 ```
 
 
 ```{r}
+#Black and White on Black on White
+
 #32635
-BlackonWhite <- Homicide %>% filter(Perpetrator.Race == "Black" & Victim.Race=="White") %>% select(Date, City, State, Perpetrator.Race, Victim.Race, Weapon)
+BlackonWhite <- Homicide %>% filter(Perpetrator.Race == "Black" & Victim.Race=="White") %>% select(Date, Year, City, State, Perpetrator.Race, Victim.Race, Weapon)
 head(BlackonWhite)
 dim(BlackonWhite)
-byWeapBonW <- group_by(BlackonWhite, Weapon)
-sumWeapBonW <- summarise(byWeapBonW, count = n())
+byWeapBonW <- group_by(BlackonWhite, Weapon) 
+head(byWeapBonW)
+sumWeapBonW
+BlonWhYear <- group_by(byWeapBonW, Year)
+head(BlonWhYear)
+
+
 ```
 
 
 ```{r}
 #17004
-WhiteonBlack <- Homicide %>% filter(Perpetrator.Race == "White" & Victim.Race=="Black") %>% select(Date, City, State, Perpetrator.Race, Victim.Race, Weapon) 
+WhiteonBlack <- Homicide %>% filter(Perpetrator.Race == "White" & Victim.Race=="Black") %>% select(Date, Year, City, State, Perpetrator.Race, Victim.Race, Weapon) 
 head(WhiteonBlack)
 dim(WhiteonBlack)
 byWeapWonB <- group_by(WhiteonBlack, Weapon)
 sumWeapWonB <- summarise(byWeapWonB, count = n())
+head(byWeapB)
+WhonBlYear <- group_by(byWeapWonB, Year)
+head(BlonWhYear)
 
 ```
+
+
 
 
 
