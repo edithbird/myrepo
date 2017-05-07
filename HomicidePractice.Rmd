@@ -1,0 +1,78 @@
+---
+title: "Homicidepractice"
+author: "Christine Iyer"
+date: "May 7, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+
+```
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(data.table)
+library(zoo)
+library(knitr)
+library(ggplot2)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+#Dates
+setwd("/Users/Chris Iyer/Documents/R/myrepo/Homicide/")
+homicide <- read.csv("Homicide.csv")
+homicide <- as_data_frame(homicide)
+homicide1 <-  homicide %>% select(Month, Year)
+homicide1 <- homicide1 %>% mutate(month = ifelse(Month == "January", "01",
+ ifelse(Month == "February", "02",ifelse(Month == "March", "03",
+ ifelse(Month == "April", "04",ifelse(Month == "May", "05",
+ ifelse(Month == "June", "06",ifelse(Month == "July", "07",
+ ifelse(Month == "August", "08",ifelse(Month == "September", "09",
+ ifelse(Month == "October", "10",ifelse(Month == "November", "11","12"))))))))))))
+homicide1$Year <- as.character(homicide1$Year)
+homicide1 <- transform(homicide1, newcol = paste(Year,"/", month,"/01", sep = ""))
+homicide1$newcol <-  as.Date(homicide1$newcol, format = "%Y/%m/%d")
+class(homicide1$newcol)
+homicide1 <- homicide1 %>% select(Date = newcol)
+Homicide <- cbind.data.frame(homicide1, homicide)
+Homicide <- Homicide %>% select(1, 6:7, 10:23)
+set.seed(201)
+d <- Homicide[sample(nrow(Homicide), 100), ]
+dim(d)
+```
+
+
+```{r}
+#32635
+BlackonWhite <- Homicide %>% filter(Perpetrator.Race == "Black" & Victim.Race=="White") %>% select(Date, City, State, Perpetrator.Race, Victim.Race, Weapon)
+head(BlackonWhite)
+dim(BlackonWhite)
+byWeapBonW <- group_by(BlackonWhite, Weapon)
+sumWeapBonW <- summarise(byWeapBonW, count = n())
+```
+
+
+```{r}
+#17004
+WhiteonBlack <- Homicide %>% filter(Perpetrator.Race == "White" & Victim.Race=="Black") %>% select(Date, City, State, Perpetrator.Race, Victim.Race, Weapon) 
+head(WhiteonBlack)
+dim(WhiteonBlack)
+byWeapWonB <- group_by(WhiteonBlack, Weapon)
+sumWeapWonB <- summarise(byWeapWonB, count = n())
+
+```
+
+
+
+
+
+
