@@ -47,7 +47,7 @@ Homicide <- cbind.data.frame(homicide1, homicide)
 Homicide <- Homicide %>% select(1, 6:8, 10:23)
 head(Homicide)
 
-
+qplot(Year, State, data = Homicide, color = State)
 
 # set.seed(201)
 # d <- Homicide[sample(nrow(Homicide), 100), ]
@@ -57,10 +57,31 @@ head(Homicide)
 
 ```{r}
 #x <- plot(subset(Homicide, Perpetrator.Race %in% c("Black", "White", aes(x = Year, y = cumsum(rowsum(Homicide$Year)), type = ""))))
-head(mpg)
-ggplot(Homicide,aes(Perpetrator.Race)) + geom_bar(aes(fill = Victim.Race))
+
+
+ID <- c("P1", "P1", "P2", "P2", "P3", "P3")
+Value1 <- c(100,120,300,400,130,140)
+Value2 <- c(12,13,11,16,15,12)
+dat <- cbind.data.frame(ID,Value1,Value2)
+dat
+
+
+ggplot(subset(dat,ID %in% c("P1" , "P3"))) + 
+         geom_line(aes(Value1, Value2, group=ID, colour=ID))
+library(plyr)
+ggplot(data=dat)+ 
+  geom_line(aes(Value1, Value2, group=ID, colour=ID), subset = (ID %in% c("P1" , "P3")))
+
 
 ```
+
+
+```{r}
+ggplot(Homicide, aes(Year))+ geom_bar(aes(fill = Crime.Solved))
+
+ggplot(Homicide, aes(Year)) + geom_bar(aes(fill = Perpetrator.Race %in% c("Black", "White")))
+```
+
 
 
 ```{r}
@@ -105,7 +126,8 @@ head(WhonBlYear)
 dim(WhonBlYear)
 b <- ggplot(Homicide, aes(Year))
 b + geom_bar(aes(fill = Victim.Race))
-
+Solved <- Homicide %>% group_by(Year, Crime.Solved) %>% summarise(countSol = n())
+head(Solved)
 Yearly <- group_by(Homicide, Year)
 head(Yearly)
 YearRace <-  Yearly %>%  group_by(Year, Perpetrator.Race)
@@ -118,11 +140,33 @@ head(YearCounts)
 a <- ggplot(data = RaceCounts, aes(x = Year, y = countn, group = Perpetrator.Race, color = Perpetrator.Race, shape = Perpetrator.Race)) + 
     geom_line(size=1.5) + 
     geom_point(size=3, fill="white") +
-    scale_shape_manual(values=c(22,21, 22,23,24))
+    scale_shape_manual(values=c(22,21, 22,23,24))+
+    xlab("Year") + ylab("Total Homicides")
 a
+
+a <- ggplot(data = RaceCounts, aes(x = Year, y = countn, group = Perpetrator.Race, color = Perpetrator.Race, shape = Perpetrator.Race)) + 
+    geom_line(size=1) + 
+    
+    
+    xlab("Year") + ylab("Total Homicides")
+a
+
+
+ggplot(data = Solved, aes(x = Year, y = countSol, fill = Crime.Solved, color = Crime.Solved)) + geom_line(linetype="dashed",size=1.2)+
+  scale_color_manual(values=c("#999999", "#E69F00"))+
+  scale_color_brewer(palette="Dark2")
+  
+  # geom_point(color="red", size=3)
+    #geom_bar(stat="identity", position=position_dodge())
 ```
 
 
+```{r}
+ggplot(Homicide, aes(State))+ geom_bar(aes(fill = Crime.Solved)) +
+  coord_flip()
+ggplot(Homicide, aes(State))+ geom_bar(aes(fill = Perpetrator.Race)) +
+  coord_flip()
+```
 
 
 
