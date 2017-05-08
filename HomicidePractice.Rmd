@@ -56,34 +56,90 @@ head(Homicide)
 
 
 ```{r}
-#Black and White on Black on White
-
-#32635
-BlackonWhite <- Homicide %>% filter(Perpetrator.Race == "Black" & Victim.Race=="White") %>% select(Date, Year, City, State, Perpetrator.Race, Victim.Race, Weapon)
-head(BlackonWhite)
-dim(BlackonWhite)
-byWeapBonW <- group_by(BlackonWhite, Weapon) 
-head(byWeapBonW)
-sumWeapBonW
-BlonWhYear <- group_by(byWeapBonW, Year)
-head(BlonWhYear)
-
+#x <- plot(subset(Homicide, Perpetrator.Race %in% c("Black", "White", aes(x = Year, y = cumsum(rowsum(Homicide$Year)), type = ""))))
+head(mpg)
+ggplot(Homicide,aes(Perpetrator.Race)) + geom_bar(aes(fill = Victim.Race))
 
 ```
 
 
 ```{r}
-#17004
-WhiteonBlack <- Homicide %>% filter(Perpetrator.Race == "White" & Victim.Race=="Black") %>% select(Date, Year, City, State, Perpetrator.Race, Victim.Race, Weapon) 
+#Black and White on Black on White
+BlackonWhite <- Homicide %>% filter(Perpetrator.Race == "Black" & Victim.Race=="White") %>% select(Date, Year, City, State, Perpetrator.Race, Victim.Race, Weapon,Incident)
+head(BlackonWhite)
+dim(BlackonWhite)
+```
+
+```{r}
+byWeapBonW <- group_by(BlackonWhite, Weapon) 
+head(byWeapBonW)
+```
+
+```{r}
+BlonWhYear <- group_by(byWeapBonW, Year)
+head(BlonWhYear)
+dim(BlonWhYear)
+names(BlonWhYear)
+```
+
+
+```{r}
+WhiteonBlack <- Homicide %>% filter(Perpetrator.Race == "White" & Victim.Race=="Black") %>% select(Date, Year, City, State, Perpetrator.Race, Victim.Race, Weapon, Incident) 
 head(WhiteonBlack)
 dim(WhiteonBlack)
+```
+
+```{r}
 byWeapWonB <- group_by(WhiteonBlack, Weapon)
-sumWeapWonB <- summarise(byWeapWonB, count = n())
-head(byWeapB)
-WhonBlYear <- group_by(byWeapWonB, Year)
-head(BlonWhYear)
+head(byWeapWonB)
 
 ```
+
+```{r}
+sumWeapWonB <- summarise(byWeapWonB, count = n())
+```
+
+```{r}
+WhonBlYear <- group_by(byWeapWonB, Year)
+head(WhonBlYear)
+dim(WhonBlYear)
+b <- ggplot(Homicide, aes(Year))
+b + geom_bar(aes(fill = Victim.Race))
+
+Yearly <- group_by(Homicide, Year)
+head(Yearly)
+YearRace <-  Yearly %>%  group_by(Year, Perpetrator.Race)
+YearCounts <- summarise(Yearly, count = n())
+RaceCounts <- summarise(YearRace, countn = n())
+head(RaceCounts, 20)
+dim(RaceCounts)
+colors <- c("red","blue", "green", "yellow", "orange")
+head(YearCounts)
+a <- ggplot(data = RaceCounts, aes(x = Year, y = countn, group = Perpetrator.Race, color = Perpetrator.Race, shape = Perpetrator.Race)) + 
+    geom_line(size=1.5) + 
+    geom_point(size=3, fill="white") +
+    scale_shape_manual(values=c(22,21, 22,23,24))
+a
+```
+
+
+
+
+
+
+
+```{r}
+a <- ggplot(Homicide,aes(Weapon))
+a  + geom_bar()
+b <- ggplot(Homicide, aes(Perpetrator.Race))
+```
+
+
+
+```{r}
+b + geom_bar(color = "Red", fill = "Orange")
+```
+
 
 
 
