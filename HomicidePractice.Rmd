@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 
 ```{r}
+library(plyr)
 library(dplyr)
 library(tidyr)
 library(data.table)
@@ -47,16 +48,16 @@ Homicide <- cbind.data.frame(homicide1, homicide)
 Homicide <- Homicide %>% select(1, 6:8, 10:23)
 head(Homicide)
 
-qplot(Year, State, data = Homicide, color = State)
+qplot(Year, State, data = Homicide, color = State) + theme_bw()
 
-# set.seed(201)
-# d <- Homicide[sample(nrow(Homicide), 100), ]
-# dim(d)
+set.seed(201)
+Homicide <- Homicide[sample(nrow(Homicide), 100), ]
+dim(Homicide)
 ```
 
 
 ```{r}
-#x <- plot(subset(Homicide, Perpetrator.Race %in% c("Black", "White", aes(x = Year, y = cumsum(rowsum(Homicide$Year)), type = ""))))
+x <- plot(subset(Homicide, Perpetrator.Race %in% c("Black", "White", aes(x = Year, y = cumsum(rowsum(Homicide$Year)), type = ""))))
 
 
 ID <- c("P1", "P1", "P2", "P2", "P3", "P3")
@@ -68,9 +69,8 @@ dat
 
 ggplot(subset(dat,ID %in% c("P1" , "P3"))) + 
          geom_line(aes(Value1, Value2, group=ID, colour=ID))
-library(plyr)
 ggplot(data=dat)+ 
-  geom_line(aes(Value1, Value2, group=ID, colour=ID), subset = (ID %in% c("P1" , "P3")))
+  geom_line(aes(Value1, Value2, group=ID, colour=ID), subset = (ID %in% c("P1" , "P3")))+ theme_bw()
 
 
 ```
