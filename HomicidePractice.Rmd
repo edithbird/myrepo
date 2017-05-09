@@ -47,19 +47,31 @@ homicide1 <- homicide1 %>% select(Date = newcol)
 Homicide <- cbind.data.frame(homicide1, homicide)
 Homicide <- Homicide %>% select(1, 6:8, 10:23)
 head(Homicide)
-
-qplot(Year, State, data = Homicide, color = State) + theme_bw()
-
-set.seed(201)
-Homicide <- Homicide[sample(nrow(Homicide), 100), ]
-dim(Homicide)
+# sapply(Homicide, class)
+# set.seed(201)
+# Homicide <- Homicide[sample(nrow(Homicide), 100), ]
+# dim(Homicide)
 ```
 
 
 ```{r}
-x <- plot(subset(Homicide, Perpetrator.Race %in% c("Black", "White", aes(x = Year, y = cumsum(rowsum(Homicide$Year)), type = ""))))
+homicideA <- Homicide %>% select(Year,City, Weapon)%>% group_by(City, Year) %>% summarise(countA = n())  %>% arrange(desc(countA)) %>% top_n(10)
+head(homicide)
+homicideB <- Homicide %>% group_by(City, State) %>% summarise(TotalH = n()) %>% select(City, State, TotalH)
+head(homicideB)
+homicideB <- homicideB %>% mutate(Location = (paste(City, ",", State))) %>% group_by(Location) %>% summarise(TotalH)
+                                  
+                                  
+                                  
+head(homicideB)
+dim(homicideB)
+
+Most <- homicideB %>% arrange(desc(TotalH)) %>%  top_n(20)
+kable(Most)
+```
 
 
+```{r}
 ID <- c("P1", "P1", "P2", "P2", "P3", "P3")
 Value1 <- c(100,120,300,400,130,140)
 Value2 <- c(12,13,11,16,15,12)
@@ -146,8 +158,6 @@ a
 
 a <- ggplot(data = RaceCounts, aes(x = Year, y = countn, group = Perpetrator.Race, color = Perpetrator.Race, shape = Perpetrator.Race)) + 
     geom_line(size=1) + 
-    
-    
     xlab("Year") + ylab("Total Homicides")
 a
 
