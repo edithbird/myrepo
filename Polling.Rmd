@@ -35,14 +35,10 @@ disapprove <- pollsData %>% html_nodes("#polling-data-full td:nth-child(5)") %>%
 disapprove
 spread <- pollsData %>% html_nodes("#polling-data-full td.spread") %>% html_text()
 spread
-
-
 Total <- cbind.data.frame(poll, date, sample, approve, disapprove, spread)
 # kable(Total)
-
-
+Total
 write.csv(Total, "Polls.csv", row.names = F)
-
 ```
 
 ```{r}
@@ -86,11 +82,12 @@ Reuters$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18
 Reuters
 a <- "Reuters/IpsosReuters"
 b <- as.Date('2017-04-11')
-c <- "NA"
-d <- "NA"
-e <- "NA"
-f <- "NA"
+c <- "1847A"
+d <- "47"
+e <- "48"
+f <- "-1"
 g <- cbind.data.frame(a,b,c,d,e,f)
+g
 g <- g %>% rename(poll = a, date = b, sample = c, approve = d, disapprove = e, spread = f)
 Reuters1 <- rbind(g, Reuters)
 Reuters1 <- Reuters1 %>% arrange(desc(date))
@@ -101,81 +98,116 @@ Reuters <- Reuters[nrow(Reuters):1, ]
 Reuters$Week <- seq.int(nrow(Reuters))
 dim(Reuters)
 kable(Reuters)
+
 ```
 
 
 ```{r}
 Pollsr <- rbind(Gallup, Economist, Rasmussen, Reuters)
 tail(Pollsr, 20)
+a <- ggplot(data=Pollsr, aes(x=date, y= approve, group=poll, color = poll)) +
+    geom_line(size=1) 
+a
 ```
 
 
 ```{r}
 Fox <- Total %>% filter(poll == "FOX NewsFOX News")
+Fox$Week<- seq.int(nrow(Fox))
 dim(Fox)
 ```
+
+
 ```{r}
 CNN <- Total %>% filter(poll == "CNN/ORCCNN/ORC")
+CNN$Week<- seq.int(nrow(CNN))
 dim(CNN)
 ```
 
 
 ```{r}
 CBS <- Total %>% filter(poll == "CBS NewsCBS News")
+CBS$Week<- seq.int(nrow(CBS))
 dim(CBS)
 ```
 
 ```{r}
 WaPoABC <- Total %>% filter(poll == "ABC News/Wash PostABC/WP")
+WaPoABC$Week<- seq.int(nrow(WaPoABC))
 dim(WaPoABC) 
 ```
+
+
 ```{r}
-NBCWSJ <- Total %>% filter(poll == "NBC News/Wall St. JrnlNBC/WSJ")
-dim(NBCWSJ)
+Quinnipiac <- Total %>% filter(poll == "QuinnipiacQuinnipiac")
+Quinnipiac$Week<- seq.int(nrow(Quinnipiac))
+dim(Quinnipiac)
 ```
+
+
 ```{r}
 NBCWSJ <- Total %>% filter(poll == "NBC News/Wall St. JrnlNBC/WSJ")
-dim(NBCWSJ)
-```
-```{r}
-NBCWSJ <- Total %>% filter(poll == "NBC News/Wall St. JrnlNBC/WSJ")
+NBCWSJ$Week<- seq.int(nrow(NBCWSJ))
 dim(NBCWSJ)
 ```
 
+
+```{r}
+PPP <- Total %>% filter(poll == "PPP (D)PPP (D)")
+PPP$Week<- seq.int(nrow(PPP))
+dim(PPP)
+ 
+```
+
+
 ```{r}
 Marist <- Total %>% filter(poll == "MaristMarist")
+Marist$Week<- seq.int(nrow(Marist))
 dim(Marist)
 ```
 
 ```{r}
 TIPPIBD <- Total %>% filter(poll == "IBD/TIPPIBD/TIPP")
+TIPPIBD$Week<- seq.int(nrow(TIPPIBD))
 dim(TIPPIBD)
 ```
 ```{r}
 Pew <- Total %>% filter(poll == "Pew ResearchPew")
+Pew$Week<- seq.int(nrow(Pew))
 dim(Pew)
 
 ```
 ```{r}
 McClatchy <- Total %>% filter(poll =="McClatchy/MaristMcClatchy")
+McClatchy$Week<- seq.int(nrow(McClatchy))
 dim(McClatchy)
 ```
 
 ```{r}
 Monmouth <- Total %>% filter(poll == "MonmouthMonmouth")
+Monmouth$Week<- seq.int(nrow(Monmouth))
 dim(Monmouth)
 ```
 
 ```{r}
 USAToday <- Total %>% filter(poll == "USA Today/SuffolkUSA Today")
+USAToday$Week<- seq.int(nrow(USAToday))
 dim(USAToday)
 ```
 
 
 ```{r}
 RCPAverage <- Total %>% filter(poll == "RCP Average")
+RCPAverage$Week<- seq.int(nrow(RCPAverage))
 dim(RCPAverage)
 ```
+
+```{r}
+Emerson <- Total %>% filter(poll == "EmersonEmerson")
+Emerson$Week<- seq.int(nrow(Emerson))
+dim(Emerson)
+```
+
 
 ```{r}
 total1 <- rbind(USAToday, Monmouth, McClatchy, Pew, TIPPIBD, Quinnipiac, Reuters, Marist, Emerson, PPP, WaPoABC, NBCWSJ, CBS, Economist, CNN, Fox, Rasmussen, Gallup)
@@ -184,15 +216,18 @@ dim(total1)
 
 ```
 
-```{r}
-a <- ggplot(data=Pollsr, aes(x=Week, y=approve, group=poll, color = poll, na.rm = F)) +
-    geom_line(size=1) 
-a
+```{r, fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
+# Pollsr$approve <- as.numeric(Pollsr$approve)
+# Pollsr$disapprove <- as.numeric(Pollsr$disapprove)
+# Pollsr$spread <- as.numeric(Pollsr$spread)
+# head(Pollsr)
+
+
+
+
 ```
 
-ggplot(data=dat1, aes(x=time, y=total_bill, group=sex, shape=sex)) + 
-    geom_line(size=1.5) + 
-    geom_point(size=3, fill="white") 
+
 
 ```{r}
 library(lubridate)
@@ -203,6 +238,26 @@ plot(Gallup.ts)
 
 ```
 
+
+```{r}
+setwd("/Users/Chris Iyer/Documents/R/myrepo/")
+polls2 <- read.csv("PollingData.csv", header = T)
+kable(polls2)
+```
+
+```{r}
+iCitizen <- polls2 %>% filter(poll == "icitizen")
+iCitizen$date <- (as.Date(c('2017-04-25', '2017-04-18', '2017-04-11', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14')))
+
+iCitizen <- iCitizen[nrow(iCitizen):1, ]
+iCitizen$Week <- seq.int(nrow(iCitizen))
+iCitizen
+
+b <- ggplot(data=iCitizen, aes(x=date, y= approve)) +
+    geom_line(size=1, color = "slateblue") 
+b
+
+```
 
 
 
