@@ -53,6 +53,7 @@ Gallup$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18'
 Gallup <- Gallup[nrow(Gallup):1, ]
 Gallup$Week <- seq.int(nrow(Gallup))
 kable(Gallup)
+dim(Gallup)
 ```
 
 ```{r}
@@ -101,6 +102,13 @@ Reuters$Week <- seq.int(nrow(Reuters))
 dim(Reuters)
 kable(Reuters)
 ```
+
+
+```{r}
+Pollsr <- rbind(Gallup, Economist, Rasmussen, Reuters)
+tail(Pollsr, 20)
+```
+
 
 ```{r}
 Fox <- Total %>% filter(poll == "FOX NewsFOX News")
@@ -177,13 +185,14 @@ dim(total1)
 ```
 
 ```{r}
-a <- ggplot(data=Gallup, aes(x=Week, y=approve, group=1)) +
-    geom_line(colour="red", size=1) +
-    geom_point(colour="red", size=2, shape=21, fill="red")
+a <- ggplot(data=Pollsr, aes(x=Week, y=approve, group=poll, color = poll, na.rm = F)) +
+    geom_line(size=1) 
 a
 ```
 
-
+ggplot(data=dat1, aes(x=time, y=total_bill, group=sex, shape=sex)) + 
+    geom_line(size=1.5) + 
+    geom_point(size=3, fill="white") 
 
 ```{r}
 library(lubridate)
