@@ -1,0 +1,205 @@
+---
+title: "Polling"
+author: "Christine Iyer"
+date: "May 10, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rvest)
+library(stringr)
+library(reshape2)
+library(knitr)
+library(dplyr)
+library(forecast)
+library(ggplot2)
+library(dplyr)
+pollsData <- read_html("http://www.realclearpolitics.com/epolls/other/president_trump_job_approval-6179.html#polls")
+```
+
+ 
+```{r}
+poll <- pollsData %>% html_nodes("#polling-data-full td.noCenter") %>% html_text()
+poll
+date <- pollsData %>% html_nodes("#polling-data-full .noCenter+ td") %>% html_text()
+date
+sample <- pollsData %>% html_nodes("#polling-data-full td.sample") %>% html_text()
+sample
+approve <- pollsData %>% html_nodes("#polling-data-full .sample+ td") %>% html_text()
+approve
+disapprove <- pollsData %>% html_nodes("#polling-data-full td:nth-child(5)") %>% html_text()
+disapprove
+spread <- pollsData %>% html_nodes("#polling-data-full td.spread") %>% html_text()
+spread
+
+
+Total <- cbind.data.frame(poll, date, sample, approve, disapprove, spread)
+# kable(Total)
+
+
+write.csv(Total, "Polls.csv", row.names = F)
+
+```
+
+```{r}
+Gallup <- Total %>% filter(poll == "GallupGallup")
+
+Gallup$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))
+
+Gallup <- Gallup[nrow(Gallup):1, ]
+Gallup$Week <- seq.int(nrow(Gallup))
+kable(Gallup)
+```
+
+```{r}
+Rasmussen <- Total %>% filter(poll == "Rasmussen ReportsRasmussen")
+Rasmussen$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))
+
+Rasmussen <- Rasmussen[nrow(Rasmussen):1, ]
+Rasmussen$Week <- seq.int(nrow(Rasmussen))
+
+
+kable(Rasmussen)
+dim(Rasmussen)
+```
+
+```{r}
+Economist <- Total %>% filter(poll == "Economist/YouGovEconomist")
+Economist$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))
+
+Economist <- Economist[nrow(Economist):1, ]
+Economist$Week <- seq.int(nrow(Economist))
+
+dim(Economist)
+kable(Economist)
+```
+
+
+```{r}
+Reuters <- Total %>% filter(poll == "Reuters/IpsosReuters")
+Reuters$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))
+Reuters
+a <- "Reuters/IpsosReuters"
+b <- as.Date('2017-04-11')
+c <- "NA"
+d <- "NA"
+e <- "NA"
+f <- "NA"
+g <- cbind.data.frame(a,b,c,d,e,f)
+g <- g %>% rename(poll = a, date = b, sample = c, approve = d, disapprove = e, spread = f)
+Reuters1 <- rbind(g, Reuters)
+Reuters1 <- Reuters1 %>% arrange(desc(date))
+Reuters1
+Reuters <- Reuters1
+Reuters
+Reuters <- Reuters[nrow(Reuters):1, ]
+Reuters$Week <- seq.int(nrow(Reuters))
+dim(Reuters)
+kable(Reuters)
+```
+
+```{r}
+Fox <- Total %>% filter(poll == "FOX NewsFOX News")
+dim(Fox)
+```
+```{r}
+CNN <- Total %>% filter(poll == "CNN/ORCCNN/ORC")
+dim(CNN)
+```
+
+
+```{r}
+CBS <- Total %>% filter(poll == "CBS NewsCBS News")
+dim(CBS)
+```
+
+```{r}
+WaPoABC <- Total %>% filter(poll == "ABC News/Wash PostABC/WP")
+dim(WaPoABC) 
+```
+```{r}
+NBCWSJ <- Total %>% filter(poll == "NBC News/Wall St. JrnlNBC/WSJ")
+dim(NBCWSJ)
+```
+```{r}
+NBCWSJ <- Total %>% filter(poll == "NBC News/Wall St. JrnlNBC/WSJ")
+dim(NBCWSJ)
+```
+```{r}
+NBCWSJ <- Total %>% filter(poll == "NBC News/Wall St. JrnlNBC/WSJ")
+dim(NBCWSJ)
+```
+
+```{r}
+Marist <- Total %>% filter(poll == "MaristMarist")
+dim(Marist)
+```
+
+```{r}
+TIPPIBD <- Total %>% filter(poll == "IBD/TIPPIBD/TIPP")
+dim(TIPPIBD)
+```
+```{r}
+Pew <- Total %>% filter(poll == "Pew ResearchPew")
+dim(Pew)
+
+```
+```{r}
+McClatchy <- Total %>% filter(poll =="McClatchy/MaristMcClatchy")
+dim(McClatchy)
+```
+
+```{r}
+Monmouth <- Total %>% filter(poll == "MonmouthMonmouth")
+dim(Monmouth)
+```
+
+```{r}
+USAToday <- Total %>% filter(poll == "USA Today/SuffolkUSA Today")
+dim(USAToday)
+```
+
+
+```{r}
+RCPAverage <- Total %>% filter(poll == "RCP Average")
+dim(RCPAverage)
+```
+
+```{r}
+total1 <- rbind(USAToday, Monmouth, McClatchy, Pew, TIPPIBD, Quinnipiac, Reuters, Marist, Emerson, PPP, WaPoABC, NBCWSJ, CBS, Economist, CNN, Fox, Rasmussen, Gallup)
+dim(total1)
+# dim(Total)
+
+```
+
+```{r}
+a <- ggplot(data=Gallup, aes(x=Week, y=approve, group=1)) +
+    geom_line(colour="red", size=1) +
+    geom_point(colour="red", size=2, shape=21, fill="red")
+a
+```
+
+
+
+```{r}
+library(lubridate)
+Gallup.ts <- ts(Gallup$approve, 
+   freq=365.25/7, 
+   start=decimal_date(ymd("2017-01-24"))) 
+plot(Gallup.ts)
+
+```
+
+
+
+
+
+
+
+
+
+
