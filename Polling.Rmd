@@ -52,14 +52,16 @@ kable(Gallup)
 dim(Gallup)
 ```
 
+
+
 ```{r}
 Rasmussen <- Total %>% filter(poll == "Rasmussen ReportsRasmussen")
 Rasmussen$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))
 
 Rasmussen <- Rasmussen[nrow(Rasmussen):1, ]
 Rasmussen$Week <- seq.int(nrow(Rasmussen))
-
-
+Rasmussen$approve <- as.integer(Rasmussen$approve)
+cor(Rasmussen$Week, Rasmussen$approve)
 kable(Rasmussen)
 dim(Rasmussen)
 ```
@@ -103,18 +105,16 @@ kable(Reuters)
 
 
 ```{r}
-Pollsr <- rbind(Gallup, Economist, Rasmussen, Reuters)
-tail(Pollsr, 20)
-a <- ggplot(data=Pollsr, aes(x=date, y= approve, group=poll, color = poll)) +
-    geom_line(size=1) 
-a
-```
-
-
-```{r}
 Fox <- Total %>% filter(poll == "FOX NewsFOX News")
-Fox$Week<- seq.int(nrow(Fox))
+Fox
+Fox$date <- (as.Date(c('2017-04-25','2017-03-14', '2017-02-13')))
+
+Fox <- Fox[nrow(Fox):1, ]
+Fox$Week <- seq.int(nrow(Fox))
+Fox$approve <- as.integer(Fox$approve)
+Fox
 dim(Fox)
+cor(Fox$Week, Fox$approve)
 ```
 
 
@@ -127,8 +127,28 @@ dim(CNN)
 
 ```{r}
 CBS <- Total %>% filter(poll == "CBS NewsCBS News")
-CBS$Week<- seq.int(nrow(CBS))
+CBS
+CBS$date <- (as.Date(c('2017-04-24', '2017-04-09', '2017-03-28', '2017-02-21',  '2017-02-02')))
+
+CBS <- CBS[nrow(CBS):1, ]
+CBS$Week <- seq.int(nrow(CBS))
+kable(CBS)
 dim(CBS)
+ggplot(data = CBS, aes(x = date, y = approve)) + geom_line(size=1) 
+
+
+
+
+```
+
+
+
+```{r}
+Pollsr <- rbind(CBS, Economist, Rasmussen, Reuters, Fox)
+tail(Pollsr, 20)
+a <- ggplot(data=Pollsr, aes(x=date, y= approve, group=poll, color = poll)) +
+    geom_line(size=0.015) +geom_smooth(method = "lm", se = FALSE, linetype = 2)
+a
 ```
 
 ```{r}
@@ -256,9 +276,116 @@ iCitizen
 b <- ggplot(data=iCitizen, aes(x=date, y= approve)) +
     geom_line(size=1, color = "slateblue") 
 b
+```
+
+```{r}
+PublicPolicy <- polls2 %>% filter(poll == "Public Policy Polling")
+PublicPolicy
+PublicPolicy$date <- (as.Date(c('2017-04-18', '2017-03-28', '2017-03-12', '2017-02-22','2017-02-08', '2017-01-31', '2017-01-24')))
+
+PublicPolicy <- PublicPolicy[nrow(PublicPolicy):1, ]
+PublicPolicy$Week <- seq.int(nrow(PublicPolicy))
+PublicPolicy
+cor(PublicPolicy$Week, PublicPolicy$approve)
 
 ```
 
+
+
+```{r}
+YouGov <- polls2 %>% filter(poll == "YouGov")
+YouGov$date <- as.Date(c((as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11','2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21','2017-02-18', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))))
+YouGov <- YouGov[nrow(YouGov):1, ]
+YouGov$Week <- seq.int(nrow(YouGov))
+dim(YouGov)
+dim(Economist)
+c <- ggplot(data = YouGov, aes(x = date, y = approve)) + geom_line(size=1, color = "slateblue")
+c
+YouCitizen <- rbind(YouGov, iCitizen)
+YouCitizen
+
+d <- ggplot(data = YouCitizen, aes(x = date, y = approve, group = poll, color = poll)) + geom_line(size=1) + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "lm")
+d
+```
+
+
+```{r}
+RasmussenReports <- polls2 %>% filter(poll == "Rasmussen Reports/Pulse Opinion Research")
+dim(RasmussenReports)
+RasmussenReports$date <- (as.Date(c('2017-05-10', '2017-05-07', '2017-05-02', '2017-04-27',  '2017-04-24',  '2017-04-19', '2017-04-16', '2017-04-11','2017-04-06',  '2017-04-03', '2017-03-29', '2017-03-26','2017-03-21', '2017-03-16', '2017-03-13','2017-03-08', '2017-03-05', '2017-02-28', '2017-02-23','2017-02-20', '2017-02-15', '2017-02-12', '2017-02-07', '2017-02-02', '2017-01-30', '2017-01-25')))
+dim(RasmussenReports$date)
+RasmussenReports <- RasmussenReports[nrow(RasmussenReports):1, ]
+RasmussenReports$Week <- seq.int(nrow(RasmussenReports))
+RasmussenReports
+
+```
+
+
+```{r}
+MorningConsult <- polls2 %>% filter(poll == "Morning Consult")
+dim(MorningConsult)
+
+MorningConsult$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11', '2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24')))
+MorningConsult <- MorningConsult[nrow(MorningConsult):1, ]
+MorningConsult$Week <- seq.int(nrow(MorningConsult))
+MorningConsult
+```
+
+```{r}
+Ipsos <- polls2 %>% filter(poll == "Ipsos")
+dim(Ipsos)
+
+Ipsos$date <- (as.Date(c('2017-05-08', '2017-05-03' ,'2017-04-28', '2017-04-23', '2017-04-18','2017-04-13', '2017-04-08', '2017-04-03','2017-03-29', '2017-03-24', '2017-03-19', '2017-03-14', '2017-03-09', '2017-03-04','2017-02-27', '2017-02-22', '2017-02-17', '2017-02-12', '2017-02-07','2017-02-02', '2017-01-28')))
+Ipsos <- Ipsos[nrow(Ipsos):1, ]
+Ipsos$Week <- seq.int(nrow(Ipsos))
+Ipsos
+```
+
+```{r}
+Pew <- polls2 %>% filter(poll == "Pew Research Center")
+dim(Pew)
+
+Pew$date <- (as.Date(c('2017-04-11','2017-03-12', '2017-02-12')))
+Pew<- Pew[nrow(Pew):1, ]
+Pew$Week <- seq.int(nrow(Pew))
+Pew
+```
+
+
+
+
+```{r, fig.height=8, fig.width=8}
+
+Gallup1 <- polls2 %>% filter(poll == "Gallup")
+dim(Gallup)
+SurveyMonkey <- polls2 %>% filter(poll == "SurveyMonkey")
+SurveyMonkey$date <- as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '2017-04-18', '2017-04-11','2017-04-04', '2017-03-28', '2017-03-21', '2017-03-14', '2017-03-07', '2017-02-28', '2017-02-21','2017-02-18', '2017-02-14', '2017-02-07', '2017-01-31', '2017-01-24'))
+SurveyMonkey <- SurveyMonkey[nrow(SurveyMonkey):1, ]
+SurveyMonkey$Week <- seq.int(nrow(SurveyMonkey))
+SurveyMonkey
+
+YouCitizenMonkey <- rbind(YouGov, iCitizen, SurveyMonkey, RasmussenReports, MorningConsult, Ipsos, Pew, PublicPolicy)
+YouCitizenMonkey
+
+d <- ggplot(data = YouCitizenMonkey, aes(x = date, y = approve, group = poll, color = poll)) + geom_line(size=1) + geom_point() + facet_wrap(~ poll) + geom_smooth(method = "lm", color = "grey", se = FALSE)
+
+# + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") 
+d
+```
+
+
+```{r}
+a <- ggplot(data=Pollsr, aes(x=date, y= approve, group=poll, color = poll)) +
+    geom_line(size=1) 
+a
+```
+
+
+```{r}
+a <- ggplot(data=YouCitizen, aes(x=date, y= approve, group=poll, color = poll)) +
+    geom_line(size=1) 
+a
+```
 
 
 
