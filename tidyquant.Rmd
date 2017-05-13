@@ -43,7 +43,7 @@ Rav <- VTSAX %>% tq_transmute(adjusted, periodReturn, period = "monthly", col_re
 
 Rav
 kable(tail(RA))
-VTSAX %>% tq_per
+
 ```
 
 ```{r}
@@ -61,23 +61,18 @@ VTSAX %>% select(date, Close, SMA.15, SMA.50) %>%
 ```
 
 
-
-
-
-
-
-
-
-
-
-
 **Adjusted with a column for each stock**
 
 ```{r}
 RaVTSAX <- VTSAX %>% tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "VTSAX")
 kable(RaVTSAX)
+#-----------------------------
 RbVTSAX <- "^GSPC" %>% tq_get(get = "stock.prices", from = from) %>%
   tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "SP500")
+#------------------------------
+RbVTSAX <- "^GSPC" %>% tq_get(get = "stock.prices", from = from) %>%
+  tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "SP500")
+#
 RaVTSAX
 joinVTSAX <-  left_join(RaVTSAX, RbVTSAX, by = c("date" = "date"))
 kable(tail(joinVTSAX))
@@ -102,7 +97,8 @@ oneTable
 ```{r}
 colors <- c("slateblue", "purple")
 a <- ggplot(data=oneTable, aes(x=date, y= adjusted, group=symbol, color = symbol)) +
-    geom_line(size=1.25) + scale_color_manual(values=c("#CC6666", "#9999CC"))
+    geom_line(size=1.25) + scale_color_manual(values=c("#CC6666", "#9999CC")) + geom_ma_(position = "identity",
+  na.rm = TRUE, show.legend = NA, inherit.aes = TRUE, ma_fun = "SMA", n = 6, size=1.25)
 # + geom_smooth(method = "lm", se = FALSE, linetype = 2) 
 a
 ```
@@ -139,14 +135,30 @@ knitr::opts_chunk$set(message = FALSE,
 X_L_returns_monthly %>%
     ggplot(aes(x = month(date), y = monthly.returns, fill = symbol)) +
     geom_bar(position = "dodge", stat = "identity") +
-    labs(title = "FANG: Annual Returns", 
-         subtitle = "Mutating at scale is quick and easy!",
-         y = "Returns", x = "", color = "") +
+    labs(title = "My Portfolio: ", 
+         subtitle = "Monthly Returns 2016-17",
+         y = "Returns", x = "2017 Returns", color = "") +
     scale_y_continuous(labels = scales::percent) +
-    theme_tq() +
-    scale_fill_tq()
+    scale_x_discrete(limits = c("May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "March", "April", "May")) 
+
 
 ```
+```{r}
+X_L_returns_monthly %>%
+    ggplot(aes(x = month(date), y = monthly.returns, fill = symbol, color = symbol)) +
+    geom_line(size = 1.25) +
+    labs(title = "My Portfolio: ", 
+         subtitle = "Monthly Returns 2016-17",
+         y = "Returns", x = "2017 Returns", color = "") +
+    scale_y_continuous(labels = scales::percent) +
+    scale_x_discrete(limits = c("May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "March", "April", "May")) + geom_ma(position = "identity",
+  na.rm = TRUE, show.legend = NA, inherit.aes = TRUE, n = 3, size=1, color = "grey")  + facet_wrap(~ symbol) + geom_smooth(method = "lm", se = FALSE, linetype = 1, color = "black", size = 0.5)
+
+```
+
+
+
+
 
 ```{r}
 ## ------------------------------------------------------------------------
