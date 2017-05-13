@@ -1,0 +1,337 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyquant)
+library(lubridate)
+library(TTR)
+library(dplyr)
+library(knitr)
+library(pander)
+library(choosecolor)
+```
+
+[For instructions](http://www.business-science.io/code-tools/2017/01/01/tidyquant-introduction.html)
+
+```{r}
+#variable to create period of interest
+from <- today() - years(1)
+```
+
+```{r}
+#create stock variable specifying the prices desired
+VTSAX <- tq_get("VTSAX", get = "stock.prices", from = from)
+kable(tail(VTSAX))
+```
+
+```{r}
+pander(tq_mutate_fun_options() %>% 
+  str())
+```
+
+```{r}
+#create columns with moving averages
+VTSAX <-  tq_mutate(VTSAX, select = close, mutate_fun = SMA, n = 15)
+VTSAX <-  tq_mutate(VTSAX, select = close, mutate_fun = SMA, n = 50)
+VTSAX <- VTSAX %>% rename(Close = close, SMA.15 = SMA, SMA.50= SMA.1)
+kable(head(VTSAX))
+
+
+Rav <- VTSAX %>% tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "RaV")
+
+Rav
+kable(tail(RA))
+VTSAX %>% tq_per
+```
+
+```{r}
+my_palette <- c("black", "steelblue", "darkgreen")
+VTSAX %>% select(date, Close, SMA.15, SMA.50) %>%
+  gather(key = type, value = price, Close:SMA.50) %>% 
+  ggplot(aes(x = date, y = price, col = type)) + 
+  geom_line(size=1.25) + 
+  scale_colour_manual(values = my_palette) + 
+  theme(legend.position = "bottom") + 
+  ggtitle("Simple Moving Averages are a Breeze with tidyquant") + 
+  xlab("") + 
+  ylab("Stock Price")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+**Adjusted with a column for each stock**
+
+```{r}
+RaVTSAX <- VTSAX %>% tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "VTSAX")
+kable(RaVTSAX)
+RbVTSAX <- "^GSPC" %>% tq_get(get = "stock.prices", from = from) %>%
+  tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "SP500")
+RaVTSAX
+joinVTSAX <-  left_join(RaVTSAX, RbVTSAX, by = c("date" = "date"))
+kable(tail(joinVTSAX))
+```
+
+*One Table**
+
+```{r}
+listV <- length(RaVTSAX)
+symbol <- rep("VTSAX",length(listV))
+LongVTSAX <- cbind(RaVTSAX, symbol)
+LongVTSAX <- LongVTSAX %>% rename(adjusted = VTSAX)
+listSP <- length(RbVTSAX)
+symbol <- rep("SP500", length(listSP))
+LongSP <- cbind(RbVTSAX, symbol)
+LongSP <- LongSP %>% rename(adjusted = SP500)
+oneTable <- rbind.data.frame(LongSP, LongVTSAX)
+oneTable
+```
+
+
+```{r}
+colors <- c("slateblue", "purple")
+a <- ggplot(data=oneTable, aes(x=date, y= adjusted, group=symbol, color = symbol)) +
+    geom_line(size=1.25) + scale_color_manual(values=c("#CC6666", "#9999CC"))
+# + geom_smooth(method = "lm", se = FALSE, linetype = 2) 
+a
+```
+
+
+
+
+```{r}
+x_List <- c("VTSAX", "CHK", "NK", "IDXX", "NVAX", "BABA") %>%
+    tq_get(get = "stock.prices", from = "2016-01-01", to = "2017-01-01")
+head(x_List)
+
+
+
+X_L_returns_monthly <- x_List %>%
+    group_by(symbol) %>%
+    tq_transmute(select     = adjusted, 
+                 mutate_fun = periodReturn, 
+                 period     = "monthly", 
+                 col_rename = "monthly.returns") 
+X_L_returns_monthly
+
+## ---- echo = FALSE, message = FALSE, warning = FALSE---------------------
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.width = 8, 
+                      fig.height = 4.5,
+                      fig.align = 'center',
+                      out.width='95%', 
+                      dpi = 200)
+```
+
+```{r}
+X_L_returns_monthly %>%
+    ggplot(aes(x = month(date), y = monthly.returns, fill = symbol)) +
+    geom_bar(position = "dodge", stat = "identity") +
+    labs(title = "FANG: Annual Returns", 
+         subtitle = "Mutating at scale is quick and easy!",
+         y = "Returns", x = "", color = "") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_tq() +
+    scale_fill_tq()
+
+```
+
+```{r}
+## ------------------------------------------------------------------------
+NK_annual_log_returns <- get_annual_returns("IDXX")
+AAPL_annual_log_returns
+
+## ------------------------------------------------------------------------
+NK_annual_log_returns %>%
+    ggplot(aes(x = year(date), y = yearly.returns)) + 
+    geom_hline(yintercept = 0, color = palette_light()[[1]]) +
+    geom_point(size = 2, color = palette_light()[[3]]) +
+    geom_line(size = 1, color = palette_light()[[3]]) + 
+    geom_smooth(method = "lm", se = FALSE) +
+    labs(title = "NK: Visualizing Trends in Annual Returns",
+         x = "", y = "Annual Returns", color = "") +
+    theme_tq()
+```
+
+**Tidyquant features and functionality**
+
+Adjusted return of stock, stock data taken from FANG dataset
+
+```{r}
+data(FANG)
+Ra <- FANG %>% group_by(symbol) %>% tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "Ra")
+kable(tail(RA))
+```
+
+```{r}
+#adjusted return of S&P index and join it to stock table 
+Rb <- "^GSPC" %>%
+  tq_get(get  = "stock.prices",
+         from = "2010-01-01",
+         to   = "2015-12-31") %>%
+  tq_transmute(adjusted, periodReturn, period = "monthly", col_rename = "Rb")
+RaRb <- left_join(Ra, Rb, by = c("date" = "date"))
+kable(head(RaRb))
+
+```
+
+
+```{r}
+#to get a list of all the options available
+tq_performance_fun_options()
+```
+**Sharpe Ratio**
+
+The higher a fund's Sharpe ratio, the better its returns have been relative to the amount of investment risk it has taken. For example, both State Street Global Research SSGRX and Morgan Stanley Inst. European Real Estate MSUAX have enjoyed heady three-year returns of 23.9% through August 2004. But Morgan Stanley sports a Sharpe ratio of 1.09 versus State Street's 0.74, indicating that Morgan Stanley took on less risk to achieve the same return.
+
+```{r}
+# Get performance metrics
+RaRb %>%
+  tq_performance(Ra = Ra, performance_fun = SharpeRatio, p = 0.95)
+```
+
+```{r}
+RaRb %>%
+  tq_performance(Ra = Ra, Rb = Rb, performance_fun = table.CAPM)
+
+```
+
+
+```{r}
+
+
+## ------------------------------------------------------------------------
+stock_list <- tibble(stocks = c("AAPL", "JPM", "CVX"),
+                     industry = c("Technology", "Financial", "Energy"))
+stock_list
+
+## ------------------------------------------------------------------------
+stock_list %>%
+    tq_get(get = "stock.prices", from = "2016-05-13", to = "2017-05-13")
+
+## ------------------------------------------------------------------------
+#tq_index("DOWJONES")
+
+## ------------------------------------------------------------------------
+#tq_exchange("NYSE")
+
+## ------------------------------------------------------------------------
+tq_index("DOWJONES") %>%
+    slice(1:3) %>%
+    tq_get(get = "stock.prices")
+
+## ------------------------------------------------------------------------
+x <- tibble(symbol = c("NK", "CHK", "VTSAX", "IDXX")) %>%
+    mutate(stock.prices = map(.x = symbol, ~ tq_get(.x, get = "stock.prices")))
+head(x)
+
+## ------------------------------------------------------------------------
+c("VTSAX", "IDXX") %>%
+    tq_get(get = c("stock.prices", "financials"))
+
+## ------------------------------------------------------------------------
+data("FANG")
+FANG
+
+## ------------------------------------------------------------------------
+
+
+## ------------------------------------------------------------------------
+FANG_returns_yearly %>%
+    ggplot(aes(x = year(date), y = yearly.returns, fill = symbol)) +
+    geom_bar(position = "dodge", stat = "identity") +
+    labs(title = "FANG: Annual Returns", 
+         subtitle = "Mutating at scale is quick and easy!",
+         y = "Returns", x = "", color = "") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_tq() +
+    scale_fill_tq()
+
+## ------------------------------------------------------------------------
+get_annual_returns <- function(stock.symbol) {
+    stock.symbol %>%
+        tq_get(get  = "stock.prices",
+               from = "2007-01-01",
+               to   = "2016-12-31") %>%
+        tq_transmute(select     = adjusted, 
+                     mutate_fun = periodReturn, 
+                     type       = "log", 
+                     period     = "yearly")
+}
+
+## ------------------------------------------------------------------------
+AAPL_annual_log_returns <- get_annual_returns("AAPL")
+AAPL_annual_log_returns
+
+## ------------------------------------------------------------------------
+AAPL_annual_log_returns %>%
+    ggplot(aes(x = year(date), y = yearly.returns)) + 
+    geom_hline(yintercept = 0, color = palette_light()[[1]]) +
+    geom_point(size = 2, color = palette_light()[[3]]) +
+    geom_line(size = 1, color = palette_light()[[3]]) + 
+    geom_smooth(method = "lm", se = FALSE) +
+    labs(title = "AAPL: Visualizing Trends in Annual Returns",
+         x = "", y = "Annual Returns", color = "") +
+    theme_tq()
+
+## ------------------------------------------------------------------------
+mod <- lm(yearly.returns ~ year(date), data = AAPL_annual_log_returns)
+mod
+
+## ------------------------------------------------------------------------
+library(broom)
+tidy(mod)
+
+## ------------------------------------------------------------------------
+get_model <- function(stock.symbol) {
+    annual_returns <- get_annual_returns(stock.symbol)
+    mod <- lm(yearly.returns ~ year(date), data = annual_returns)
+    tidy(mod)
+}
+
+## ------------------------------------------------------------------------
+get_model("AAPL")
+
+## ------------------------------------------------------------------------
+set.seed(10)
+stocks <- tq_index("SP500") %>%
+    sample_n(5)
+stocks
+
+## ------------------------------------------------------------------------
+stocks_model_stats <- stocks %>%
+    mutate(model = map(symbol, get_model)) %>%
+    unnest() %>%
+    filter(term == "year(date)") %>%
+    arrange(desc(estimate)) %>%
+    select(-term)
+stocks_model_stats
+
+## ------------------------------------------------------------------------
+tq_get("XYZ", "stock.prices")
+
+## ---- warning = TRUE-----------------------------------------------------
+c("AAPL", "GOOG", "BAD APPLE") %>%
+    tq_get(get = "stock.prices", complete_cases = TRUE)
+
+## ---- warning = TRUE-----------------------------------------------------
+c("AAPL", "GOOG", "BAD APPLE") %>%
+    tq_get(get = "stock.prices", complete_cases = FALSE)
+```
+
+
+
+
+
