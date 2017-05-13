@@ -6,10 +6,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(rvest)
 library(stringr)
 library(reshape2)
@@ -274,7 +278,7 @@ iCitizen$Week <- seq.int(nrow(iCitizen))
 iCitizen
 
 b <- ggplot(data=iCitizen, aes(x=date, y= approve)) +
-    geom_line(size=1, color = "slateblue") 
+    geom_line(size=1, color = "slateblue") + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "se")
 b
 ```
 
@@ -287,7 +291,9 @@ PublicPolicy <- PublicPolicy[nrow(PublicPolicy):1, ]
 PublicPolicy$Week <- seq.int(nrow(PublicPolicy))
 PublicPolicy
 cor(PublicPolicy$Week, PublicPolicy$approve)
-
+b <- ggplot(data=PublicPolicy, aes(x=date, y= approve)) +
+    geom_line(size=1, color = "slateblue") + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "se")
+b
 ```
 
 
@@ -317,6 +323,9 @@ dim(RasmussenReports$date)
 RasmussenReports <- RasmussenReports[nrow(RasmussenReports):1, ]
 RasmussenReports$Week <- seq.int(nrow(RasmussenReports))
 RasmussenReports
+b <- ggplot(data=RasmussenReports, aes(x=date, y= approve)) +
+    geom_line(size=1, color = "slateblue") + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "lm")
+b
 
 ```
 
@@ -329,6 +338,9 @@ MorningConsult$date <- (as.Date(c('2017-05-09', '2017-05-02' ,'2017-04-25', '201
 MorningConsult <- MorningConsult[nrow(MorningConsult):1, ]
 MorningConsult$Week <- seq.int(nrow(MorningConsult))
 MorningConsult
+b <- ggplot(data=MorningConsult, aes(x=date, y= approve)) +
+    geom_line(size=1, color = "slateblue") + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "se")
+b
 ```
 
 ```{r}
@@ -339,6 +351,9 @@ Ipsos$date <- (as.Date(c('2017-05-08', '2017-05-03' ,'2017-04-28', '2017-04-23',
 Ipsos <- Ipsos[nrow(Ipsos):1, ]
 Ipsos$Week <- seq.int(nrow(Ipsos))
 Ipsos
+b <- ggplot(data=Ipsos, aes(x=date, y= approve)) +
+    geom_line(size=1, color = "slateblue") + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "lm")
+b
 ```
 
 ```{r}
@@ -349,6 +364,9 @@ Pew$date <- (as.Date(c('2017-04-11','2017-03-12', '2017-02-12')))
 Pew<- Pew[nrow(Pew):1, ]
 Pew$Week <- seq.int(nrow(Pew))
 Pew
+b <- ggplot(data=Pew, aes(x=date, y= approve)) +
+    geom_line(size=1, color = "slateblue") + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") + geom_point() + geom_smooth(method = "lm")
+b
 ```
 
 
@@ -367,11 +385,25 @@ SurveyMonkey
 YouCitizenMonkey <- rbind(YouGov, iCitizen, SurveyMonkey, RasmussenReports, MorningConsult, Ipsos, Pew, PublicPolicy)
 YouCitizenMonkey
 
-d <- ggplot(data = YouCitizenMonkey, aes(x = date, y = approve, group = poll, color = poll)) + geom_line(size=1) + geom_point() + facet_wrap(~ poll) + geom_smooth(method = "lm", color = "grey", se = FALSE)
+d <- ggplot(data = YouCitizenMonkey, aes(x = date, y = approve, group = poll, color = poll)) + geom_point() + facet_wrap(~ poll) + geom_smooth(method = "lm", color = "grey", se = FALSE)
 
 # + geom_text(aes(label = approve), size = 3, hjust = 0.5, vjust = 3, position = "stack") 
 d
 ```
+
+
+```{r}
+
+fit1 <- lm(Week ~ approve, data = Fox)
+summary(fit1)
+d <- ggplot(data = YouCitizenMonkey, aes(x = date, y = approve, group = poll, color = poll)) + geom_line(size = 0.25, color = "black") + geom_point() + facet_wrap(~ poll) + geom_smooth(method = "lm", color = "grey", se = FALSE)
+d
+```
+
+
+
+
+
 
 
 ```{r}
