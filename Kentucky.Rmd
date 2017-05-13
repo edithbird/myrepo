@@ -1,0 +1,90 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(lubridate)
+library(dplyr)
+library(knitr)
+library(tidyr)
+library(ggplot2)
+```
+
+
+```{r}
+
+Kentucky <- read.csv("Kentucky.csv", header = T)
+Kentucky <- Kentucky %>% rename(Male_1985 = Male.life.expectancy..1985..years., 
+                                Female_1985 = Female.life.expectancy..1985..years., 
+                                Male_1990 = Male.life.expectancy..1990..years., 
+                                Female_1990 = Female.life.expectancy..1990..years., 
+                                Male_1995 = Male.life.expectancy..1995..years., 
+                                Female_1995 = Female.life.expectancy..1995..years., 
+                                Male_2000 = Male.life.expectancy..2000..years., 
+                                Female_2000 = Female.life.expectancy..2000..years., 
+                                Male_2005 = Male.life.expectancy..2005..years., 
+                                Female_2005 = Female.life.expectancy..2005..years., 
+                                Male_2010 = Male.life.expectancy..2010..years., 
+                                Female_2010 = Female.life.expectancy..2010..years.,
+                                MaleDifference = Difference.in.male.life.expectancy..1985.2010..years., 
+                                FemaleDifference = Difference.in.female.life.expectancy..1985.2010..years.) %>% 
+  select(State.County, Male_1985, Male_1990, Male_1995, Male_2000, Male_2005, Male_2010, Female_1985, Female_1990, Female_1995, Female_2000, Female_2005, Female_2010)
+
+names(Kentucky)
+
+head(Kentucky)
+
+Kentucky <- Kentucky %>% gather(GenderYr, Age, Male_1985:Female_2010)
+head(Kentucky)
+
+
+Kentucky1 <- data.frame(do.call('rbind', strsplit(as.character(Kentucky$Gender),'_',fixed=TRUE)))
+Kentucky1 <- Kentucky1 %>% mutate(Year_Number = ifelse(X2 == "1985", 0, ifelse(X2 =="1990", 5,ifelse(X2 == "1995", 10, ifelse(X2 == "2000", 15, ifelse(X2 == "2005", 20,25))))))
+head(Kentucky1)
+#Kentucky <-  do.call(rbind,str_split(Kentucky$Gender, '_'))
+
+Kentucky11 <- cbind.data.frame(Kentucky, Kentucky1)
+head(Kentucky11)
+
+Kentucky11 <- Kentucky11 %>% rename(Gender = X1, Year = X2) %>% select(State.County, Year, Gender, Age, Year_Number)
+kable(head(Kentucky11, 20))
+kable(tail(Kentucky11, 20))
+Kentucky11$Year_Number <- as.integer(Kentucky11$Year_Number)
+Kentucky11$Age <- as.numeric(Kentucky11$Age)
+head(Kentucky11)
+
+```
+
+**Subset by County**
+
+```{r}
+Kentucky2 <- Kentucky11 %>% filter(State.County == "Kentucky") %>% select(State.County, Year, Year_Number, Gender, Age)
+head(Kentucky2)
+
+USA <- Kentucky11 %>% filter(State.County == "United States") %>% select(State.County, Year, Year_Number,Gender, Age)
+head(USA)
+x <- rbind.data.frame(USA, Kentucky2)
+x
+combine <- x %>% group_by(State.County)
+combine
+dim(combine)
+dim(x)
+```
++ geom_ribbon(aes(x=Year_Number, ymax= Age.upper, ymin= Age.lower), fill="pink", alpha=.5)
+
+```{r}
+corYear <- cor(x$Year_Number, x$Age)
+corYear
+par(mfrow = c(2,2))
+p <- ggplot(data = x, aes(x = Year_Number, y = Age, group = State.County, color = State.County)) + geom_line(size = 1.5) + facet_wrap(~ Gender) +
+  ggtitle("Kentucky Average Age at Death \nAs Compared to the Rest of the Country") +geom_polygon(data = x, aes(y = Age, 
+    group = State.County), alpha = 0.3)
+p
+m <- ggplot(data = x, aes(x = Year_Number, y = Age, group = Gender, color = Gender)) + geom_line(size = 1.5) + facet_wrap(~ State.County)
+m
+```
+
+
+
+
