@@ -114,8 +114,6 @@ setwd("/Users/Chris Iyer/Documents/R/myrepo/Homicide/")
 homicide <- read.csv("Homicide.csv")
 homicide <- as_data_frame(homicide)
 homicide1 <-  homicide %>% select(Month, Year)
-
-
 homicide1 <- homicide1 %>% mutate(month = ifelse(Month == "January", "01",
  ifelse(Month == "February", "02",ifelse(Month == "March", "03",
  ifelse(Month == "April", "04",ifelse(Month == "May", "05",
