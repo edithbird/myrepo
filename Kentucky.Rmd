@@ -66,11 +66,46 @@ USA <- Kentucky11 %>% filter(State.County == "United States") %>% select(State.C
 head(USA)
 x <- rbind.data.frame(USA, Kentucky2)
 x
-combine <- x %>% group_by(State.County)
-combine
-dim(combine)
-dim(x)
+
 ```
+
+```{r}
+y <- x[c(1:12), ]
+y <- y %>% rename(Country = State.County)
+y
+```
+
+```{r}
+z <- x[c(13:24), ]
+z
+colnames(z) <- c("State","YearK","Year_NumberK", "GenderK", "AgeK")
+z
+```
+
+```{r}
+combine <- cbind.data.frame(y,z)
+combine <- combine %>% mutate(difference = Age - AgeK, differenceK = Age - AgeK)
+dim(combine)
+combineUnUA <- combine[, c(1:5,11)]
+names(combineUnUA) <- c("State.County", "Year", "Year_Number", "Gender", "Age", "Difference")
+combineUnUA
+
+combineKen <-  combine[, c(6:10,11)]
+names(combineKen) <- c("State.County", "Year", "Year_Number", "Gender", "Age", "Difference")
+combineKen
+NewlyCombined <- rbind.data.frame(combineUnUA, combineKen)
+NewlyCombined
+
+
+```
+
+
+```{r}
+mm <- ggplot(data = NewlyCombined, aes(x = Year, y = Difference, group = Gender, color = Gender)) + geom_line(size = 2) +
+  ggtitle("Number Years the Average US Citizen \n Outives the Average Kentucker") + geom_smooth(method = "lm")
+mm
+```
+
 + geom_ribbon(aes(x=Year_Number, ymax= Age.upper, ymin= Age.lower), fill="pink", alpha=.5)
 
 ```{r}
