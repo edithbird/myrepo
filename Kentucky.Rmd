@@ -56,27 +56,64 @@ head(Kentucky11)
 
 ```
 
+```{r}
+USnewDate <- data.frame("State.County" = character(), "Year" = character(), "Year_Number" = integer(), "Gender" = character(), "Age" = double(), stringsAsFactors = FALSE)
+USnewDate[nrow(USnewDate)+1, ] <- c("United States", "2014", 29, "Male", 76.71)
+USnewDate[nrow(USnewDate)+1, ] <- c("United States", "2014", 29, "Female", 81.45)
+USnewDate
+USnewDate1 <- USnewDate[1,]
+USnewDate2 <- USnewDate[2,]
+USnewDate1
+USnewDate2
+```
+
+```{r}
+KnewDate <- data.frame("State.County" = character(), "Year" = character(), "Year_Number" = integer(), "Gender" = character(), "Age" = double(), stringsAsFactors = FALSE)
+KnewDate[nrow(KnewDate)+1, ] <- c("Kentucky", "2014", 29, "Male", 73.71)
+KnewDate[nrow(KnewDate)+1, ] <- c("Kentucky", "2014", 29, "Female", 78.82)
+KnewDate
+KnewDate1 <- KnewDate[1,]
+KnewDate2 <- KnewDate[2,]
+KnewDate1
+KnewDate2
+
+```
+
+
+
 **Subset by County**
 
 ```{r}
 Kentucky2 <- Kentucky11 %>% filter(State.County == "Kentucky") %>% select(State.County, Year, Year_Number, Gender, Age)
-head(Kentucky2)
+tail(Kentucky2)
+Kentucky2
+
+newData1 <- rbind(Kentucky2[1:6, ],KnewDate1, Kentucky2[7:12,], KnewDate2 )
+newData1
 
 USA <- Kentucky11 %>% filter(State.County == "United States") %>% select(State.County, Year, Year_Number,Gender, Age)
 head(USA)
-x <- rbind.data.frame(USA, Kentucky2)
+
+newData2 <- rbind(USA[1:6, ], USnewDate1, USA[7:12, ], USnewDate2)
+newData2
+
+Kentucky2
+USA
+x <- rbind.data.frame(newData2, newData1)
+x$Age <- as.numeric(x$Age)
+x$Year_Number <- as.numeric(x$Year_Number)
 x
 
 ```
 
 ```{r}
-y <- x[c(1:12), ]
+y <- x[c(1:14), ]
 y <- y %>% rename(Country = State.County)
 y
 ```
 
 ```{r}
-z <- x[c(13:24), ]
+z <- x[c(15:28), ]
 z
 colnames(z) <- c("State","YearK","Year_NumberK", "GenderK", "AgeK")
 z
@@ -87,6 +124,7 @@ combine <- cbind.data.frame(y,z)
 combine
 combine <- combine %>% mutate(difference = Age - AgeK, differenceK = Age - AgeK)
 dim(combine)
+combine
 combineUnUA <- combine[, c(1:5,11)]
 names(combineUnUA) <- c("State.County", "Year", "Year_Number", "Gender", "Age", "Difference")
 combineUnUA
@@ -117,11 +155,12 @@ mm
 
 + geom_ribbon(aes(x=Year_Number, ymax= Age.upper, ymin= Age.lower), fill="pink", alpha=.5)
 
-```{r}
+```{r, echo=TRUE}
 NewlyCombined
 corYear <- cor(x$Year_Number, x$Age)
 corYear
-par(mfrow = c(2,2))
+
+
 ```
 
 
@@ -131,8 +170,8 @@ x
 p <- ggplot(data = x, aes(x = Year, y = Age, group = State.County, color = State.County)) + 
   geom_line(size = 2.5) + 
   facet_wrap(~ Gender) +
-  ggtitle("Age of death in Kentucky lags behind the rest of the country \nAnd that lag is getting bigger each year.") +
-  labs(subtitle = "\nIs Mitch McConnell to blame?\n") + 
+  ggtitle("Life expectancy in Kentucky lags behind much of the US. \nAnd that gap widens each year. \n\nLet's blame Mitch McConnell. \n") +
+  
   #so grey is not obscuring the legend
   geom_ribbon(aes(x=Year, ymin=ymin, ymax=ymax), fill="grey", alpha=.3, show_guide=FALSE) + 
   scale_color_manual(values=c("#330099", "#FF3300")) +
@@ -144,6 +183,12 @@ p + theme(legend.title = element_blank()) +
   theme(plot.title=element_text(size=17, hjust=0.5,color="black")) +
   theme(plot.subtitle=element_text(size=13, hjust=0.5, color="black")) 
 
+
+p <- ggplot(data = x, aes(x = Year, y = Age, group = State.County, color = State.County)) + geom_point(size = 2) + geom_line(size = 1.5) + facet_wrap(~Gender) + 
+  scale_color_manual(values=c("#330099", "#FF3300")) +
+  ggtitle("Life expectancy in Kentucky lags behind much of the US. \nAnd that gap widens each year. \n\nLet's blame Mitch McConnell. \n") 
+p +
+  theme_bw() + theme(legend.title = element_blank()) 
 ```
 
 
