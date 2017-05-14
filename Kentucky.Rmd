@@ -84,6 +84,7 @@ z
 
 ```{r}
 combine <- cbind.data.frame(y,z)
+combine
 combine <- combine %>% mutate(difference = Age - AgeK, differenceK = Age - AgeK)
 dim(combine)
 combineUnUA <- combine[, c(1:5,11)]
@@ -93,33 +94,50 @@ combineUnUA
 combineKen <-  combine[, c(6:10,11)]
 names(combineKen) <- c("State.County", "Year", "Year_Number", "Gender", "Age", "Difference")
 combineKen
+
 NewlyCombined <- rbind.data.frame(combineUnUA, combineKen)
 NewlyCombined
-
-
+ymin <- rep(combine$AgeK,2)
+ymin
+ymax <- rep(combine$Age,2)
+ymax
+minmax <- cbind.data.frame(ymin, ymax)
+minmax <- minmax %>% mutate(diff = ymax - ymin)
+minmax
 ```
 
 
 ```{r}
 mm <- ggplot(data = NewlyCombined, aes(x = Year, y = Difference, group = Gender, color = Gender)) + geom_line(size = 2) +
-  ggtitle("Number Years the Average US Citizen \n Outives the Average Kentucker") + geom_smooth(method = "lm")
+  ggtitle("Number Years the Average US Citizen \n Outives the Average Kentucker") 
+#+ geom_smooth(method = "lm", se = FALSE, size = .5, color = "black")
+              
 mm
 ```
 
 + geom_ribbon(aes(x=Year_Number, ymax= Age.upper, ymin= Age.lower), fill="pink", alpha=.5)
 
 ```{r}
+NewlyCombined
 corYear <- cor(x$Year_Number, x$Age)
 corYear
 par(mfrow = c(2,2))
-p <- ggplot(data = x, aes(x = Year_Number, y = Age, group = State.County, color = State.County)) + geom_line(size = 1.5) + facet_wrap(~ Gender) +
-  ggtitle("Kentucky Average Age at Death \nAs Compared to the Rest of the Country") +geom_polygon(data = x, aes(y = Age, 
-    group = State.County), alpha = 0.3)
-p
-m <- ggplot(data = x, aes(x = Year_Number, y = Age, group = Gender, color = Gender)) + geom_line(size = 1.5) + facet_wrap(~ State.County)
-m
 ```
 
 
+```{r}
+x <- cbind.data.frame(x, minmax)
+x
+p <- ggplot(data = x, aes(x = Year_Number, y = Age, group = State.County, color = State.County)) + geom_line(size = 0.5) + facet_wrap(~ Gender) +
+  ggtitle("Kentucky Average Age at Death \nAs Compared to the Rest of the Country") + geom_ribbon(aes(x=Year_Number, ymin=ymin, ymax=ymax), fill="grey", alpha=.4) + scale_color_manual(values=c("#CC6666", "#9999CC")) + geom_smooth(method = "lm", se = FALSE, size = 1.5) 
+p
+
+```
+
+
+```{r}
+m <- ggplot(data = x, aes(x = Year_Number, y = Age, group = Gender, color = Gender)) + geom_line(size = 1.5) + facet_wrap(~ State.County)
+m
+```
 
 
