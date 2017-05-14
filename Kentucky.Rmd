@@ -128,9 +128,21 @@ par(mfrow = c(2,2))
 ```{r}
 x <- cbind.data.frame(x, minmax)
 x
-p <- ggplot(data = x, aes(x = Year_Number, y = Age, group = State.County, color = State.County)) + geom_line(size = 0.5) + facet_wrap(~ Gender) +
-  ggtitle("Kentucky Average Age at Death \nAs Compared to the Rest of the Country") + geom_ribbon(aes(x=Year_Number, ymin=ymin, ymax=ymax), fill="grey", alpha=.4) + scale_color_manual(values=c("#CC6666", "#9999CC")) + geom_smooth(method = "lm", se = FALSE, size = 1.5) 
-p
+p <- ggplot(data = x, aes(x = Year, y = Age, group = State.County, color = State.County)) + 
+  geom_line(size = 2.5) + 
+  facet_wrap(~ Gender) +
+  ggtitle("Age of death in Kentucky lags behind the rest of the country \nAnd that lag is getting bigger each year.") +
+  labs(subtitle = "\nIs Mitch McConnell to blame?\n") + 
+  #so grey is not obscuring the legend
+  geom_ribbon(aes(x=Year, ymin=ymin, ymax=ymax), fill="grey", alpha=.3, show_guide=FALSE) + 
+  scale_color_manual(values=c("#330099", "#FF3300")) +
+  theme_bw()+
+  theme(legend.position='bottom', legend.direction='horizontal') 
+#+ geom_smooth(method = "lm", se = FALSE, size = 0.025) 
+
+p + theme(legend.title = element_blank()) +
+  theme(plot.title=element_text(size=17, hjust=0.5,color="black")) +
+  theme(plot.subtitle=element_text(size=13, hjust=0.5, color="black")) 
 
 ```
 
