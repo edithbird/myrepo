@@ -1,0 +1,300 @@
+---
+title: "R Blogger Practice"
+output: html_notebook
+---
+
+Logistic Regression and the stock market. 
+
+May 14, 2017
+By Data Scientist PakinJa
+
+We will develop a logistic regression example. The exercise was originally published in “An Introduction to Statistical Learning. With applications in R” by Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani. Springer 2015.
+
+The example we will develop is about predicting when the market value will rise (UP) or fall (Down).
+
+We will carry out the exercise verbatim as published in the aforementioned reference and only with slight changes in the coding style.
+
+For more details on the models, algorithms and parameters interpretation, it is recommended to check the aforementioned reference or any other bibliography of your choice.
+
+  “An Introduction to Statistical Learning.
+  With applications in R” by Gareth James,
+  Daniela Witten, Trevor Hastie and Robert Tibshirani.
+  Springer 2015.
+
+  install and load required packages
+
+```{r}
+library(ISLR)
+library(psych)
+library(knitr)
+```
+  explore the dataset
+
+Smarket
+```{r}
+names(Smarket)
+dim(Smarket)
+summary(Smarket)
+kable(head(Smarket))
+```
+
+  correlation matrix
+```{r}
+cor(Smarket[,-9])
+```
+
+correlations between th lag variables and today returns are close to zero
+the only substantial correlation is between Year and Volume.
+
+
+```{r}
+plot(Smarket$Volume, main = "Stock Market Data", ylab = "Volume", col = "blue")
+
+```
+scatterplots, distributions and correlations
+
+```{r}
+pairs.panels(Smarket)
+```
+fit a logistic regression model to predict $Direction using $Lag1 through $Lag5 and $Volume glm(): generalized linear model function family=binomial => logistic regression
+
+```{r}
+glm.fit <- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+               data = Smarket, family = binomial)
+summary(glm.fit)
+
+```
+the smallest p_value is associated with Lag1 the negative coefficient for this predictor suggests **that if the market had a positive return yesterday, then it is less likely to go up today at a value of 0.15, the p-value is still relatively large, and so there is no clear evidence of a real association between $Lag1 and $Direction**
+
+explore fitted model coefficients
+
+```{r}
+coef(glm.fit)
+summary(glm.fit)$coef
+summary(glm.fit)$coef[ ,4]
+```
+**predict the probability that the market will go up, given values of the predictors**
+```{r}
+glm.probs <- predict(glm.fit, type = "response")
+glm.probs[1:10]
+contrasts(Smarket$Direction)
+```
+These values correspond to the probability of the marketgoing up, rather than down, because the contrasts() function indicates that R has created a dummy variable with a 1 for Up.
+
+Create a vector of class predictions based on whether the predicted probability of a market increase is greater than or less than 0.5.
+
+```{r}
+glm.pred <- rep ("Down", 1250)
+glm.pred[glm.probs > .5] <- "Up"
+```
+
+Confusion matrix in order to determine how many observations were correctly or incorrectly classified. 
+
+```{r}
+table(glm.pred, Smarket$Direction)
+mean(glm.pred == Smarket$Direction)
+```
+Model correctly predicted that the market would go up on 507 days and that it would go down on 145 days, for a total of 507 + 145 = 652 correct predictions. Logistic regression correctly predicted the movement of the market 52.2 % of the time. 
+
+To better assess the accuracy of the logistic regression model in this setting, we can fit the model using part of the data, and then examine how well it predicts the held out data. 
+
+```{r}
+train <- (Smarket$Year < 2005)
+Smarket.2005 <- Smarket[!train, ]
+dim(Smarket.2005)
+Direction.2005 <- Smarket$Direction[!train]
+Direction.2005
+```
+
+```{r}
+glm.fit <- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+               data = Smarket, family = binomial, subset = train)
+glm.fit
+glm.probs <- predict(glm.fit, Smarket.2005, type = "response")
+```
+Compute the predictions for 2005 and compare them to the actual movements of the market over that time period. 
+
+```{r}
+glm.pred <- rep("Down", 252)
+glm.pred
+glm.pred[glm.probs > 0.5] <- "Up"
+table(glm.pred, Direction.2005)
+mean(glm.pred == Direction.2005)
+mean(glm.pred != Direction.2005)
+```
+
+Not generally expect to be able to use previous days returns to predict future market performance. 
+
+
+Refit the logistic regression using just $Lag1 and $Lag2, which seemed to have the highest predictive power in the original logistic regression model. 
+
+```{r}
+glm.fit <- glm(Direction ~ Lag1 + Lag2 , data = Smarket,
+               family = binomial, subset = train)
+glm.probs <- predict(glm.fit, Smarket.2005 , type = "response")
+glm.pred <- rep("Down", 252)
+glm.pred[glm.probs > 0.5] <- "Up"
+table(glm.pred, Direction.2005)
+mean(glm.pred == Direction.2005)
+```
+Results appear to be a little better: 56%
+If we want to predict the returns associated with particular values of $Lag1 and $Lag2
+
+```{r}
+predict(glm.fit, newdata = data.frame(Lag1 = c (1.2 ,1.5),
+ Lag2 = c(1.1, -0.8)) , type = "response")
+```
+
+
+###Predicting Medical Expenses
+library(psych)
+
+Read and explore the data
+
+```{r}
+insurance <- read.csv("insurance.csv", header = T)
+head(insurance)
+str(insurance)
+```
+Model dependent variable: $expenses
+```{r}
+### change $charges name to $expenses
+colnames(insurance)[7] <- "expenses"
+summary(insurance$expenses)
+```
+```{r}
+hist(insurance$expenses, main = "Insurance Expenses", col = "red",
+     xlab = "Expenses (USD")
+```
+
+```{r}
+### explore $region
+table(insurance$region)
+```
+Exploring relationships among features
+
+```{r}
+### correlation matrix
+cor(insurance[c("age", "bmi", "children", "expenses")])
+```
+
+Visualizing relationships among features.
+
+```{r}
+### scatterplot matrix
+pairs(insurance[c("age", "bmi", "children", "expenses")])
+```
+
+```{r}
+### scatterplots, distributions and correlations
+pairs.panels(insurance[c("age", "bmi", "children", "expenses")])
+```
+
+```{r}
+### training a model on the data
+ins_model <- lm(expenses ~ age + children + bmi + sex + smoker + region, data = insurance)
+### this does the same
+#ins_model <- lm(expenses ~ ., data = insurance)
+### explore model parameters
+ins_model
+
+```
+
+```{r}
+### evaluating model performance
+summary(ins_model)
+```
+The model explains 74.9% of the variation of the dependent variable (adjusted R-squared: 0.7494).
+
+Improving model performance
+
+```{r}
+### adding non-linear relationships
+### adding second order term on $age
+insurance$age2 <- insurance$age^2
+```
+
+Converting a numeric variable to a binary indicator
+
+### $bmi feature only have impact above some value
+
+```{r}
+insurance$bmi30 <- ifelse(insurance$bmi >= 30, 1, 0)
+```
+
+Putting it all together
+
+```{r}
+### improved regression model
+ins_model2 <- lm(expenses ~ age + age2 + children + bmi + sex + bmi30*smoker + region, data = insurance)
+summary(ins_model2)
+
+```
+
+
+The accuracy of the model has improved to an 86.5% of explanation of the variation of the independent variable.
+
+###K-Means
+
+The iris dataset contains data about sepal length, sepal width, petal length, and petal width of flowers of different species. Let us see what it looks like:
+
+
+```{r}
+library(datasets)
+head(iris)
+```
+
+After a little bit of exploration, I found that Petal.Length and Petal.Width were similar among the same species but varied considerably between different species, as demonstrated below:
+
+```{r}
+library(ggplot2)
+ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) + geom_point()
+```
+
+
+Clustering
+
+Okay, now that we have seen the data, let us try to cluster it. Since the initial cluster assignments are random, let us set the seed to ensure reproducibility.
+
+```{r}
+set.seed(20)
+irisCluster <- kmeans(iris[, 3:4], 3, nstart = 20)
+irisCluster
+```
+
+
+Since we know that there are 3 species involved, we ask the algorithm to group the data into 3 clusters, and since the starting assignments are random, we specify nstart = 20. This means that R will try 20 different random starting assignments and then select the one with the lowest within cluster variation.
+We can see the cluster centroids, the clusters that each data point was assigned to, and the within cluster variation.
+
+Let us compare the clusters with the species.
+
+```{r}
+table(irisCluster$cluster, iris$Species)
+```
+
+As we can see, the data belonging to the setosa species got grouped into cluster 3, versicolor into cluster 2, and virginica into cluster 1. The algorithm wrongly classified two data points belonging to versicolor and six data points belonging to virginica.
+
+We can also plot the data to see the clusters:
+
+```{r}
+irisCluster$cluster <- as.factor(irisCluster$cluster)
+
+ggplot(iris, aes(Petal.Length, Petal.Width, color = irisCluster$cluster)) + geom_point()
+```
+
+That brings us to the end of the article. I hope you enjoyed it! If you have any questions or feedback, feel free to leave a comment or reach out to me on Twitter.
+
+[7 Important Visualizations](https://www.r-bloggers.com/7-visualizations-you-should-learn-in-r/)
+
+```{r}
+bigMart <- read.csv("BigMartData.csv", header = T,stringsAsFactors = F)
+bigMart
+str(bigMart)
+```
+
+1. Scatter Plot to see the relationship between variables
+
+```{r, eval=FALSE, include=FALSE}
+ggplot(train, aes(Item_Visibility, Item_MRP)) + geom_point() + scale_x_continuous("Item Visibility", breaks = seq(0,0.35,0.05))+ scale_y_continuous("Item MRP", breaks = seq(0,270,by = 30))+ theme_bw() 
+```
+
