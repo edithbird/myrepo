@@ -294,7 +294,120 @@ str(bigMart)
 
 1. Scatter Plot to see the relationship between variables
 
-```{r, eval=FALSE, include=FALSE}
-ggplot(train, aes(Item_Visibility, Item_MRP)) + geom_point() + scale_x_continuous("Item Visibility", breaks = seq(0,0.35,0.05))+ scale_y_continuous("Item MRP", breaks = seq(0,270,by = 30))+ theme_bw() 
+```{r, echo=TRUE}
+ggplot(bigMart, aes(Item_Visibility, Item_MRP, group = Item_Type, color = Item_Type)) + geom_point() + scale_x_continuous("Item Visibility", breaks = seq(0,0.35,0.05))+ scale_y_continuous("Item MRP", breaks = seq(0,270,by = 30))+ theme_bw() 
+```
+
+Now, we can view a third variable also in same chart, say a categorical variable (Item_Type) which will give the characteristic (item_type) of each data set. Different categories are depicted by way of different color for item_type in below chart.
+
+We can even make it more visually clear by creating separate scatter plots for each separate Item_Type as shown below.
+
+```{r, echo=TRUE}
+ggplot(bigMart, aes(Item_Visibility, Item_MRP)) + geom_point(aes(color = Item_Type)) + 
+  scale_x_continuous("Item Visibility", breaks = seq(0,0.35,0.05))+
+  scale_y_continuous("Item MRP", breaks = seq(0,270,by = 30))+
+  theme_bw() + labs(title="Scatterplot") + facet_wrap(~ Item_Type)
+```
+
+
+2. Histogram
+
+When to use: Histogram is used to plot continuous variable. It breaks the data into bins and shows frequency distribution of these bins. We can always change the bin size and see the effect it has on visualization.
+
+From our mart dataset, if we want to know the count of items on basis of their cost, then we can plot histogram using continuous variable Item_MRP as shown below.
+
+```{r}
+ggplot(bigMart, aes(Item_MRP)) + geom_histogram(binwidth = 2)+
+  scale_x_continuous("Item MRP", breaks = seq(0,270,by = 30))+
+  scale_y_continuous("Count", breaks = seq(0,200,by = 20))+
+  labs(title = "Histogram")
+```
+
+3. Bar & Stack Bar Chart
+
+**When to use:** Bar charts are recommended when you want to plot a categorical variable or a combination of continuous and categorical variable.
+
+From our dataset, if we want to know number of marts established in particular year, then bar chart would be most suitable option, use variable Establishment Year as shown below.
+
+```{r}
+ggplot(bigMart, aes(Outlet_Establishment_Year)) + geom_bar(fill = "red")+theme_bw()+
+  scale_x_continuous("Establishment Year", breaks = seq(1985,2010)) + 
+  scale_y_continuous("Count", breaks = seq(0,1500,150)) +
+  coord_flip()+ labs(title = "Bar Chart") + theme_gray()
+
+```
+
+
+
+```{r}
+ggplot(bigMart, aes(Item_Type, Item_Weight)) + geom_bar(stat = "identity", fill = "darkblue") + scale_x_discrete("Outlet Type")+ scale_y_continuous("Item Weight", breaks = seq(0,15000, by = 500))+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) + labs(title = "Bar Chart")
+```
+Stacked Bar
+
+```{r}
+ggplot(bigMart, aes(Outlet_Location_Type, fill = Outlet_Type)) + geom_bar()+
+labs(title = "Stacked Bar Chart", x = "Outlet Location Type", y = "Count of Outlets")
+```
+
+4. Box Plot
+When to use: Box Plots are used to plot a combination of categorical and continuous variables. This plot is useful for visualizing the spread of the data and detect outliers. It shows five statistically significant numbers- the minimum, the 25th percentile, the median, the 75th percentile and the maximum.
+
+From our dataset, if we want to identify each outlet’s detailed item sales including minimum, maximum & median numbers, box plot can be helpful. In addition, it also gives values of outliers of item sales for each outlet as shown in below chart.
+
+The black points are outliers. Outlier detection and removal is an essential step of successful data exploration.
+
+```{r}
+ggplot(bigMart, aes(Outlet_Identifier, Item_Outlet_Sales)) + geom_boxplot(fill = "red")+
+scale_y_continuous("Item Outlet Sales", breaks= seq(0,15000, by=500))+
+labs(title = "Box Plot", x = "Outlet Identifier")
+
+```
+
+5. Area Chart
+When to use: Area chart is used to show continuity across a variable or data set. It is very much same as line chart and is commonly used for time series plots. Alternatively, it is also used to plot continuous variables and analyze the underlying trends.
+
+From our dataset, when we want to analyze the trend of item outlet sales, area chart can be plotted as shown below. It shows count of outlets on basis of sales.
+
+```{r}
+ggplot(bigMart, aes(Item_Outlet_Sales)) + geom_area(stat = "bin", bins = 30, fill = "steelblue") + scale_x_continuous(breaks = seq(0, 11000, 1000)) + labs(title = "Area Chart", x = "Item Outlet Sales", y = "Number of Outlets")
+```
+
+6. Heat Map
+When to use: Heat Map uses intensity (density) of colors to display relationship between two or three or many variables in a two dimensional image. It allows you to explore two dimensions as the axis and the third dimension by intensity of color.
+
+From our dataset, if we want to know cost of each item on every outlet, we can plot heatmap as shown below using three variables Item MRP, Outlet Identifier & Item Type from our mart dataset.
+
+```{r}
+ggplot(bigMart, aes(Outlet_Identifier, Item_Type)) + geom_raster(aes(fill = Item_MRP)) + labs(title = "Heat Map", x = "Outlet Identifier", y = "Item Type") + scale_fill_continuous(name = "Item MRP")
+```
+
+7. Correlogram
+When to use: Correlogram is used to test the level of co-relation among the variable available in the data set. The cells of the matrix can be shaded or colored to show the co-relation value.
+
+Darker the color, higher the co-relation between variables. Positive co-relations are displayed in blue and negative correlations in red color. Color intensity is proportional to the co-relation value.
+
+From our dataset, let’s check co-relation between Item cost, weight, visibility along with Outlet establishment year and Outlet sales from below plot.
+
+In our example, we can see that Item cost & Outlet sales are positively correlated while Item weight & its visibility are negatively correlated.
+
+```{r}
+library(corrgram)
+corrgram(bigMart, order = NULL, panel = panel.shade, text.panel = panel.txt, main = "Correlogram")
+```
+
+[Another Correlogram](http://www.sthda.com/english/wiki/visualize-correlation-matrix-using-correlogram)
+
+```{r}
+head(mtcars)
+#find correlations
+M <- cor(mtcars)
+head(M)
+```
+```{r}
+#Visualizing the correlation matrix
+library(corrplot)
+corrplot(M, method = "circle")
+corrplot(M, method = "number")
+corrplot(M, type="upper", order="hclust", col=c("black", "white"), bg="lightblue", tl.col="black", tl.srt=45)
 ```
 
