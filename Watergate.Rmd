@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+library(dygraphs)
+library(xts)
 library(stringr)
 library(reshape2)
 library(XML)
@@ -19,6 +21,9 @@ library(knitr)
 library(dplyr)
 library(RCurl)
 library(rvest)
+library(tidyr)
+library(ggplot2)
+library(tidyquant)
 ```
 
 
@@ -30,15 +35,146 @@ pollsData1 <- read_html("https://en.wikipedia.org/wiki/Timeline_of_the_Watergate
 
 ```{r}
 Senator <- pollsData1 %>% html_nodes("p+ ul li") %>% html_text()
-kable(head(Senator))
-index <- seq(from = 1, to = 64)
-#Senator <- cbind.data.frame(index, Senator)
-Date <- as.Date(c("1968-11-05", "1969-01-20", "1971-07-01", "1971-08-21", "1971-09-03", "1972-02-02", "1972-05-02", "1972-06-17", "1972-06-20","1972-06-23", "1972-09-15", "1972-11-07", "1973-01-08", "1973-01-20", "1973-02-28", "1973-03-17", "1973-04-06", "1973-04-27",  "1973-04-30", "1973-05-17", "1973-05-19","1973-06-03", "1973-07-13", "1973-07-18", "1973-07-23", "1973-10-10", "1973-10-12", "1973-10-20", "1973-11-01", "1973-11-17", "1973-11-27", "1973-12-06", "1974-01-28", "1974-02-25", "1974-03-01", "1974-03-04", "1974-04-05",  "1974-04-07",  "1974-04-16", "1974-04-30", "1974-05-09", "1974-06-15", "1974-07-24", "1974-07-27", "1974-07-30", "1974-08-06", "1974-08-06","1974-08-08", "1974-08-09", "1974-09-08", "1974-11-07", "1974-12-31", "1975-01-01", "1975-07-27", "1975-11-04", "1976-05-05", "1975-11-02", "1977-01-20", "1977-05-04", "1978-05-15", "1978-10-25", "1994-04-22", "2005-05-31" ))
-length(Date)
-Date <- cbind.data.frame(index, Date, Senator)
-kable(Date)
-kable(Senator)
+Senator.df <- as.data.frame(Senator)
+# Senator.df <- Senator.df %>% separate(Senator.df, into = c('year', 'month'), sep = 17)
+#Senator.df
 
-Senator <- Senator %>% str_replace_all("\\:,", "")
+
+
+
+#kable(head(Senator))
+#dim(Senator)
+Index <- seq(from = 1, to = 64)
+Senator <- cbind.data.frame(Index, Senator.df)
+
+#Senator.df <- Senator %>% select(Index,year)
+
+#kable(Senator.df)
+Date1 <- as.Date(c("1968-11-05",
+"1969-01-20",
+"1971-07-01",
+"1971-08-21",
+"1971-09-03",
+"1972-02-02",
+"1972-05-02",
+"1972-06-17",
+"1972-06-20",
+"1972-06-23",
+"1972-09-15",
+"1972-11-07",
+"1973-01-08",
+"1973-01-20",
+"1973-02-28",
+"1973-03-17",
+"1973-04-06",
+"1973-04-27",
+"1973-04-30",
+"1973-05-17",
+"1973-05-19",
+"1973-06-03",
+                  "1973-07-13",
+                  "1973-07-18",
+                  "1973-07-23",
+                  "1973-10-10",
+                  "1973-10-10",
+                  "1973-10-12",
+                  "1973-10-20",
+                  "1973-11-01",
+                  "1973-11-17",
+                  "1973-11-27",
+                  "1973-12-06",
+                  "1974-01-28",
+                  "1974-02-25",
+                  "1974-03-01",
+                  "1974-03-04",
+                  "1974-04-05",
+                  "1974-04-07",
+                  "1974-04-16",
+                  "1974-04-30",
+                  "1974-05-09",
+                  "1974-06-15",
+                  "1974-07-24",
+                  "1974-07-27",
+                  "1974-07-30",
+                  "1974-08-06",
+                  "1974-08-06",
+                  "1974-08-08",
+                  "1974-08-09",
+                  "1974-09-08",
+                  "1974-11-07",
+                  "1974-12-31",
+                  "1975-01-01",
+                  "1975-07-27",
+                  "1975-11-04",
+                  "1976-05-05",
+                  "1975-11-02",
+                  "1977-01-20",
+                  "1977-05-04",
+                  "1978-05-15",
+                  "1978-10-25",
+                  "1994-04-22",
+                  "2005-05-31" ))
+length(Date1)
+newSenator.df <- cbind.data.frame(Date1, Senator)
+newSenator.df <- newSenator.df %>% select(Index, Date1, Senator)
+kable(newSenator.df)
+
+# kable(Date)
+# kable(Senator)
+# 
+# Senator <- Senator %>% str_replace_all("\\:,", "")
 ```
+
+```{r}
+TimeLine <- seq(as.Date("1968/11/01"), as.Date("1974/12/31"), "days")
+head(TimeLine)
+length(TimeLine)
+Index <- seq(from = 1, to = 2252)
+TimeLine <- cbind.data.frame(Index, TimeLine)
+head(TimeLine)
+tail(TimeLine)
+TimeLine <- TimeLine %>% rename(Date1 = TimeLine)
+From <- as.Date("1968/11/01")
+To <- as.Date("1974/12/31")
+Stocks <- read.csv("GSPC.csv", header = T, stringsAsFactors = F, na.strings = c(""))
+Stocks[Stocks == 0] <- NA
+
+Stocks <- Stocks[,c(1:2,8)]
+head(Stocks)
+tail(Stocks)
+Stocks$Date <- as.Date(Stocks$Date,  format = "%m/%d/%Y")
+a <- ggplot(data = Stocks,aes(x = Date, y = Close)) + geom_line() + geom_point(aes(x = Date, y = Occurance, na.rm = TRUE), size = 2, color="red") 
+a
+```
+
+
+```{r}
+df1 <- data.frame(p=c(10,8,7,3,2,6,7,8),
+             v=c(100,300,150,400,450,250,150,400))
+df2 <- data.frame(p=c(10,8,6,4), v=c(150,250,350,400))
+df1
+df2
+
+```
+
+```{r}
+#df1 is the default dataset for all geoms
+(plot1 <- ggplot(df1, aes(v, p)) + 
+    geom_line() +
+    geom_point(data = df2, aes(color = "red", size = 3))
+)
+
+
+
+```
+
+```{r}
+#Stocks$Date <- as.Date(Stocks$Date)
+head(Stocks)
+time_series <- xts(Stocks, order.by = Stocks$Date)
+head(time_series)
+dygraph(time_series$Close, main = "Watergate's Influence on S&P 500") 
+```
+
+
 
