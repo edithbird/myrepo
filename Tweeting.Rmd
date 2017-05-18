@@ -1,0 +1,64 @@
+---
+title: "Tweeting"
+author: "Christine Iyer"
+date: "May 17, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(knitr)
+library(pander)
+library(twitteR)
+library(tidytext)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(tidyr)
+library(wordcloud)
+```
+
+```{r, include=FALSE}
+consumer_key <- "UsCe7XLj03gFbK3C3aILJA1vd"
+consumer_secret <- "dXrS7DFrvPErpm5LqjkibXFlkPBww7J4lJAOObk38b04tLGwvW"
+access_token <- "909252506-W4WONt5BJTg9tVkrtnVE4poh3cikfUZYc0wOrCMH"
+access_secret <- "e5tQ6yRwYzAXiGxanu0xyf7x0X36KtQMITtxPzbuLE1NK"
+setup_twitter_oauth(consumer_key, consumer_secret,
+                    access_token, access_secret)
+#getTwitterOAuth(consumer_key, consumer_secret)
+
+num_tweets <- 2
+colors <- c("#A7A7A7",
+ "dodgerblue",
+ "firebrick",
+ "forestgreen",
+ "gold")
+```
+
+```{r}
+sbT <- userTimeline("Fire_The_Fool", n = 5)
+
+sbT_df <- tbl_df(map_df(sbT, as.data.frame))
+tweets <- sbT_df %>% select(#id, statusSource,
+  text, created) #%>% extract(statusSource, "source", "Twitter for (.*?)<")
+reg <- "([^A-Za-z\\d#@']|'('?![A-Za-z\\d#@]))"
+tweet_words <- tweets %>% filter(!str_detect(text, '^"')) %>% mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|&amp;", "")) %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>% filter (!word %in% stop_words$word, str_detect(word, "[a-z]"))
+#kable(head(tweet_words))
+nrc <- sentiments %>% filter( lexicon == "nrc") %>% select(word, sentiment)
+#kable(head(nrc))
+#kable(head(tweets, 5))
+tweet_words %>% count(word) %>% arrange(n) %>% with(wordcloud(word, n, max.words = 100, scale=c(5,.5),min.freq=5, random.order=FALSE, rot.per=.15, colors=brewer.pal(9,"YlOrRd")))
+```
+
+```{r}
+names(tweets)
+pander(tweets, n = 20)
+```
+
