@@ -30,24 +30,15 @@ pollsData1 <- read_html("https://en.wikipedia.org/wiki/Timeline_of_the_Watergate
 
 ```{r}
 Senator <- pollsData1 %>% html_nodes("p+ ul li") %>% html_text()
-head(Senator)
+kable(head(Senator))
+index <- seq(from = 1, to = 64)
+#Senator <- cbind.data.frame(index, Senator)
+Date <- as.Date(c("1968-11-05", "1969-01-20", "1971-07-01", "1971-08-21", "1971-09-03", "1972-02-02", "1972-05-02", "1972-06-17", "1972-06-20","1972-06-23", "1972-09-15", "1972-11-07", "1973-01-08", "1973-01-20", "1973-02-28", "1973-03-17", "1973-04-06", "1973-04-27",  "1973-04-30", "1973-05-17", "1973-05-19","1973-06-03", "1973-07-13", "1973-07-18", "1973-07-23", "1973-10-10", "1973-10-12", "1973-10-20", "1973-11-01", "1973-11-17", "1973-11-27", "1973-12-06", "1974-01-28", "1974-02-25", "1974-03-01", "1974-03-04", "1974-04-05",  "1974-04-07",  "1974-04-16", "1974-04-30", "1974-05-09", "1974-06-15", "1974-07-24", "1974-07-27", "1974-07-30", "1974-08-06", "1974-08-06","1974-08-08", "1974-08-09", "1974-09-08", "1974-11-07", "1974-12-31", "1975-01-01", "1975-07-27", "1975-11-04", "1976-05-05", "1975-11-02", "1977-01-20", "1977-05-04", "1978-05-15", "1978-10-25", "1994-04-22", "2005-05-31" ))
+length(Date)
+Date <- cbind.data.frame(index, Date, Senator)
+kable(Date)
+kable(Senator)
 
-
-Senator <- Senator %>% str_replace_all("\\:", "")
-Senator <- as.data.frame(Senator)
-head(Senator)
-
-
-# Party <- pollsData1 %>% html_nodes("tr > :nth-child(2)") %>% html_text()
-# 
-# District <- pollsData1 %>% html_nodes("tr :nth-child(3)") %>% html_text()
-# 
-# Date <- pollsData1 %>% html_nodes("tr :nth-child(4)") %>% html_text()
-# 
-# Title <- pollsData1 %>% html_nodes("tr :nth-child(5)") %>% html_text()
-# 
-# Total1 <- cbind.data.frame(Senator, Party, District, Date, Title)
-# kable(Total)
-
+Senator <- Senator %>% str_replace_all("\\:,", "")
 ```
 
