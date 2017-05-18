@@ -1,0 +1,53 @@
+---
+title: "Watergate"
+author: "Christine Iyer"
+date: "May 17, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(stringr)
+library(reshape2)
+library(XML)
+library(knitr)
+library(dplyr)
+library(RCurl)
+library(rvest)
+```
+
+
+
+```{r}
+pollsData1 <- read_html("https://en.wikipedia.org/wiki/Timeline_of_the_Watergate_scandal")
+```
+
+
+```{r}
+Senator <- pollsData1 %>% html_nodes("p+ ul li") %>% html_text()
+head(Senator)
+
+
+Senator <- Senator %>% str_replace_all("\\:", "")
+Senator <- as.data.frame(Senator)
+head(Senator)
+
+
+# Party <- pollsData1 %>% html_nodes("tr > :nth-child(2)") %>% html_text()
+# 
+# District <- pollsData1 %>% html_nodes("tr :nth-child(3)") %>% html_text()
+# 
+# Date <- pollsData1 %>% html_nodes("tr :nth-child(4)") %>% html_text()
+# 
+# Title <- pollsData1 %>% html_nodes("tr :nth-child(5)") %>% html_text()
+# 
+# Total1 <- cbind.data.frame(Senator, Party, District, Date, Title)
+# kable(Total)
+
+```
+
