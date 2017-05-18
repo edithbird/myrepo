@@ -1,0 +1,104 @@
+---
+title: "rssPractice"
+author: "Christine Iyer"
+date: "May 17, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(stringr)
+library(reshape2)
+library(XML)
+library(knitr)
+library(dplyr)
+library(RCurl)
+library(rvest)
+```
+
+```{r}
+doc <- xmlTreeParse("http://thehill.com/taxonomy/term/1130/feed")
+#head(doc)
+src <- xpathApply(xmlRoot(doc), "//item")
+head(src)
+for (i in 1:length(src)) {
+  if (i==1) {
+    foo<-xmlSApply(src[[i]], xmlValue)
+    SenateRSS<-data.frame(t(foo), stringsAsFactors=FALSE)
+  }
+  else {
+    foo<-xmlSApply(src[[i]], xmlValue)
+    tmp<-data.frame(t(foo), stringsAsFactors=FALSE)
+    SenateRSS<-rbind(SenateRSS, tmp)
+  }
+  
+}
+date_time<-vector()
+for (i in 1:length(src)) {
+  res <-htmlTreeParse(SenateRSS$link[i], useInternalNodes=TRUE)
+  title<-xpathApply(xmlRoot(res), "//title")
+  date_time[i]<-xmlSApply(title[[1]], xmlValue)
+}
+SenateRSS<-cbind(SenateRSS,date_time)  
+#names(SenateRSS)
+SenateRSS <- SenateRSS %>% select(Title = title, Link = link, Description = description, Author = author, pubDate)
+kable(head(SenateRSS, 20))
+
+```
+
+
+
+
+```{r}
+pollsData <- read_html("https://projects.propublica.org/represent/statements")
+```
+
+ 
+```{r}
+Senator <- pollsData %>% html_nodes("tr > :nth-child(1)") %>% html_text()
+
+Party <- pollsData %>% html_nodes("tr > :nth-child(2)") %>% html_text()
+
+District <- pollsData %>% html_nodes("tr :nth-child(3)") %>% html_text()
+
+Date <- pollsData %>% html_nodes("tr :nth-child(4)") %>% html_text()
+
+Title <- pollsData %>% html_nodes("tr :nth-child(5)") %>% html_text()
+
+Total <- cbind.data.frame(Senator, Party, District, Date, Title )
+# kable(Total)
+Total
+```
+
+
+ 
+
+```{r}
+pollsData1 <- read_html("https://projects.propublica.org/represent/statements?page=2")
+```
+
+
+```{r}
+Senator <- pollsData1 %>% html_nodes("tr > :nth-child(1)") %>% html_text()
+
+Party <- pollsData1 %>% html_nodes("tr > :nth-child(2)") %>% html_text()
+
+District <- pollsData1 %>% html_nodes("tr :nth-child(3)") %>% html_text()
+
+Date <- pollsData1 %>% html_nodes("tr :nth-child(4)") %>% html_text()
+
+Title <- pollsData1 %>% html_nodes("tr :nth-child(5)") %>% html_text()
+
+Total1 <- cbind.data.frame(Senator, Party, District, Date, Title)
+# kable(Total)
+
+```
+
+```{r}
+Senate <- rbind.data.frame(Total, Total1)
+kable(head(Senate))
+```
+
