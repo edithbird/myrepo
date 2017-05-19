@@ -123,7 +123,7 @@ TimeLine <- cbind.data.frame(Index, TimeLine)
 
 TimeLine <- TimeLine %>% rename(Date1 = TimeLine)
 From <- as.Date("1968/11/01")
-To <- as.Date("1974/12/31")
+To <- as.Date("1975/12/31")
 Stocks <- read.csv("GSPC.csv", header = T, stringsAsFactors = F, na.strings = c(""))
 Stocks[Stocks == 0] <- NA
 
@@ -154,9 +154,10 @@ p <- plot_ly(Stocks, x = Stocks$Date, y = Stocks$Close, name = 'High 2014', mode
 time_series[complete.cases(time_series),]
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=9}
 dygraph(time_series, main = "Watergate Events and the S&P 500 Closing Prices") %>%
-  dyAxis("y", valueRange = c(50, 150)) %>%
+  dyAxis("y", valueRange = c(50, 150)) %>% 
+  dySeries("Close", color = "slateblue")%>%
   dyAnnotation("1968-11-01", text = "*", tooltip = "Richard Nixon elected President") %>%
   dyAnnotation("1969-01-20", text = "*", tooltip = "Richard Nixon is inaugurated as the 37th President of the United States" ) %>%
   dyAnnotation("1971-07-01" , text = "*", tooltip = "David Young and Egil 'Bud' Krogh write a memo suggesting the formation of what later became called the 'White House Plumbers' in response to the leak of the Pentagon Papers by Daniel Ellsberg") %>%
@@ -210,5 +211,7 @@ dygraph(time_series, main = "Watergate Events and the S&P 500 Closing Prices") %
   dyAnnotation("1974-11-07", text = "*", tooltip = "94th Congress elected: Democratic Party picks up 5 Senate seats and 49 House seats. Many of the freshman congressmen are very young; the media dubs them Watergate Babies.")%>%
   dyAnnotation("1974-12-31", text = "*", tooltip =  "As a result of Nixon administration abuses of privacy, Privacy Act of 1974 passes into law. Ford is persuaded to veto the bill by Richard Cheney and Donald Rumsfeld; Congress overrides Ford's veto. (Note that the newly elected Congress had not taken office yet, this Congress was still the 93rd Congress.)") %>%
 dyRangeSelector()%>%
-  dyOptions(colors = RColorBrewer::brewer.pal(2, "Set2"))    
+  dyOptions(colors = RColorBrewer::brewer.pal(3, "Set2"))    
 ```
+
+
