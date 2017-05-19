@@ -155,7 +155,7 @@ time_series[complete.cases(time_series),]
 ```
 
 ```{r}
-dygraph(time_series, main = "Presidential Approval") %>%
+dygraph(time_series, main = "Watergate Events and the S&P 500 Closing Prices") %>%
   dyAxis("y", valueRange = c(50, 150)) %>%
   dyAnnotation("1968-11-01", text = "*", tooltip = "Richard Nixon elected President") %>%
   dyAnnotation("1969-01-20", text = "*", tooltip = "Richard Nixon is inaugurated as the 37th President of the United States" ) %>%
@@ -209,5 +209,6 @@ dygraph(time_series, main = "Presidential Approval") %>%
   dyAnnotation("1974-09-09", text = "*", tooltip = "President Ford ends the investigations by granting Nixon a pardon.")%>%
   dyAnnotation("1974-11-07", text = "*", tooltip = "94th Congress elected: Democratic Party picks up 5 Senate seats and 49 House seats. Many of the freshman congressmen are very young; the media dubs them Watergate Babies.")%>%
   dyAnnotation("1974-12-31", text = "*", tooltip =  "As a result of Nixon administration abuses of privacy, Privacy Act of 1974 passes into law. Ford is persuaded to veto the bill by Richard Cheney and Donald Rumsfeld; Congress overrides Ford's veto. (Note that the newly elected Congress had not taken office yet, this Congress was still the 93rd Congress.)") %>%
-dyRangeSelector()    
+dyRangeSelector()%>%
+  dyOptions(colors = RColorBrewer::brewer.pal(2, "Set2"))    
 ```
