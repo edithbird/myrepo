@@ -6,7 +6,11 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
 
@@ -28,7 +32,7 @@ library(tidyquant)
 
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 pollsData1 <- read_html("https://en.wikipedia.org/wiki/Timeline_of_the_Watergate_scandal")
 ```
 
@@ -36,20 +40,10 @@ pollsData1 <- read_html("https://en.wikipedia.org/wiki/Timeline_of_the_Watergate
 ```{r}
 Senator <- pollsData1 %>% html_nodes("p+ ul li") %>% html_text()
 Senator.df <- as.data.frame(Senator)
-# Senator.df <- Senator.df %>% separate(Senator.df, into = c('year', 'month'), sep = 17)
-#Senator.df
 
-
-
-
-#kable(head(Senator))
-#dim(Senator)
 Index <- seq(from = 1, to = 64)
 Senator <- cbind.data.frame(Index, Senator.df)
 
-#Senator.df <- Senator %>% select(Index,year)
-
-#kable(Senator.df)
 Date1 <- as.Date(c("1968-11-05",
 "1969-01-20",
 "1971-07-01",
@@ -114,291 +108,50 @@ Date1 <- as.Date(c("1968-11-05",
                   "1978-10-25",
                   "1994-04-22",
                   "2005-05-31" ))
-length(Date1)
+
 newSenator.df <- cbind.data.frame(Date1, Senator)
 newSenator.df <- newSenator.df %>% select(Index, Date1, Senator)
-kable(newSenator.df)
 
-# kable(Date)
-# kable(Senator)
-# 
-# Senator <- Senator %>% str_replace_all("\\:,", "")
+
 ```
 
 ```{r}
 TimeLine <- seq(as.Date("1968/11/01"), as.Date("1974/12/31"), "days")
-head(TimeLine)
-length(TimeLine)
+
 Index <- seq(from = 1, to = 2252)
 TimeLine <- cbind.data.frame(Index, TimeLine)
-head(TimeLine)
-tail(TimeLine)
+
 TimeLine <- TimeLine %>% rename(Date1 = TimeLine)
 From <- as.Date("1968/11/01")
 To <- as.Date("1974/12/31")
 Stocks <- read.csv("GSPC.csv", header = T, stringsAsFactors = F, na.strings = c(""))
 Stocks[Stocks == 0] <- NA
-head(Stocks)
+
 Stocks <- Stocks[,c(1:3,8)]
-head(Stocks)
-tail(Stocks)
+
 Stocks$Date <- as.Date(Stocks$Date,  format = "%m/%d/%Y")
 a <- ggplot(data = Stocks,aes(x = Date, y = Close)) + geom_line() + geom_point(aes(x = Date, y = Occurance, na.rm = TRUE), size = 3, color="red") 
-a
-```
-
-
-```{r}
-df1 <- data.frame(p=c(10,8,7,3,2,6,7,8),
-             v=c(100,300,150,400,450,250,150,400))
-df2 <- data.frame(p=c(10,8,6,4), v=c(150,250,350,400))
-df1
-df2
-
-```
-
-```{r}
-#df1 is the default dataset for all geoms
-z <- (plot1 <- ggplot(df1, aes(v, p)) + 
-    geom_line() +
-    geom_point(data = df2, aes(color = "red", size = 3))
-)
-
-
 
 ```
 
 ```{r}
 Stocks$Date <- as.Date(Stocks$Date)
-head(Stocks)
+
 time_series <- xts(Stocks, order.by = Stocks$Date)
-head(time_series)
-dygraph(time_series, main = "Watergate's Influence on S&P 500")  %>%
-  dyHighlight(highlightCircleSize = 7)%>% 
-  dyAnnotation("1968-11-05", text = "Elected", tooltip = "November 5, 1968: Richard Nixon elected President.") %>%
-  dyAnnotation("1969-01-20", text = "Inaugurated", tooltip = "Richard Nixon is inaugurated as the 37th President of The United States.")%>%
-  dyShading(from = "1971-05-01", to = "1972-05-01", color = "#FFE6E6") %>%
-dyRangeSelector() 
 ```
 
-```{r}
-dygraph(time_series, main = "Watergate's Influence on S&P 500")  %>%
-  dyHighlight(highlightCircleSize = 7)%>% 
-  dySeries("Occurance", drawPoints = TRUE, color = "blue")%>%
-  dyAnnotation("1968-11-05", text = "Elected", tooltip = "November 5, 1968: Richard Nixon elected President.") %>%
-  dyAnnotation("1969-01-20", text = "Inaugurated", tooltip = "Richard Nixon is inaugurated as the 37th President of The United States.")%>%
-  dyShading(from = "1971-05-01", to = "1974-01-01", color = "#FFE6E6")
-```
-
-
-```{r}
+```{r, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 library(plotly)
-
-
 p <- plot_ly(Stocks, x = Stocks$Date, y = Stocks$Close, name = 'High 2014', mode = 'lines',
         line = list(color = 'black', width = 2)) %>%
   add_trace( ~Occurance, name = 'Big Event', mode = 'markers', color = "pink")
-p
+
 ```
 
 [Plots help](https://www.r-statistics.com/2016/11/ggedit-interactive-ggplot-aesthetic-and-theme-editor/)
 
-```{r}
-library(dygraphs)
-dygraph(time_series, main = "Watergate") %>%
-dyAxis("y", valueRange = c(0, 150)) %>%
-dyEvent("1950-6-30", "Korea", labelLoc = "bottom") %>%
-dyEvent("1965-2-09", "Vietnam", labelLoc = "bottom")
-dygraph(presidents, main = "Presidential Approval") %>%
-dyAxis("y", valueRange = c(0, 100)) %>%
-dyEvent(c("1950-6-30", "1965-2-09"), c("Korea", "Vietnam"), labelLoc = "bottom")
-
-
-dygraph(nhtemp, main = "New Haven Temperatures") %>%
-dyRangeSelector(height = 20, strokeColor = "")
-```
-
-```{r}
-dygraph(presidents, main = "Quarterly Presidential Approval Ratings") %>%
-  dyAxis("y", valueRange = c(0, 100)) -> graph
-
-dates<-c("1950-7-1","1965-1-1","1972-1-1")
- texts<-c("a","bb","cc")
-
- my_code<-paste("graph %>%",
- paste0("dyAnnotation('",dates,"',text='",texts,"')",collapse = " %>% "))
- 
-graph %>% dyAnnotation('1950-7-1',text='a') %>% dyAnnotation('1965-1-1',text='bb') %>% dyAnnotation('1972-1-1',text='cc')
-eval(parse(text = my_code))
-my_code<-paste("graph2<- graph %>%",
-  paste0("dyAnnotation('",dates,"',text='",texts,"')",collapse = " %>% "))
-```
-
-
-```{r}
+```{r, eval=FALSE, include=FALSE}
 time_series[complete.cases(time_series),]
-```
-
-
-
-```{r}
-# dygraph(time_series, main = "Watergate's Influence on S&P 500") %>%
-#   dyAnnotation(x = c("1968-11-01",
-# "1969-01-20",
-# "1971-07-01",
-# "1971-08-23",
-# "1971-09-03",
-# "1972-02-02",
-# "1972-05-02",
-# "1972-06-16",
-# "1972-06-20",
-# "1972-06-23",
-# "1972-09-15",
-# "1972-11-08",
-# "1973-01-08",
-# "1973-01-22",
-# "1973-02-28",
-# "1973-03-19",
-# "1973-04-06",
-# "1973-04-27",
-# "1973-04-30",
-# "1973-05-17",
-# "1973-05-21",
-# "1973-06-04",
-# "1973-07-13",
-# "1973-07-18",
-# "1973-07-23",
-# "1973-10-10",
-# "1973-10-12",
-# "1973-10-22",
-# "1973-11-01",
-# "1973-11-19",
-# "1973-11-27",
-# "1973-12-06",
-# "1974-01-28",
-# "1974-02-25",
-# "1974-03-01",
-# "1974-03-04",
-# "1974-04-05",
-# "1974-04-08",
-# "1974-04-16",
-# "1974-04-30",
-# "1974-05-09",
-# "1974-06-17",
-# "1974-07-24",
-# "1974-07-29",
-# "1974-07-30",
-# "1974-08-06",
-# "1974-08-08",
-# "1974-08-09",
-# "1974-09-09",
-# "1974-11-07",
-# "1974-12-31"), 
-# text = c("*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*",
-# "*"), 
-# tooltip = 
-# c("Richard Nixon elected President",
-# "Richard Nixon is inaugurated as the 37th President of The United States",
-# "David Young and Egil Bud Krogh write a memo suggesting the formation of what later became called the White House Plumbers in response to the leak of the Pentagon Papers by Daniel Ellsberg",
-# "Nixons Enemies List is started by White House aides (though Nixon himself may not have been aware of it); to use the available federal machinery to screw our political enemies.",
-# "White House Plumbers E. Howard Hunt, G. Gordon Liddy et al. break into the offices of Daniel Ellsbergs psychiatrist Lewis Fielding looking for material that might discredit Ellsberg, underthedirection ofJohnEhrlichmanorhisstaff withinthe WhiteHouse. Thiswas the Plumbers first major operation.",
-# "By early 1972, the Plumbers, at this stage assigned to the Committee to Re-Elect the President (CREEP), had become frustrated at the lack of additional assignments they were being asked to perform, and thatanyplansandproposalstheysuggested were being rejectedbyCREEP. Liddy and Hunt took their complaints to the White House  most likely to Charles Colson  and requested that the White House start putting pressure on CREEP to assign them new operations. It is likely that both Colson and White House Chief of Staff H.R. Haldeman did so, starting the train of events that led to the Watergate break-ins a few months later. This narrative was confirmed in the famous Cancer of the Presidency conversation between Nixon and White House Counsel John Dean on March 21, 1973",
-# "J. Edgar Hoover dies; L. Patrick Gray is appointed acting FBI director.",
-# "The plumbers are arrested at 2:30 a.m. in the process of burglarizing and planting surveillance bugs in the Democratic National Committee offices at the Watergate Building Comple",
-# " Reportedly based on a tip from Deep Throat (associate director of the FBI, Mark Felt), Bob Woodward reports in the Washington Post that one of the burglars had E. Howard Hunt in his addressbookand possessedcheckssignedbyHunt,and thatHunt was connected to[CharlesColson.",
-# "In the Oval Office, H.R. Haldeman recommends to President Nixon that they attempt to shut down the FBI investigation of the Watergate break-in, by having CIA Director Richard Helms and DeputyDirector VernonA.WalterstellactingFBIDirectorL. PatrickGrayto,Stay the hell out of this. Haldeman expects Gray will then seek and take advice from Deputy FBI Director Mark Felt, and Felt will obey direction from the White House out of ambition. Nixon agrees and gives the order. [5]The conversation is recorded",
-# "Hunt, Liddy, and the Watergate burglars are indicted by a federal grand jury.",
-# "Nixon re-elected, defeating George McGovern with the largest plurality of votes in American history.",
-# "Five defendants plead guilty as the burglary trial begins. Liddy and James W. McCord Jr. are convicted after the trial.",
-# " Nixon is inaugurated for his second term.",
-# "Confirmation hearings begin for confirming L. Patrick Gray as permanent Director of the FBI. During these hearings, Gray reveals that he had complied with an order from John Dean to provide dailyupdates ontheWatergateinvestigation,andalso thatDeanhadprobablylied to FBI investigators.",
-# "Watergate burglar McCord writes a letter to Judge John Sirica, claiming that some of his testimony was perjured under pressure and that the burglary was not a CIA operation, but had involvedother governmentofficials,therebyleadingtheinvestigation to theWhiteHouse.",
-# "White House counsel John Dean begins cooperating with federal Watergate prosecutors.",
-# "L. Patrick Gray resigns after it comes to light that he destroyed files from E. Howard Hunts safe. William Ruckelshaus is appointed as his replacement.",
-# "Senior White House administration officials Ehrlichman, Haldeman, and Richard Kleindienst resign, and John Dean is fired.",
-# " The Senate Watergate Committee begins its nationally televised hearings.",
-# " Independent special prosecutor Archibald Cox appointed to oversee investigation into possible presidential impropriety.",
-# "John Dean tells Watergate investigators that he has discussed the cover-up with Nixon at least 35 times.",
-# "Alexander Butterfield, former presidential appointments secretary, reveals that all conversations and telephone calls in Nixons office have been taped since 1971.",
-# "Nixon orders White House taping systems disconnected.",
-# " Nixon refuses to turn over presidential tapes to Senate Watergate Committee or the special prosecutor.",
-# "Vice President replaced, gnew resigns as Vice President of the United States due to corruption while he was the governor of Maryland.",
-# "Ford is nominated as Vice President under the 25th Amendment.",
-# " Saturday Night Massacre - Nixon orders Elliot Richardson and Ruckleshouse to fire special prosecutor Cox. They both refuse to comply and resign. Robert Bork considers resigning but carriesoutthe order.",
-# "Leon Jaworski is appointed new special prosecutor.",
-# "Nixon delivers I am not a crook speech at a televised press conference at Disney World on 11/17",
-# "Senate votes 92 to 3 to confirm Ford as Vice President.",
-# "House votes 387 to 35 to confirm Ford as Vice President, and he takes the oath of office an hour after the vote.",
-# "Nixon campaign aide Herbert Porter pleads guilty to perjury.",
-# "Nixon personal counsel Herbert Kalmbach pleads guilty to two charges of illegal campaign activities.",
-# "Nixon is named as an unindicted co-conspirator in an indictment against seven former presidential aides.",
-# "the Watergate Seven (Mitchell, Haldeman, Ehrlichman, Colson, Gordon C. Strachan, [[Robert Mardian}, and Kenneth Parkinson) are indicted",
-# "Dwight Chapin convicted of lying to a grand jury.",
-# "Ed Reinecke, Republican lieutenant governor of California, indicted on three charges of perjury before the Senate committee.",
-# "Special Prosecutor Jaworski issues a subpoena for 64 White House tapes.",
-# "White House releases edited transcripts of the Nixon tapes, but the House Judiciary Committee insists the actual tapes must be turned over.",
-# "mpeachment hearings begin before the House Judiciary Committee.",
-# "Woodward and Bernsteins book All the Presidents Men is published by Simon & Schuster",
-# "United States v. Nixon decided: Nixon is ordered to give up tapes to investigators",
-# "Congress moves to impeach Nixon.",
-# "House Judiciary Committee passes Articles of Impeachment.",
-# "Previously unknown tape from June 23, 1972 (recorded a few days after the break-in) documenting Nixon and Haldeman formulating a plan to block investigations is released. This recording laterbecame known astheSmokingGun.",
-# "Nixon delivers his resignation speech in front of a nationally televised audience.",
-# "Nixon resigns the presidency. Gerald Ford becomes President.",
-# "President Ford ends the investigations by granting Nixon a pardon.",
-# "94th Congress elected: Democratic Party picks up 5 Senate seats and 49 House seats. Many of the freshman congressmen are very young; the media dubs them Watergate Babies.",
-# "As a result of Nixon administration abuses of privacy, Privacy Act of 1974 passes into law. Ford is persuaded to veto the bill by Richard Cheney and Donald Rumsfeld; Congress overrides Fordsveto. (Note that thenewlyelectedCongresshadnottakenoffice yet, this Congress was still the 93rd Congress.)")) 
 ```
 
 ```{r}
@@ -458,159 +211,3 @@ dygraph(time_series, main = "Presidential Approval") %>%
   dyAnnotation("1974-12-31", text = "*", tooltip =  "As a result of Nixon administration abuses of privacy, Privacy Act of 1974 passes into law. Ford is persuaded to veto the bill by Richard Cheney and Donald Rumsfeld; Congress overrides Ford's veto. (Note that the newly elected Congress had not taken office yet, this Congress was still the 93rd Congress.)") %>%
 dyRangeSelector()    
 ```
-"1968-11-01",
-"1969-01-20",
-"1971-07-01",
-"1971-08-23",
-"1971-09-03",
-"1972-02-02",
-"1972-05-02",
-"1972-06-16",
-"1972-06-20",
-"1972-06-23",
-"1972-09-15",
-"1972-11-08",
-"1973-01-08",
-"1973-01-22",
-"1973-02-28",
-"1973-03-19",
-"1973-04-06",
-"1973-04-27",
-"1973-04-30",
-"1973-05-17",
-"1973-05-21",
-"1973-06-04",
-"1973-07-13",
-"1973-07-18",
-"1973-07-23",
-"1973-10-10",
-"1973-10-12",
-"1973-10-22",
-"1973-11-01",
-"1973-11-19",
-"1973-11-27",
-"1973-12-06",
-"1974-01-28",
-"1974-02-25",
-"1974-03-01",
-"1974-03-04",
-"1974-04-05",
-"1974-04-08",
-"1974-04-16",
-"1974-04-30",
-"1974-05-09",
-"1974-06-17",
-"1974-07-24",
-"1974-07-29",
-"1974-07-30",
-"1974-08-06",
-"1974-08-08",
-"1974-08-09",
-"1974-09-09",
-"1974-11-07",
-"1974-12-31"), 
-text = c("*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*",
-"*"), 
-tooltip = 
-c("Richard Nixon elected President",
-"Richard Nixon is inaugurated as the 37th President of The United States",
-"David Young and Egil Bud Krogh write a memo suggesting the formation of what later became called the White House Plumbers in response to the leak of the Pentagon Papers by Daniel Ellsberg",
-"Nixons Enemies List is started by White House aides (though Nixon himself may not have been aware of it); to use the available federal machinery to screw our political enemies.",
-"White House Plumbers E. Howard Hunt, G. Gordon Liddy et al. break into the offices of Daniel Ellsbergs psychiatrist Lewis Fielding looking for material that might discredit Ellsberg, underthedirection ofJohnEhrlichmanorhisstaff withinthe WhiteHouse. Thiswas the Plumbers first major operation.",
-"By early 1972, the Plumbers, at this stage assigned to the Committee to Re-Elect the President (CREEP), had become frustrated at the lack of additional assignments they were being asked to perform, and thatanyplansandproposalstheysuggested were being rejectedbyCREEP. Liddy and Hunt took their complaints to the White House  most likely to Charles Colson  and requested that the White House start putting pressure on CREEP to assign them new operations. It is likely that both Colson and White House Chief of Staff H.R. Haldeman did so, starting the train of events that led to the Watergate break-ins a few months later. This narrative was confirmed in the famous Cancer of the Presidency conversation between Nixon and White House Counsel John Dean on March 21, 1973",
-"J. Edgar Hoover dies; L. Patrick Gray is appointed acting FBI director.",
-"The plumbers are arrested at 2:30 a.m. in the process of burglarizing and planting surveillance bugs in the Democratic National Committee offices at the Watergate Building Comple",
-" Reportedly based on a tip from Deep Throat (associate director of the FBI, Mark Felt), Bob Woodward reports in the Washington Post that one of the burglars had E. Howard Hunt in his addressbookand possessedcheckssignedbyHunt,and thatHunt was connected to[CharlesColson.",
-"In the Oval Office, H.R. Haldeman recommends to President Nixon that they attempt to shut down the FBI investigation of the Watergate break-in, by having CIA Director Richard Helms and DeputyDirector VernonA.WalterstellactingFBIDirectorL. PatrickGrayto,Stay the hell out of this. Haldeman expects Gray will then seek and take advice from Deputy FBI Director Mark Felt, and Felt will obey direction from the White House out of ambition. Nixon agrees and gives the order. [5]The conversation is recorded",
-"Hunt, Liddy, and the Watergate burglars are indicted by a federal grand jury.",
-"Nixon re-elected, defeating George McGovern with the largest plurality of votes in American history.",
-"Five defendants plead guilty as the burglary trial begins. Liddy and James W. McCord Jr. are convicted after the trial.",
-" Nixon is inaugurated for his second term.",
-"Confirmation hearings begin for confirming L. Patrick Gray as permanent Director of the FBI. During these hearings, Gray reveals that he had complied with an order from John Dean to provide dailyupdates ontheWatergateinvestigation,andalso thatDeanhadprobablylied to FBI investigators.",
-"Watergate burglar McCord writes a letter to Judge John Sirica, claiming that some of his testimony was perjured under pressure and that the burglary was not a CIA operation, but had involvedother governmentofficials,therebyleadingtheinvestigation to theWhiteHouse.",
-"White House counsel John Dean begins cooperating with federal Watergate prosecutors.",
-"L. Patrick Gray resigns after it comes to light that he destroyed files from E. Howard Hunts safe. William Ruckelshaus is appointed as his replacement.",
-"Senior White House administration officials Ehrlichman, Haldeman, and Richard Kleindienst resign, and John Dean is fired.",
-" The Senate Watergate Committee begins its nationally televised hearings.",
-" Independent special prosecutor Archibald Cox appointed to oversee investigation into possible presidential impropriety.",
-"John Dean tells Watergate investigators that he has discussed the cover-up with Nixon at least 35 times.",
-"Alexander Butterfield, former presidential appointments secretary, reveals that all conversations and telephone calls in Nixons office have been taped since 1971.",
-"Nixon orders White House taping systems disconnected.",
-" Nixon refuses to turn over presidential tapes to Senate Watergate Committee or the special prosecutor.",
-"Vice President replaced, gnew resigns as Vice President of the United States due to corruption while he was the governor of Maryland.",
-"Ford is nominated as Vice President under the 25th Amendment.",
-" Saturday Night Massacre - Nixon orders Elliot Richardson and Ruckleshouse to fire special prosecutor Cox. They both refuse to comply and resign. Robert Bork considers resigning but carriesoutthe order.",
-"Leon Jaworski is appointed new special prosecutor.",
-"Nixon delivers I am not a crook speech at a televised press conference at Disney World on 11/17",
-"Senate votes 92 to 3 to confirm Ford as Vice President.",
-"House votes 387 to 35 to confirm Ford as Vice President, and he takes the oath of office an hour after the vote.",
-"Nixon campaign aide Herbert Porter pleads guilty to perjury.",
-"Nixon personal counsel Herbert Kalmbach pleads guilty to two charges of illegal campaign activities.",
-"Nixon is named as an unindicted co-conspirator in an indictment against seven former presidential aides.",
-"the Watergate Seven (Mitchell, Haldeman, Ehrlichman, Colson, Gordon C. Strachan, [[Robert Mardian}, and Kenneth Parkinson) are indicted",
-"Dwight Chapin convicted of lying to a grand jury.",
-"Ed Reinecke, Republican lieutenant governor of California, indicted on three charges of perjury before the Senate committee.",
-"Special Prosecutor Jaworski issues a subpoena for 64 White House tapes.",
-"White House releases edited transcripts of the Nixon tapes, but the House Judiciary Committee insists the actual tapes must be turned over.",
-"mpeachment hearings begin before the House Judiciary Committee.",
-"Woodward and Bernsteins book All the Presidents Men is published by Simon & Schuster",
-"United States v. Nixon decided: Nixon is ordered to give up tapes to investigators",
-"Congress moves to impeach Nixon.",
-"House Judiciary Committee passes Articles of Impeachment.",
-"Previously unknown tape from June 23, 1972 (recorded a few days after the break-in) documenting Nixon and Haldeman formulating a plan to block investigations is released. This recording laterbecame known astheSmokingGun.",
-"Nixon delivers his resignation speech in front of a nationally televised audience.",
-"Nixon resigns the presidency. Gerald Ford becomes President.",
-"President Ford ends the investigations by granting Nixon a pardon.",
-"94th Congress elected: Democratic Party picks up 5 Senate seats and 49 House seats. Many of the freshman congressmen are very young; the media dubs them Watergate Babies.",
-"As a result of Nixon administration abuses of privacy, Privacy Act of 1974 passes into law. Ford is persuaded to veto the bill by Richard Cheney and Donald Rumsfeld; Congress overrides Fordsveto. (Note that thenewlyelectedCongresshadnottakenoffice yet, this Congress was still the 93rd Congress.)")) 
