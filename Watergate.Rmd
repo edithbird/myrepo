@@ -138,8 +138,8 @@ From <- as.Date("1968/11/01")
 To <- as.Date("1974/12/31")
 Stocks <- read.csv("GSPC.csv", header = T, stringsAsFactors = F, na.strings = c(""))
 Stocks[Stocks == 0] <- NA
-
-Stocks <- Stocks[,c(1:2,8)]
+head(Stocks)
+Stocks <- Stocks[,c(1:3,8)]
 head(Stocks)
 tail(Stocks)
 Stocks$Date <- as.Date(Stocks$Date,  format = "%m/%d/%Y")
@@ -169,12 +169,26 @@ df2
 ```
 
 ```{r}
-#Stocks$Date <- as.Date(Stocks$Date)
+Stocks$Date <- as.Date(Stocks$Date)
 head(Stocks)
 time_series <- xts(Stocks, order.by = Stocks$Date)
 head(time_series)
-dygraph(time_series$Close, main = "Watergate's Influence on S&P 500") 
+dygraph(time_series, main = "Watergate's Influence on S&P 500")  %>%
+  dyHighlight(highlightCircleSize = 7)%>% 
+  dyAnnotation("1968-11-05", text = "Elected", tooltip = "November 5, 1968: Richard Nixon elected President.") %>%
+  dyAnnotation("1969-01-20", text = "Inaugurated", tooltip = "Richard Nixon is inaugurated as the 37th President of The United States.")%>%
+  dyShading(from = "1971-05-01", to = "1972-05-01", color = "#FFE6E6")
 ```
+
+```{r}
+dygraph(time_series, main = "Watergate's Influence on S&P 500")  %>%
+  dyHighlight(highlightCircleSize = 7)%>% 
+  dySeries("Occurance", drawPoints = TRUE, color = "blue")%>%
+  dyAnnotation("1968-11-05", text = "Elected", tooltip = "November 5, 1968: Richard Nixon elected President.") %>%
+  dyAnnotation("1969-01-20", text = "Inaugurated", tooltip = "Richard Nixon is inaugurated as the 37th President of The United States.")%>%
+  dyShading(from = "1971-05-01", to = "1974-01-01", color = "#FFE6E6")
+```
+
 
 
 
