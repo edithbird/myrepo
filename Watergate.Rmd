@@ -403,59 +403,60 @@ time_series[complete.cases(time_series),]
 
 ```{r}
 dygraph(time_series, main = "Presidential Approval") %>%
-  dyAxis("y", valueRange = c(0, 100)) %>%
+  dyAxis("y", valueRange = c(50, 150)) %>%
   dyAnnotation("1968-11-01", text = "*", tooltip = "Richard Nixon elected President") %>%
-  dyAnnotation("1969-01-20", text = "*", tooltip = "Richard Nixon is inaugurated as the 37th President of The United States" ) %>%
-  dyAnnotation("1971-07-01" , text = "*", tooltip = "David Young and Egil Bud Krogh write a memo suggesting the formation of what later became called the White House Plumbers in response to the leak of the Pentagon Papers by Daniel Ellsberg") %>%
-  dyAnnotation("  1971-08-23 ", text = "*", tooltip = "Nixons Enemies List is started by White House aides (though Nixon himself may not have been aware of it); to use the available federal machinery to screw our political enemies.")%>%
-  dyAnnotation("1971-09-03  ", text = "*", tooltip = "White House Plumbers E. Howard Hunt, G. Gordon Liddy et al. break into the offices of Daniel Ellsbergs psychiatrist Lewis Fielding looking for material that might discredit Ellsberg, under the direction of John Ehrlichman or his staff within the White House. This was the Plumbers first major operation.") %>%
-  dyAnnotation("1972-02-02   ", text = "*", tooltip = "By early 1972, the Plumbers, at this stage assigned to the Committee to Re-Elect the President (CREEP), had become frustrated at the lack of additional assignments they were being asked to perform, and that any plans and proposals they suggested were being rejected by CREEP. Liddy and Hunt took their complaints to the White House  most likely to Charles Colson  and requested that the White House start putting pressure on CREEP to assign them new operations. It is likely that both Colson and White House Chief of Staff H.R. Haldeman did so, starting the train of events that led to the Watergate break-ins a few months later. This narrative was confirmed in the famous Cancer of the Presidency conversation between Nixon and White House Counsel John Dean on March 21, 1973"
+  dyAnnotation("1969-01-20", text = "*", tooltip = "Richard Nixon is inaugurated as the 37th President of the United States" ) %>%
+  dyAnnotation("1971-07-01" , text = "*", tooltip = "David Young and Egil 'Bud' Krogh write a memo suggesting the formation of what later became called the 'White House Plumbers' in response to the leak of the Pentagon Papers by Daniel Ellsberg") %>%
+  dyAnnotation("1971-08-23 ", text = "*", tooltip = "Nixon's Enemies List is started by White House aides (though Nixon himself may not have been aware of it); to use the available federal machinery to screw our political enemies.")%>%
+  dyAnnotation("1971-09-03  ", text = "*", tooltip = "White House Plumbers E. Howard Hunt, G. Gordon Liddy et al. break into the offices of Daniel Ellsberg's psychiatrist Lewis Fielding looking for material that might discredit Ellsberg, under the direction of John Ehrlichman or his staff within the White House. This was the Plumbers first major operation.") %>%
+  dyAnnotation("1972-02-02", text = "*", tooltip = "By early 1972, the Plumbers, at this stage assigned to the Committee to Re-Elect the President (CREEP), had become frustrated at the lack of additional assignments they were being asked to perform, and that any plans and proposals they suggested were being rejected by CREEP. Liddy and Hunt took their complaints to the White House most likely to Charles Colson  and requested that the White House start putting pressure on CREEP to assign them new operations. It is likely that both Colson and White House Chief of Staff H.R. Haldeman did so, starting the train of events that led to the Watergate break-ins a few months later. This narrative was confirmed in the famous 'Cancer of the Presidency' conversation between Nixon and White House Counsel John Dean on March 21, 1973"
 )%>%
-  dyAnnotation("1972-05-02  ", text = "*", tooltip = "J. Edgar Hoover dies; L. Patrick Gray is appointed acting FBI director.") %>%
-  dyAnnotation("1972-06-16   ", text = "*", tooltip = "The plumbers are arrested at 2:30 a.m. in the process of burglarizing and planting surveillance bugs in the Democratic National Committee offices at the Watergate Building Comple" )%>%
-  dyAnnotation("1972-06-20  ", text = "*", tooltip = " Reportedly based on a tip from Deep Throat (associate director of the FBI, Mark Felt), Bob Woodward reports in the Washington Post that one of the burglars had E. Howard Hunt in his address book and possessed checks signed by Hunt, and that Hunt was connected to[Charles Colson." ) %>%
-  dyAnnotation("1972-06-23   ", text = "*", tooltip = "In the Oval Office, H.R. Haldeman recommends to President Nixon that they attempt to shut down the FBI investigation of the Watergate break-in, by having CIA Director Richard Helms and Deputy Director Vernon A. Walters tell acting FBI Director L. Patrick Gray to, Stay the hell out of this. Haldeman expects Gray will then seek and take advice from Deputy FBI Director Mark Felt, and Felt will obey direction from the White House out of ambition. Nixon agrees and gives the order. [5]The conversation is recorded")%>%
+  dyAnnotation("1972-05-02", text = "*", tooltip = "J. Edgar Hoover dies; L. Patrick Gray is appointed acting FBI director.") %>%
+  dyAnnotation("1972-06-16", text = "*", tooltip = "The plumbers are arrested at 2:30 a.m. in the process of burglarizing and planting surveillance bugs in the Democratic National Committee offices at the Watergate Building Comple" )%>%
+  dyAnnotation("1972-06-20", text = "*", tooltip = " Reportedly based on a tip from Deep Throat (associate director of the FBI, Mark Felt), Bob Woodward reports in the Washington Post that one of the burglars had E. Howard Hunt in his address book and possessed checks signed by Hunt, and that Hunt was connected to Charles Colson." ) %>%
+  dyAnnotation("1972-06-23", text = "*", tooltip = "In the Oval Office, H.R. Haldeman recommends to President Nixon that they attempt to shut down the FBI investigation of the Watergate break-in, by having CIA Director Richard Helms and Deputy Director Vernon A. Walters tell acting FBI Director L. Patrick Gray to, stay the hell out of this. Haldeman expects Gray will then seek and take advice from Deputy FBI Director Mark Felt, and Felt will obey direction from the White House out of ambition. Nixon agrees and gives the order. The conversation is recorded")%>%
   dyAnnotation("1972-09-15  ", text = "*", tooltip = "Hunt, Liddy, and the Watergate burglars are indicted by a federal grand jury.") %>%
   dyAnnotation("1972-11-08", text = "*", tooltip ="Nixon re-elected, defeating George McGovern with the largest plurality of votes in American history." )%>%
   dyAnnotation("1973-01-08", text = "*", tooltip = "Five defendants plead guilty as the burglary trial begins. Liddy and James W. McCord Jr. are convicted after the trial.") %>%
-  dyAnnotation("1973-01-22", text = "*", tooltip = " Nixon is inaugurated for his second term." )%>%
-  dyAnnotation("1973-02-28", text = "*", tooltip ="Confirmation hearings begin for confirming L. Patrick Gray as permanent Director of the FBI. During these hearings, Gray reveals that he had complied with an order from John Dean to provide daily updates on the Watergate investigation, and also that Dean had probably lied to FBI investigators." ) %>%
+  dyAnnotation("1973-01-22", text = "*", tooltip = "Nixon is inaugurated for his second term." )%>%
+  dyAnnotation("1973-02-28", text = "*", tooltip ="Confirmation hearings begin for confirming L. Patrick Gray as permanent Director of the FBI. During these hearings, Gray reveals that he had complied with an order from John Dean to provide daily updates on the Watergate investigation, and also that Dean had probably lied to FBI investigators." ) %>%
   dyAnnotation("1973-03-19", text = "*", tooltip = "Watergate burglar McCord writes a letter to Judge John Sirica, claiming that some of his testimony was perjured under pressure and that the burglary was not a CIA operation, but had involved other government officials, thereby leading the investigation to the White House.")%>%
   dyAnnotation("1973-04-06", text = "*", tooltip = "White House counsel John Dean begins cooperating with federal Watergate prosecutors." ) %>%
-  dyAnnotation("1973-04-27", text = "*", tooltip = "L. Patrick Gray resigns after it comes to light that he destroyed files from E. Howard Hunts safe. William Ruckelshaus is appointed as his replacement.")%>%
-  dyAnnotation("1973-04-30", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-05-17", text = "*", tooltip = "*")%>%
-  dyAnnotation("1973-05-21", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-06-04", text = "*", tooltip = "*")%>%
-  dyAnnotation("1973-07-13", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-07-18", text = "*", tooltip = "*")%>%
-  dyAnnotation("1973-07-23", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-10-10", text = "*", tooltip = "*")%>%
-  dyAnnotation("1973-10-12" , text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-10-22", text = "*", tooltip = "*")%>%
-  dyAnnotation("1973-11-01", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-11-19", text = "*", tooltip = "*")%>%
-  dyAnnotation("1973-11-27", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1973-12-06", text = "*", tooltip = "*")%>%
-  dyAnnotation("1974-01-28", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1974-02-25", text = "*", tooltip = "*")%>%
-  dyAnnotation("1974-03-01", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1974-03-04", text = "*", tooltip = "*")%>%
-  dyAnnotation("1974-04-05", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1974-04-08", text = "*", tooltip = "*")%>%
-  dyAnnotation("1974-04-16", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1974-04-30", text = "*", tooltip = "*")%>%
-  dyAnnotation("1974-05-09", text = "*", tooltip = "   ") %>%
-  dyAnnotation("1974-06-17", text = "*", tooltip = "*") %>%
-  dyAnnotation("1974-07-24", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-07-29", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-07-30", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-08-06", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-08-08", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-08-09", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-09-09", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-11-07", text = "*", tooltip = "*")    %>%
-  dyAnnotation("1974-12-31", text = "*", tooltip = "*")      
+  dyAnnotation("1973-04-27", text = "*", tooltip = "L. Patrick Gray resigns after it comes to light that he destroyed files from E. Howard Hunt's safe. William Ruckelshaus is appointed as his replacement.")%>%
+  dyAnnotation("1973-04-30", text = "*", tooltip = "Senior White House administration officials Ehrlichman, Haldeman, and Richard Kleindienst resign, and John Dean is fired.") %>%
+  dyAnnotation("1973-05-17", text = "*", tooltip = " The Senate Watergate Committee begins its nationally televised hearings.")%>%
+  dyAnnotation("1973-05-21", text = "*", tooltip = " Independent special prosecutor Archibald Cox appointed to oversee investigation into possible presidential impropriety.") %>%
+  dyAnnotation("1973-06-04", text = "*", tooltip = "John Dean tells Watergate investigators that he has discussed the cover-up with Nixon at least 35 times." )%>%
+  dyAnnotation("1973-07-13", text = "*", tooltip = "Alexander Butterfield, former presidential appointments secretary, reveals that all conversations and telephone calls in Nixon's office have been taped since 1971.") %>%
+  dyAnnotation("1973-07-18", text = "*", tooltip = "Nixon orders White House taping systems disconnected.")%>%
+  dyAnnotation("1973-07-23", text = "*", tooltip = "Nixon refuses to turn over presidential tapes to Senate Watergate Committee or the special prosecutor.") %>%
+  dyAnnotation("1973-10-10", text = "*", tooltip = "Vice President replaced, Agnew resigns as Vice President of the United States due to corruption while he was the governor of Maryland." )%>%
+  dyAnnotation("1973-10-12" , text = "*", tooltip = "Ford is nominated as Vice President under the 25th Amendment.") %>%
+  dyAnnotation("1973-10-22", text = "*", tooltip = "'Saturday Night Massacre' - Nixon orders Elliot Richardson and Ruckleshouse to fire special prosecutor Cox. They both refuse to comply and resign. Robert Bork considers resigning but carries out the order." )%>%
+  dyAnnotation("1973-11-01", text = "*", tooltip = "Leon Jaworski is appointed new special prosecutor.") %>%
+  dyAnnotation("1973-11-19", text = "*", tooltip = "Nixon delivers 'I am not a Crook' speech at a televised press conference at Disney World on 11/17")%>%
+  dyAnnotation("1973-11-27", text = "*", tooltip = "Senate votes 92 to 3 to confirm Ford as Vice President.") %>%
+  dyAnnotation("1973-12-06", text = "*", tooltip = "House votes 387 to 35 to confirm Ford as Vice President, and he takes the oath of office an hour after the vote.")%>%
+  dyAnnotation("1974-01-28", text = "*", tooltip = "Nixon campaign aide Herbert Porter pleads guilty to perjury.") %>%
+  dyAnnotation("1974-02-25", text = "*", tooltip = "Nixon personal counsel Herbert Kalmbach pleads guilty to two charges of illegal campaign activities.")%>%
+  dyAnnotation("1974-03-01", text = "*", tooltip = "Nixon is named as an unindicted co-conspirator in an indictment against seven former presidential aides.") %>%
+  dyAnnotation("1974-03-04", text = "*", tooltip = "The Watergate Seven (Mitchell, Haldeman, Ehrlichman, Colson, Gordon C. Strachan, Robert Mardian, and Kenneth Parkinson) are indicted")%>%
+  dyAnnotation("1974-04-05", text = "*", tooltip = "Dwight Chapin convicted of lying to a grand jury.") %>%
+  dyAnnotation("1974-04-08", text = "*", tooltip = "Ed Reinecke, Republican lieutenant governor of California, indicted on three charges of perjury before the Senate committee.")%>%
+  dyAnnotation("1974-04-16", text = "*", tooltip = "Special Prosecutor Jaworski issues a subpoena for 64 White House tapes.") %>%
+  dyAnnotation("1974-04-30", text = "*", tooltip = "White House releases edited transcripts of the Nixon tapes, but the House Judiciary Committee insists the actual tapes must be turned over.")%>%
+  dyAnnotation("1974-05-09", text = "*", tooltip = "Impeachment hearings begin before the House Judiciary Committee." ) %>%
+  dyAnnotation("1974-06-17", text = "*", tooltip = "Woodward and Bernstein's book 'All the President's Men' is published by Simon & Schuster") %>%
+  dyAnnotation("1974-07-24", text = "*", tooltip = "United States v. Nixon decided: Nixon is ordered to give up tapes to investigators")    %>%
+  dyAnnotation("1974-07-29", text = "*", tooltip = "Congress moves to impeach Nixon.")%>%
+  dyAnnotation("1974-07-30", text = "*", tooltip = "House Judiciary Committee passes Articles of Impeachment.") %>%
+  dyAnnotation("1974-08-06", text = "*", tooltip = "Previously unknown tape from June 23, 1972 (recorded a few days after the break-in) documenting Nixon and Haldeman formulating a plan to block investigations is released. This recording later became known as the 'Smoking Gun'.")    %>%
+  dyAnnotation("1974-08-08", text = "*", tooltip = "Nixon delivers his resignation speech in front of a nationally televised audience.")%>%
+  dyAnnotation("1974-08-09", text = "*", tooltip = "Nixon resigns the presidency. Gerald Ford becomes President.")%>%
+  dyAnnotation("1974-09-09", text = "*", tooltip = "President Ford ends the investigations by granting Nixon a pardon.")%>%
+  dyAnnotation("1974-11-07", text = "*", tooltip = "94th Congress elected: Democratic Party picks up 5 Senate seats and 49 House seats. Many of the freshman congressmen are very young; the media dubs them Watergate Babies.")%>%
+  dyAnnotation("1974-12-31", text = "*", tooltip =  "As a result of Nixon administration abuses of privacy, Privacy Act of 1974 passes into law. Ford is persuaded to veto the bill by Richard Cheney and Donald Rumsfeld; Congress overrides Ford's veto. (Note that the newly elected Congress had not taken office yet, this Congress was still the 93rd Congress.)") %>%
+dyRangeSelector()    
 ```
 "1968-11-01",
 "1969-01-20",
