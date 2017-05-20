@@ -1,0 +1,84 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(dygraphs)
+library(xts)
+library(stringr)
+library(reshape2)
+library(XML)
+library(knitr)
+library(dplyr)
+library(RCurl)
+library(rvest)
+library(tidyr)
+library(ggplot2)
+library(tidyquant)
+library(xts)
+```
+
+
+```{r}
+Timeline <- read_html("http://www.motherjones.com/politics/2017/03/exhaustive-history-donald-trump-russia-scandal-timeline")
+```
+
+```{r}
+Statement <- Timeline %>% html_nodes("#node-body-top p") %>% html_text()
+Timeline.df <- as.data.frame(Statement)
+length(Timeline.df)
+
+as.data.frame(Timeline.df) 
+kable(tail(Timeline.df, 25))
+dim(Timeline.df)
+
+```
+
+
+[TimeLine from LA Times](http://www.latimes.com/politics/la-na-pol-trump-flynn-comey-russia-timeline-2017-htmlstory.html)
+
+
+
+```{r}
+x_List <- "^GSPC") %>%
+    tq_get(get = "stock.prices", from = "2016-11-01", to = "2017-05-19")
+head(x_List)
+
+
+
+# X_L_returns_monthly <- x_List %>%
+#     group_by(symbol) %>%
+#     tq_transmute(select     = adjusted, 
+#                  mutate_fun = periodReturn, 
+#                  period     = "daily", 
+#                  col_rename = "daily.returns") 
+# X_L_returns_monthly
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+%>%
+  dyAnnotation("2016-11-08", text = "*", tooltip = "Trump wins election. Trump, defying polls, shocks the political establishment and beats Hillary Clinton to become the 45th president of the United States. It’s widely considered to be one of the biggest upsets in American political history.") %>%
+  dyAnnotation("2016-11-10", text = "*", tooltip = "Obama warns Trump during a 90-minute meeting at the White House that Flynn, a former U.S. Army lieutenant general and Defense Intelligence Agency chief, is a problem. The warning comes out in May during Sally Yates’ testimony before Congress." ) %>%
+  dyAnnotation("2016-11-14" , text = "*", tooltip = "Putin calls Trump to congratulate him on his victory. According to a release by Trump’s transition team, the two men discuss 'a range of issues including the threats and challenges facing the United States and Russia.' It goes on to add that Trump looks forward to 'a strong and enduring relationship with Russia and the people of Russia.'") %>%
+  dyAnnotation("2016-11-18" , text = "*", tooltip = "Trump names Flynn as his choice as National Security Advisor") %>%
+  dyAnnotation("2011-12-11", text = "*", tooltip = "Trump praises Rex Tillerson, chairman of ExxonMobil and recipient of Russia’s “Order of Friendship” Medal from Vladimir Putin in 2013, as “much more than a business executive” and a “world-class player.” Trump says Tillerson “knows many of the players” and did “massive deals in Russia” for Exxon. Two days later, Trump nominates him to be secretary of state.
+") %>%
+  dyAnnotation("2016-12-29", text = "*", tooltip = "White House imposes sanctions on Russia in response to her hacking of the DNC last summer and other interference in the U.S. Presidential election. Flynn, the incoming Nat. Security advisor, contacts the Russian Ambassador.") %>%
+  dyAnnotation("2016-12-30", text = "*", tooltip = "Putin announces that he will not retailate against the US sanctions. It is very unusual for the Russians not to do this. Trump praises this announcement on Twitter"
+)%>%
+  dyAnnotation("2017-01-04", text = "*", tooltip = "Trump tweets a series of attacks on the integrity of the US intelligence community’s findings that Russia had hacked the election.") %>%
+  dyAnnotation("2017-01-05", text = "*", tooltip = "Trump contimnues 'Tweet Storm'" )%>%
+dyAnnotation("2017-01-06", text = "*", tooltip = "The CIA, FBI and NSA release their unclassified report, concluding unanimously, “Vladimir Putin ordered an influence campaign in 2016 aimed at the US presidential election.” The three intelligence agencies agree that “the Russian government aspired to help President-elect Trump’s election chances when possible.” The report also states that WikiLeaks had been Russia’s conduit for the effort, writing “We assess with high confidence that Russian military intelligence (General Staff Main Intelligence Directorate or GRU) used the Guccifer 2.0 persona and DCLeaks.com to release US victim data obtained in cyber operations publicly and in exclusives to media outlets and relayed material to WikiLeaks.(Source:http://billmoyers.com/story/the-trump-resistance-plan-a-timeline-russia-and-president-trump/)”" %>%  
+  dyAnnotation("2017-01-11", text = "*", tooltip =  "At his first news conference, Trump says, 'As far as hacking, I think it was Russia. But I think we also get hacked by other countries and other people.' Also, Trump’s outside lawyer and a partner in the Morgan, Lewis & Bockius law firm, presents the plan to deal with Trump’s business conflicts of interest during his presidency. The plan allows Trump to retain beneficial ownership in all of his businesses. " ) %>%
+    
+    dyAnnotation("2017-01-13", text = "*", tooltip = "Press secretary Sean Spicer says, in response to WaPo atricle about Michael Flynn's conversations with the Russian Ambassador,  'it was only one call. They exchanged logistical information” for an upcoming call between Trump and Vladimir Putin after the inauguration.'") %>% 
+    dyAnnotation("2017-01-15", text = "*", tooltip = "'We should trust Putin,' Trump tells The Times of London. Expressing once again his skepticism about NATO, Trump lambastes German Chancellor Angela Merkel.") %>% 
+    dyAnnotation("2017-01-19", text = "*", tooltip = "The New York Times reports that former Trump campaign manager Paul Manafort, along with advisers Roger Stone and Carter Page, are under investigation in connection with possible links to Russia.") %>% 
+
+    dyAnnotation("2017-02-08", text = "*", tooltip =  "Jeff Sessions confirmed as Atty. General." ) 
+  
+```
+
