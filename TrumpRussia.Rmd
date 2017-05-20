@@ -42,7 +42,7 @@ dim(Timeline.df)
 
 
 ```{r}
-x_List <- "^GSPC") %>%
+x_List <- "^GSPC" %>%
     tq_get(get = "stock.prices", from = "2016-11-01", to = "2017-05-19")
 head(x_List)
 
@@ -77,8 +77,17 @@ dyAnnotation("2017-01-06", text = "*", tooltip = "The CIA, FBI and NSA release t
     dyAnnotation("2017-01-13", text = "*", tooltip = "Press secretary Sean Spicer says, in response to WaPo atricle about Michael Flynn's conversations with the Russian Ambassador,  'it was only one call. They exchanged logistical information” for an upcoming call between Trump and Vladimir Putin after the inauguration.'") %>% 
     dyAnnotation("2017-01-15", text = "*", tooltip = "'We should trust Putin,' Trump tells The Times of London. Expressing once again his skepticism about NATO, Trump lambastes German Chancellor Angela Merkel.") %>% 
     dyAnnotation("2017-01-19", text = "*", tooltip = "The New York Times reports that former Trump campaign manager Paul Manafort, along with advisers Roger Stone and Carter Page, are under investigation in connection with possible links to Russia.") %>% 
+ dyAnnotation("2017-01-30", text = "*", tooltip =  "Trump fires Acting Attorney General Sally Yates. According to his statement, the reason was that she had “betrayed the Department of Justice” by refusing to defend Trump’s travel ban in court.") %>% 
+    
+    
 
-    dyAnnotation("2017-02-08", text = "*", tooltip =  "Jeff Sessions confirmed as Atty. General." ) 
+    dyAnnotation("2017-02-08", text = "*", tooltip =  "Jeff Sessions confirmed as Atty. General." ) %>% 
+   dyAnnotation("2017-02-09", text = "*", tooltip =  "Michael Flynn, fired National Security Director, says, regarding his conversations of 12/29 with the Russian Ambassador, that the subject of sanctions may have come up though he has no recollection of it." ) %>% 
+  
+  dyAnnotation("2017-05-09", text = "*", tooltip =  "FBI Director, Janes Comey fired.") 
+  dyAnnotation("2017-05-12", text = "*", tooltip =  "President Trump threatens on Twitter that he has tapes of his meeting with Comey") 
+  dyAnnotation("2017-05-16", text = "*", tooltip =  "We hear that FBI keeps copious notes and memos on much of its interactions with the President.")
+  dyAnnotation("2017-05-18", text = "*", tooltip =  "Michael Flynn refuses to comply with Congressional supoena to provide relevant documents to the Committee's investigation into Russian interference. Flynn also say he has been in contact with the President. Says the President told him to stay strong." ) 
   
 ```
 
