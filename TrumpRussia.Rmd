@@ -20,6 +20,62 @@ library(tidyquant)
 library(xts)
 ```
 
+```{r}
+Stocks <- read.csv("SPRecent.csv", header = T, stringsAsFactors = F)
+Stocks <- Stocks[,c(1,5)]
+
+Stocks$Date <- as.Date(Stocks$Date,  format = "%m/%d/%Y")
+Stocks
+summary(Stocks)
+time_series <- xts(Stocks, order.by = Stocks$Date)
+```
+
+```{r}
+dygraph(time_series , main = "Trump/Russia Events and the S&P 500 Closing Prices") %>%
+  dyAxis("y", valueRange = c(2000, 3000)) %>% 
+  dySeries("Close", color = "slateblue")%>%
+  dyAnnotation("2016-11-08", text = "*", tooltip = "Trump wins election. Trump, defying polls, shocks the political establishment and beats Hillary Clinton to become the 45th president of the United States. It’s widely considered to be one of the biggest upsets in American political history.") %>%
+  dyAnnotation("2016-11-10", text = "*", tooltip = "Obama warns Trump during a 90-minute meeting at the White House that Flynn, a former U.S. Army lieutenant general and Defense Intelligence Agency chief, is a problem. The warning comes out in May during Sally Yates’ testimony before Congress." ) %>%
+  dyAnnotation("2016-11-14" , text = "*", tooltip = "Putin calls Trump to congratulate him on his victory. According to a release by Trump’s transition team, the two men discuss 'a range of issues including the threats and challenges facing the United States and Russia.' It goes on to add that Trump looks forward to 'a strong and enduring relationship with Russia and the people of Russia.'") %>%
+  dyAnnotation("2016-11-18" , text = "*", tooltip = "Trump names Flynn as his choice as National Security Advisor") %>%
+  dyAnnotation("2016-12-11", text = "*", tooltip = "Trump praises Rex Tillerson, chairman of ExxonMobil and recipient of Russia’s “Order of Friendship” Medal from Vladimir Putin in 2013, as “much more than a business executive” and a “world-class player.” Trump says Tillerson “knows many of the players” and did “massive deals in Russia” for Exxon. Two days later, Trump nominates him to be secretary of state.") %>%
+  dyAnnotation("2016-12-29", text = "*", tooltip = "White House imposes sanctions on Russia in response to her hacking of the DNC last summer and other interference in the U.S. Presidential election. Flynn, the incoming Nat. Security advisor, contacts the Russian Ambassador.") %>%
+  dyAnnotation("2016-12-30", text = "*", tooltip = "Putin announces that he will not retailate against the US sanctions. It is very unusual for the Russians not to do this. Trump praises this announcement on Twitter") %>%
+  dyAnnotation("2017-01-04", text = "*", tooltip = "Trump tweets a series of attacks on the integrity of the US intelligence community’s findings that Russia had hacked the election.") %>%
+  dyAnnotation("2017-01-05", text = "*", tooltip = "Trump continues Tweet Storm") %>% 
+  dyAnnotation("2017-01-06", text = "*", tooltip = "Washington Intelligence release an  unclassified report that Russia conducted a campaign to influence the US Presidential Election.") %>% 
+  dyAnnotation("2017-01-11", text = "*", tooltip =  "At his first news conference,Trump says, 'As far as hacking, I think it was Russia. But I think we also get hacked by other countries and other people.' Also, Trump’s outside lawyer and a partner in the Morgan, Lewis & Bockius law firm, presents the plan to deal with Trump’s business conflicts of interest during his presidency. The plan allows Trump to retain beneficial ownership in all of his businesses.") %>% 
+  dyAnnotation("2017-01-13", text = "*", tooltip = "Press secretary Sean Spicer says, in response to WaPo atricle about Michael Flynn's conversations with the Russian Ambassador,  'it was only one call. They exchanged logistical information” for an upcoming call between Trump and Vladimir Putin after the inauguration.'") %>% 
+  dyAnnotation("2017-01-15", text = "*", tooltip = "'We should trust Putin,' Trump tells The Times of London. Expressing once again his skepticism about NATO, Trump lambastes German Chancellor Angela Merkel.") %>% 
+  dyAnnotation("2017-01-19", text = "*", tooltip = "The New York Times reports that former Trump campaign manager Paul Manafort, along with advisers Roger Stone and Carter Page, are under investigation in connection with possible links to Russia.") %>% 
+ dyAnnotation("2017-01-30", text = "*", tooltip =  "Trump fires Acting Attorney General Sally Yates. According to his statement, the reason was that she had “betrayed the Department of Justice” by refusing to defend Trump’s travel ban in court.") %>% 
+  dyAnnotation("2017-02-08", text = "*", tooltip =  "Jeff Sessions confirmed as Atty. General." ) %>% 
+  dyAnnotation("2017-02-09", text = "*", tooltip =  "Michael Flynn, fired National Security Director, says, regarding his conversations of 12/29 with the Russian Ambassador, that the subject of sanctions may have come up though he has no recollection of it." ) %>% 
+  dyAnnotation("2017-05-09", text = "*", tooltip =  "FBI Director, James Comey fired.") %>% 
+  dyAnnotation("2017-05-12", text = "*", tooltip =  "President Trump threatens on Twitter that he has tapes of his meeting with Comey") %>%  dyAnnotation("2017-05-15", text = "*", tooltip =  "Washington Post breaks news that the president revealed classified intelligence that it received from an ally to the Russian Foreign Minister and Ambassador during his meeting with them in the Oval Office.") %>% 
+  dyAnnotation("2017-05-16", text = "*", tooltip =  "1) NY Times reveals that the source of the classified intelligence is Israel. 2) Supoena for documents related to a loan taken out by Paul Manafort, a former Trump campaign manager. 3) Memo leaked written by former FBI Director, J. Comey. Concerns an incident where the President asks the Director to shut down the investigation into Michael Flynn. We hear that FBI Director kept copious notes and memos on much of its interactions with the President.") %>% 
+  dyAnnotation("2017-05-17", text = "*", tooltip =  "1) The Deputy AG, Rod Rosenstein, appoints a special councel to handle the investigation into Russian meddling and all related matters. 2) Russian President V;adimer Putin offers to release transcript exonerating President from leaking classified information during the Oval Office meeting with the Russian Foreign Minister and Ambassador.")  %>%
+  dyAnnotation("2017-05-18", text = "*", tooltip =  "Michael Flynn refuses to comply with Congressional supoena to provide relevant documents to the Committee's investigation into Russian interference. Flynn also say he has been in contact with the President. Says the President told him to stay strong." ) %>% 
+   dyAnnotation("2017-05-19", text = "*", tooltip =  "1) NY Times reveals that a Senior WH official is a 'person of interest'. 2) NY Times breaks that a transcript from the Trump's Oval Office meeting with the Russian Foreign Minister and Ambassador reveals Trump saying, 'I just fired the head of the FBI. He was crazy, a real nut job, I faced great pressure because of Russia. That's taken off.' Many wonder if this is considered obstruction of justice. 3) James Comey will testify in public at a Senate Intelligence Committee meeting in the near future. 4) WH lawyers begin to research Impeachment procedures. 5) Russians brag that during the election that they had built a strong relationship with Michael Flynn and could use him to influence Trump.")
+  
+```
+ 
+  
+   %>% 
+
+   %>%
+    
+     %>% 
+     %>% 
+     %>% 
+     %>% 
+    %>% 
+   %>% 
+  %>%
+  %>% 
+  
+```
+
 
 ```{r}
 Timeline <- read_html("http://www.motherjones.com/politics/2017/03/exhaustive-history-donald-trump-russia-scandal-timeline")
@@ -59,35 +115,7 @@ head(x_List)
 
 
 ```{r, eval=FALSE, include=FALSE}
-%>%
-  dyAnnotation("2016-11-08", text = "*", tooltip = "Trump wins election. Trump, defying polls, shocks the political establishment and beats Hillary Clinton to become the 45th president of the United States. It’s widely considered to be one of the biggest upsets in American political history.") %>%
-  dyAnnotation("2016-11-10", text = "*", tooltip = "Obama warns Trump during a 90-minute meeting at the White House that Flynn, a former U.S. Army lieutenant general and Defense Intelligence Agency chief, is a problem. The warning comes out in May during Sally Yates’ testimony before Congress." ) %>%
-  dyAnnotation("2016-11-14" , text = "*", tooltip = "Putin calls Trump to congratulate him on his victory. According to a release by Trump’s transition team, the two men discuss 'a range of issues including the threats and challenges facing the United States and Russia.' It goes on to add that Trump looks forward to 'a strong and enduring relationship with Russia and the people of Russia.'") %>%
-  dyAnnotation("2016-11-18" , text = "*", tooltip = "Trump names Flynn as his choice as National Security Advisor") %>%
-  dyAnnotation("2011-12-11", text = "*", tooltip = "Trump praises Rex Tillerson, chairman of ExxonMobil and recipient of Russia’s “Order of Friendship” Medal from Vladimir Putin in 2013, as “much more than a business executive” and a “world-class player.” Trump says Tillerson “knows many of the players” and did “massive deals in Russia” for Exxon. Two days later, Trump nominates him to be secretary of state.
-") %>%
-  dyAnnotation("2016-12-29", text = "*", tooltip = "White House imposes sanctions on Russia in response to her hacking of the DNC last summer and other interference in the U.S. Presidential election. Flynn, the incoming Nat. Security advisor, contacts the Russian Ambassador.") %>%
-  dyAnnotation("2016-12-30", text = "*", tooltip = "Putin announces that he will not retailate against the US sanctions. It is very unusual for the Russians not to do this. Trump praises this announcement on Twitter"
-)%>%
-  dyAnnotation("2017-01-04", text = "*", tooltip = "Trump tweets a series of attacks on the integrity of the US intelligence community’s findings that Russia had hacked the election.") %>%
-  dyAnnotation("2017-01-05", text = "*", tooltip = "Trump contimnues 'Tweet Storm'" )%>%
-dyAnnotation("2017-01-06", text = "*", tooltip = "The CIA, FBI and NSA release their unclassified report, concluding unanimously, “Vladimir Putin ordered an influence campaign in 2016 aimed at the US presidential election.” The three intelligence agencies agree that “the Russian government aspired to help President-elect Trump’s election chances when possible.” The report also states that WikiLeaks had been Russia’s conduit for the effort, writing “We assess with high confidence that Russian military intelligence (General Staff Main Intelligence Directorate or GRU) used the Guccifer 2.0 persona and DCLeaks.com to release US victim data obtained in cyber operations publicly and in exclusives to media outlets and relayed material to WikiLeaks.(Source:http://billmoyers.com/story/the-trump-resistance-plan-a-timeline-russia-and-president-trump/)”" %>%  
-  dyAnnotation("2017-01-11", text = "*", tooltip =  "At his first news conference, Trump says, 'As far as hacking, I think it was Russia. But I think we also get hacked by other countries and other people.' Also, Trump’s outside lawyer and a partner in the Morgan, Lewis & Bockius law firm, presents the plan to deal with Trump’s business conflicts of interest during his presidency. The plan allows Trump to retain beneficial ownership in all of his businesses. " ) %>%
-    
-    dyAnnotation("2017-01-13", text = "*", tooltip = "Press secretary Sean Spicer says, in response to WaPo atricle about Michael Flynn's conversations with the Russian Ambassador,  'it was only one call. They exchanged logistical information” for an upcoming call between Trump and Vladimir Putin after the inauguration.'") %>% 
-    dyAnnotation("2017-01-15", text = "*", tooltip = "'We should trust Putin,' Trump tells The Times of London. Expressing once again his skepticism about NATO, Trump lambastes German Chancellor Angela Merkel.") %>% 
-    dyAnnotation("2017-01-19", text = "*", tooltip = "The New York Times reports that former Trump campaign manager Paul Manafort, along with advisers Roger Stone and Carter Page, are under investigation in connection with possible links to Russia.") %>% 
- dyAnnotation("2017-01-30", text = "*", tooltip =  "Trump fires Acting Attorney General Sally Yates. According to his statement, the reason was that she had “betrayed the Department of Justice” by refusing to defend Trump’s travel ban in court.") %>% 
-    
-    
 
-    dyAnnotation("2017-02-08", text = "*", tooltip =  "Jeff Sessions confirmed as Atty. General." ) %>% 
-   dyAnnotation("2017-02-09", text = "*", tooltip =  "Michael Flynn, fired National Security Director, says, regarding his conversations of 12/29 with the Russian Ambassador, that the subject of sanctions may have come up though he has no recollection of it." ) %>% 
-  
-  dyAnnotation("2017-05-09", text = "*", tooltip =  "FBI Director, Janes Comey fired.") 
-  dyAnnotation("2017-05-12", text = "*", tooltip =  "President Trump threatens on Twitter that he has tapes of his meeting with Comey") 
-  dyAnnotation("2017-05-16", text = "*", tooltip =  "We hear that FBI keeps copious notes and memos on much of its interactions with the President.")
-  dyAnnotation("2017-05-18", text = "*", tooltip =  "Michael Flynn refuses to comply with Congressional supoena to provide relevant documents to the Committee's investigation into Russian interference. Flynn also say he has been in contact with the President. Says the President told him to stay strong." ) 
   
 ```
 
