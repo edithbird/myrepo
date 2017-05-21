@@ -1,0 +1,54 @@
+---
+title: "Air Crashes"
+author: "Christine Iyer"
+date: "May 21, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+```
+
+
+```{r}
+x <- read.csv("airaccs.csv", stringsAsFactors = T)
+head(x)
+x$Date <- as.Date(x$Date, format = "%m/%d/%Y")
+kable(head(x, 20))
+percentSurvived <- x %>% mutate(percentSurvived = 1 - (Dead/Aboard)) 
+percentSurvived$percentSurvived <-  round(percentSurvived$percentSurvived, digits = 2)
+head(percentSurvived)
+
+```
+
+```{r}
+
+percentSurvived$Year1 <- format(as.Date(percentSurvived$Date, format="%Y/%m/%d"),"%Y")
+
+
+
+
+
+
+percentSurvived$Year <-  substring(percentSurvived$Date,1,4)
+
+
+library(zoo)
+head(percentSurvived %>%
+  separate(Date, c("Y", "M", "D"), "-"))
+
+```
+
+
+```{r}
+
+ggplot(percentSurvived,aes(Year)) + geom_bar(color = "blue")
+```
+
