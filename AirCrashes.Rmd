@@ -21,34 +21,136 @@ library(knitr)
 x <- read.csv("airaccs.csv", stringsAsFactors = T)
 head(x)
 x$Date <- as.Date(x$Date, format = "%m/%d/%Y")
-kable(head(x, 20))
-percentSurvived <- x %>% mutate(percentSurvived = 1 - (Dead/Aboard)) 
-percentSurvived$percentSurvived <-  round(percentSurvived$percentSurvived, digits = 2)
+kable(head(x, 50))
+percentSurvived <- x %>% mutate(percentSurvivors = 1 - (Dead/Aboard)) 
+percentSurvived$percentSurvivors <-  round(percentSurvived$percentSurvivors, digits = 2)
+head(percentSurvived)
+dim(x)
+x <- x %>% filter(Dead >= 200)  %>% arrange(desc(Dead))
+x
+```
+
+```{r}
+percentSurvived$Year1 <- format(as.Date(percentSurvived$Date, format="%Y/%m/%d"),"%Y")
+percentSurvived$Year <-  substring(percentSurvived$Date,1,4)
+library(zoo)
+head(percentSurvived %>%
+  separate(Date, c("Y", "M", "D"), "-"))
+```
+
+
+```{r}
+percentSurvived$Year <- as.integer(percentSurvived$Year)
+head(percentSurvived)
+dim(percentSurvived)
+ggplot(percentSurvived,aes(Year)) + geom_bar(color = "blue", fill = "blue") 
+ggplot(percentSurvived, aes(Year,Dead > 0))  + geom_point()
+```
+
+```{r}
+Military <- percentSurvived %>%  filter(grepl("Milit",operator))
+head(Military, 50)
+dim(Military)
+Japan
+
+Chin <- percentSurvived %>%  filter(grepl("Force",location))
+head(Chin)
+dim(Chin)
+
+Chin
+```
+
+American Owned Airlines
+
+```{r}
+percentSurvived <- percentSurvived %>% select(1:9)
 head(percentSurvived)
 
 ```
 
+
 ```{r}
+Delta <- percentSurvived %>%  filter(operator == "Delta Air Lines") 
+head(Delta)
+dim(Delta)
+Delta
+```
 
-percentSurvived$Year1 <- format(as.Date(percentSurvived$Date, format="%Y/%m/%d"),"%Y")
+```{r}
+United <- percentSurvived %>%  filter(operator == "United Air Lines")
+head(United)
+dim(United)
+United
 
+```
+PanAm <- PanAm %>% rename(operator = operator1) 
+```{r}
+head(percentSurvived)
+PanAm <- percentSurvived %>%  filter(grepl("Pan American",operator)) 
+head(PanAm)
+PanAm <- PanAm[, -3]
+PanAm <- PanAm %>% mutate(operator = rep("PanAm"))
+PanAm <- PanAm %>% select(Date, location, operator, planeType, Dead, Aboard, Ground, percentSurvivors, Year1)
 
-
-
-
-
-percentSurvived$Year <-  substring(percentSurvived$Date,1,4)
-
-
-library(zoo)
-head(percentSurvived %>%
-  separate(Date, c("Y", "M", "D"), "-"))
-
+dim(PanAm)
+PanAm
 ```
 
 
+
+
+```{r}
+American  <- percentSurvived %>%  filter(operator == "American Airlines")
+head(American)
+dim(American)
+American
+
+```
+
 ```{r}
 
-ggplot(percentSurvived,aes(Year)) + geom_bar(color = "blue")
+Major <- rbind(Delta, United, PanAm, American)
+Major$Year1 <- as.integer(Major$Year1)
+head(Major)
+Major %>% arrange(desc(Year1))
+ggplot(Major, aes(Year1)) + geom_bar(aes(fill = operator, position="fill"))
+ggplot(Major, aes(operator)) + geom_bar(aes(fill = operator, position="fill"))
+ggplot(Major, aes(Year1, fill = factor(operator))) +
+  geom_bar(position = "fill") + scale_x_continuous(breaks=seq(1926,2001,5))
+PanAm$Year1 <- as.integer(PanAm$Year1)
+ggplot(PanAm, aes(Year1))+ geom_bar(color = "blue", fill = "blue") + scale_x_continuous(breaks=seq(1926,2001,5))
 ```
+ggplot(data = df.team_data, aes(x = metrics, y = teams)) +
+  geom_tile(aes(fill = performance)) 
+```{r}
+ggplot(data = Major, aes(x = Year1, y = operator)) +
+  geom_tile(aes(fill = percentSurvivors)) 
+```
+
+
+
+```{r}
+States1 <- percentSurvived %>%  filter(grepl("United Air Lines", operator))
+Major$Year1 <- format(as.Date(Major$Date, format="%Y/%m/%d"),"%Y")
+Major$Year1 <- as.integer(Major$Year1)
+head(States1)
+dim(States1)
+
+
+toMatch <- c("Delta", "United", "American ")
+             # "Virgin America", "Spirit Airlines", "Southwest Airlines", "JetBlue", "Hawaiian", "Frontier", "American Airlines", "Allegiant Air", "Alaska Air"
+States <- percentSurvived %>%  filter(grepl(paste(toMatch, collapse="|"), operator))
+head(States)
+
+States
+States$Year1 <- format(as.Date(States$Date, format="%Y/%m/%d"),"%Y")
+States$Year1 <- as.integer(States$Year1)
+dim(States)
+States <- States[-c(7,35,41),]
+
+States2 <- States %>% mutate(op1 = ifelse(operator == "Delta Air Lines/North Central Airlines", "Delta Airlines", ""))
+States2
+
+```
+
 
