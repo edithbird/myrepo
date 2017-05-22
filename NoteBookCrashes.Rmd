@@ -1,0 +1,197 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "Air Crashes"
+author: "Christine Iyer"
+date: "May 21, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(gridExtra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+library(ggmap)
+library(tm)
+library(zoo)
+```
+
+How many air accidents have there been since 1908?
+
+```{r}
+x <- read.csv("airaccs.csv", stringsAsFactors = F)
+x$Date <- as.Date(x$Date, format = "%m/%d/%Y")
+percentSurvived <- x %>% mutate(percentSurvivors = 1 - (Dead/Aboard)) 
+percentSurvived$percentSurvivors <-  round(percentSurvived$percentSurvivors, digits = 2)
+Number <- percentSurvived %>% mutate(crashes = n())
+nrow(Number)
+```
+
+
+```{r}
+percentSurvived <- x %>% mutate(percentSurvivors = 1 - (Dead/Aboard)) 
+```
+
+Since 1908, how many air accidents have see more than 200 casualities? 
+
+```{r, message=FALSE, warning=FALSE}
+x <- x %>% filter(Dead >= 200)  %>% arrange(operator)
+x1 <- x[-c(21:24),]
+x2 <- x[c(21:22),]
+x3 <- x[c(23:24),]
+x2 <- x2 %>% mutate(op1 = rep("PanAm"))
+x3 <- x3 %>% mutate(op1 = rep("Saudi Arabian Airlines"))
+x4 <- rbind(x2,x3)
+x4 <- x4 %>% select(Date, location, op1, planeType:Ground)
+x4 <- x4 %>% rename(operator = op1)
+x5 <- rbind(x1, x4)
+nrow(x5)
+zz <- x %>% filter(location=="Near Ermenonville, France")
+strWord <- c("Near", "Off", "Over", "570 Miles northeast of", "Atlantic Ocean, 110 miles West of ", "Near Ermenonville", "Tenerife, ")
+x5$location <- removeWords(x5$location, strWord) 
+latlon <- geocode(x5$location)
+x55 <- cbind(x5,latlon)
+#Need to fill in the missing values
+# Uzbekistan 41.3775° N, 64.5853° E, Natal 5.7793° S, 35.2009° W
+x55[1,8] <- 41.38
+x55[1,9] <- 64.98
+x55[2,8] <- 5.78
+x55[2,9] <- 35.20
+kable(x55%>% arrange(Date))
+```
+
+Bubble Chart 
+
+```{r, message=FALSE, warning=FALSE}
+plot1 <- ggplot(x5, aes(operator)) + geom_bar(aes(fill = operator, position="fill")) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())+ theme(aspect.ratio=4/3)
+# Make color depend on yval
+plot2 <- ggplot(x5, aes(x=Date, y=Dead, colour=operator, size = Dead)) + geom_point()+ theme(legend.position="none") +
+   guides(color= guide_legend()) 
+# Make color depend on yval
+ggplot(x5, aes(x=Date, y=Dead, size = Dead)) + geom_point()+ theme(legend.position="none")  
+```
+
+```{r}
+plot2
+plot1
+
+#grid.arrange(plot2, plot1, ncol=1)
+```
+
+
+
+```{r}
+percentSurvived$Year1 <- format(as.Date(percentSurvived$Date, format="%Y/%m/%d"),"%Y")
+percentSurvived$Year <-  substring(percentSurvived$Date,1,4)
+BreakUpDate <- percentSurvived %>%
+  separate(Date, c("Y", "M", "D"), "-")
+```
+
+
+```{r, add percent survived column}
+percentSurvived$Year <- as.integer(percentSurvived$Year)
+ggplot(percentSurvived,aes(Year)) + geom_bar(color = "blue", fill = "blue") +ggtitle("Number of Fatal Air Accidents Since 1908")
+```
+
+
+###American Owned Airlines
+
+Delta
+
+```{r}
+percentSurvived <- percentSurvived %>% select(1:9)
+Delta <- percentSurvived %>%  filter(operator == "Delta Air Lines") 
+kable(Delta)
+```
+
+United
+
+```{r}
+United <- percentSurvived %>%  filter(operator == "United Air Lines")
+kable(United)
+```
+PanAm
+
+```{r}
+PanAm <- percentSurvived %>%  filter(grepl("Pan American",operator)) 
+PanAm <- PanAm[, -3]
+PanAm <- PanAm %>% mutate(operator = rep("PanAm"))
+PanAm <- PanAm %>% select(Date, location, operator, planeType, Dead, Aboard, Ground, percentSurvivors, Year1)
+kable(PanAm)
+```
+
+American Airlines
+
+```{r}
+American  <- percentSurvived %>%  filter(operator == "American Airlines")
+kable(American)
+```
+
+```{r}
+Major <- rbind(Delta, United, PanAm, American)
+Major$Year1 <- as.integer(Major$Year1)
+ggplot(Major, aes(Year1)) + geom_bar(aes(fill = operator, position="fill")) + ggtitle("Your Title Here")
+ggplot(Major, aes(operator)) + geom_bar(aes(fill = operator, position="fill")) + ggtitle("Your Title Here")
+ggplot(Major, aes(Year1, fill = factor(operator))) +
+  geom_bar(position = "fill") + scale_x_continuous(breaks=seq(1926,2001,5)) + ggtitle("Your Title Here")
+PanAm$Year1 <- as.integer(PanAm$Year1)
+ggplot(PanAm, aes(Year1))+ geom_bar(color = "blue", fill = "blue") + scale_x_continuous(breaks=seq(1926,2001,5)) +ggtitle("Your Title Here")
+```
+
+```{r, terrible heat map}
+heatMap <- ggplot(data = Major, aes(x = Year1, y = operator)) +
+  geom_tile(aes(fill = percentSurvivors)) +ggtitle("Your Title Here")
+```
+
+
+
+```{r, eval=FALSE, include=FALSE}
+States1 <- percentSurvived %>%  filter(grepl("United Air Lines", operator))
+Major$Year1 <- format(as.Date(Major$Date, format="%Y/%m/%d"),"%Y")
+Major$Year1 <- as.integer(Major$Year1)
+head(States1)
+dim(States1)
+
+
+toMatch <- c("Delta", "United", "American ")
+             # "Virgin America", "Spirit Airlines", "Southwest Airlines", "JetBlue", "Hawaiian", "Frontier", "American Airlines", "Allegiant Air", "Alaska Air"
+States <- percentSurvived %>%  filter(grepl(paste(toMatch, collapse="|"), operator))
+head(States)
+
+States
+States$Year1 <- format(as.Date(States$Date, format="%Y/%m/%d"),"%Y")
+States$Year1 <- as.integer(States$Year1)
+dim(States)
+States <- States[-c(7,35,41),]
+
+States2 <- States %>% mutate(op1 = ifelse(operator == "Delta Air Lines/North Central Airlines", "Delta Airlines", ""))
+States2
+
+```
+
+20 Most recent Military Accidents
+
+How many military accidents have there been?
+
+```{r}
+Military <- percentSurvived %>%  filter(grepl("Milit",operator)) %>% arrange(desc(Date))
+nrow(Military)
+kable(head(Military, 20))
+```
+
+
