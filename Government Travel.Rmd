@@ -1,0 +1,170 @@
+---
+title: "Government Travel"
+author: "Christine Iyer"
+date: "May 28, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tibble)
+```
+
+```{r, read data and format dates}
+df <- read.csv("https://query.data.world/s/7ezifc8eqig9vdazaoa1noecv",header=T)
+df$arrival_date <- as.Date(df$arrival_date, format = "%m/%d/%Y")
+df$departure_date <- as.Date(df$departure_date, format = "%m/%d/%Y")
+df$ArrivalYear <- format(as.Date(df$arrival_date, format="%Y/%m/%d"),"%Y")
+df$ArrivalYear <- as.integer(df$ArrivalYear)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+df <- as_data_frame(df)
+head(df)
+class(df)
+dim(df)
+```
+
+
+```{r}
+Netherlands <- df  %>% filter(grepl("Netherlands", country)) %>% select(name, country, ArrivalYear) %>% arrange(desc(name)) 
+head(Netherlands)
+dim(Netherlands)
+```
+
+```{r}
+Netherlands12 <-  Netherlands %>% filter(ArrivalYear >= 2012) %>% 
+ group_by(name,country, ArrivalYear) %>% 
+ summarise(n= n()) %>% arrange(desc(name))
+
+Netherlands12
+```
+
+
+```{r}
+# ggplot(Netherlands, aes(ArrivalYear, fill = factor(name))) + geom_bar()
+```
+
+How many times has an official been to the Netherlands?
+
+```{r}
+NetherlandsCount <-  Netherlands %>% 
+ group_by(name) %>% 
+ summarise(n= n()) %>% arrange(desc(n)) %>% select(name, n)
+
+NetherlandsCount
+```
+
+Weldon in Russia
+
+```{r}
+WeldonRussia <- df %>%  filter(grepl("Weldon",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+dim(WeldonRussia)
+WeldonRussia
+ggplot(WeldonRussia, aes(x = ArrivalYear, fill = name)) + geom_bar()
+```
+
+```{r}
+#Weldon
+WeldonRussia$ArrivalYear <- format(as.Date(WeldonRussia$arrival_date, format="%Y/%m/%d"),"%Y")
+```
+
+```{r}
+xyz <- ggplot(WeldonRussia, aes(x = ArrivalYear, fill = factor(country))) + geom_bar() + theme(legend.position='null') + ggtitle("Weldon in Russia") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+xyz
+```
+
+```{r}
+abc <- df %>%  filter(grepl("Weldon",name))  %>% arrange(desc(departure_date))
+ggplot(abc, aes(x = ArrivalYear, fill = factor(country))) + geom_bar() + ggtitle("Weldon")
+```
+
+
+[Legend Issues](https://stackoverflow.com/questions/42049243/ggplot2-histogram-legend-too-large)
+
+
+Nunes
+
+```{r}
+NunesRussia <- df %>%  filter(grepl("nunes",name)) %>% filter(grepl("Russia", country))%>% arrange(desc(departure_date))
+NunesRussia$ArrivalYear <- format(as.Date(NunesRussia$arrival_date, format="%Y/%m/%d"),"%Y")
+NunesRussia
+```
+
+Dana Rohrabacher in the Netherlands
+
+```{r}
+RohrNetherlands <- Netherlands %>%  filter(grepl("Rohr",name)) %>% filter(grepl("Netherlands", country))%>% arrange(desc(ArrivalYear))
+RohrNetherlands
+#PanAm$ArrivalYear <- format(as.Date(PanAm$arrival_date, format="%Y/%m/%d"),"%Y")
+xyz <- ggplot(RohrNetherlands, aes(x = ArrivalYear, fill = factor(country))) + geom_bar() + ggtitle("Dana Rohrabacher in the Netherlands")
+# + theme(legend.position='null')
+xyz
+```
+
+
+```{r}
+Russia <- df  %>% filter(grepl("Russia", country)) %>% select(name, country, ArrivalYear) %>% arrange(desc(name)) 
+head(Russia)
+dim(Russia)
+```
+
+
+```{r}
+RussiaCount <-  Russia %>% 
+ group_by(name) %>% 
+ summarise(n= n()) %>% arrange(desc(n)) %>% select(name, n) %>% top_n(7)
+RussiaCount
+
+ggplot(Russia, aes(x = ))
+```
+
+```{r}
+RohrabacherRussia <- df %>%  filter(grepl("Rohrabacher",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+```
+Taylor
+```{r}
+TaylorRussia <- df %>%  filter(grepl("Taylor",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+```
+
+```{r}
+GageRussia <- df %>%  filter(grepl("Gage",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+```
+
+```{r}
+KingRussia <- df %>%  filter(grepl("Robert King",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+```
+
+```{r}
+SloatRussia <- df %>%  filter(grepl("Sloat",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+```
+
+```{r}
+BerkowitzRussia <- df %>%  filter(grepl("Berkowitz",name)) %>% filter(grepl("Russia", country)) %>% arrange(desc(departure_date))
+```
+
+```{r}
+MostRussia <- rbind.data.frame(WeldonRussia, RohrabacherRussia, TaylorRussia, GageRussia, KingRussia, SloatRussia, BerkowitzRussia)
+dim(MostRussia)
+```
+
+```{r}
+MostRussia
+```
+
+```{r}
+
+MostRussia$namesVector <- rep(c("Curt Weldon", "Dana Rohrabacher","Charles Taylor","Mark Gage","Robert King","Amanda Sloat","Paul Berkowitz"), times = c(22,12,11,8,6,5,5))
+MostRussia
+```
+
+```{r}
+ggplot(MostRussia, aes(x = ArrivalYear, fill = namesVector)) + geom_bar()
+```
+
