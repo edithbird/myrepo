@@ -38,6 +38,15 @@ head(Netherlands)
 dim(Netherlands)
 ```
 
+
+```{r}
+NetherlandsCount <-  Netherlands %>% 
+ group_by(name) %>% 
+ summarise(n= n()) %>% arrange(desc(n)) %>% select(name, n) %>% top_n(7)
+NetherlandsCount
+
+```
+
 ```{r}
 Netherlands12 <-  Netherlands %>% filter(ArrivalYear >= 2012) %>% 
  group_by(name,country, ArrivalYear) %>% 
@@ -83,7 +92,15 @@ xyz
 ```{r}
 abc <- df %>%  filter(grepl("Weldon",name))  %>% arrange(desc(departure_date))
 ggplot(abc, aes(x = ArrivalYear, fill = factor(country))) + geom_bar() + ggtitle("Weldon")
+
+
+weldon <- df %>%  filter(grepl("Weldon",name)) %>% group_by(country) %>% 
+ summarise(n= n()) %>% arrange(desc(n))
+weldon
 ```
+
+
+
 
 
 [Legend Issues](https://stackoverflow.com/questions/42049243/ggplot2-histogram-legend-too-large)
@@ -108,12 +125,32 @@ xyz <- ggplot(RohrNetherlands, aes(x = ArrivalYear, fill = factor(country))) + g
 xyz
 ```
 
+```{r}
+head(df)
+```
+
 
 ```{r}
-Russia <- df  %>% filter(grepl("Russia", country)) %>% select(name, country, ArrivalYear) %>% arrange(desc(name)) 
+Russia <- df  %>% filter(grepl("Russia", country)) %>% select(name, country, ArrivalYear, arrival_date) %>% arrange(desc(name)) 
+Russia$arrival_date <- format(as.Date(Russia$arrival_date, format="%Y/%m/%d"),"%Y")
 head(Russia)
 dim(Russia)
 ```
+
+```{r}
+Russia %>% group_by(ArrivalYear, name) %>% summarise(trips = n())
+```
+
+
+
+```{r}
+Russia$trip <- rep(1,  length.out = 673, each = 1)
+
+head(Russia)
+dim(Russia)
+
+```
+
 
 
 ```{r}
@@ -122,7 +159,6 @@ RussiaCount <-  Russia %>%
  summarise(n= n()) %>% arrange(desc(n)) %>% select(name, n) %>% top_n(7)
 RussiaCount
 
-ggplot(Russia, aes(x = ))
 ```
 
 ```{r}
@@ -165,6 +201,13 @@ MostRussia
 ```
 
 ```{r}
-ggplot(MostRussia, aes(x = ArrivalYear, fill = namesVector)) + geom_bar()
+rhg_cols <- c("#771C19", "#AA3929", "#E25033", "#F27314", "#F8A31B", 
+             "#8E9CA3" , "#E2C59F", "#B6C5CC" 
+              #, "#556670""#000000"
+              )
+ggplot(MostRussia, aes(x = ArrivalYear, fill = namesVector)) + geom_bar() + 
+  scale_fill_manual(values = rhg_cols) + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
+
 
