@@ -1,0 +1,162 @@
+---
+title: "Titanic"
+author: "Christine Iyer"
+date: "May 31, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r}
+library('ggplot2') # visualization
+library('ggthemes') # visualization
+library('scales') # visualization
+library('dplyr') # data manipulation
+library('mice') # imputation
+library('randomForest') # classification algorithm
+library(knitr)
+
+```
+
+```{r}
+titanicTrain <- read.csv("TitanicTrain.csv", header = T, stringsAsFactors = F, na.strings=c("NA", "NULL"))
+titanicTest <- read.csv("TitanicTest.csv", header = T, stringsAsFactors = F)
+full <- bind_rows(titanicTrain, titanicTest)
+head(full %>% arrange(Name), 20)
+```
+
+```{r}
+#create column for title
+full$Title <- gsub('(.*, )|(\\..*)', '', full$Name)
+kable(head(full))
+dim(full)
+#make a table of titles by gender
+table(full$Sex, full$Title)
+```
+
+```{r}
+#assign the rare titles to more common categories
+rare_title <- c('Dona', 'Lady', 'the Countess','Capt', 'Col', 'Don', 
+                'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer')
+full$Title[full$Title == 'Mlle']        <- 'Miss' 
+full$Title[full$Title == 'Ms']          <- 'Miss'
+full$Title[full$Title == 'Mme']         <- 'Mrs' 
+full$Title[full$Title %in% rare_title]  <- 'Rare Title'
+```
+
+```{r}
+#recheck the table
+table(full$Sex, full$Title)
+```
+
+```{r}
+head(full$Surname)
+full$Surname <- sapply(full$Name, function(x) strsplit(x, split = "[,.]")[[1]][1])
+head(full$Surname)
+#how many surnames
+cat(paste('We have <b>', nlevels(factor(full$Surname)), '</b> unique surnames. I would be interested to infer ethnicity based on surname --- another time.'))
+dim(full %>% group_by(Surname) %>% summarise(n=n()))
+
+kable(head(full))
+```
+
+```{r}
+#family size variable
+full$Fsize <- full$SibSp + full$Parch +1
+head(full,1)
+#family variable
+full$Family <- paste(full$Surname, full$Fsize, sep = "_")
+head(full,1)
+dim(full)
+dim(titanicTrain)
+```
+
+```{r}
+#plot relationship between family size and survival (training)
+ggplot(full[1:891,], aes(x = Fsize, fill = factor(Survived))) +
+  geom_bar(stat='count', position='dodge') +
+  scale_x_continuous(breaks=c(1:11)) +
+  labs(x = 'Family Size') +
+  theme_few()
+
+```
+
+```{r}
+ggplot(full[1:891,], aes(x = Fsize, fill = factor(Survived))) +
+  geom_bar(stat='count', position='dodge') +
+  scale_x_continuous(breaks=c(1:11)) +
+  labs(x = 'Family Size')
+```
+
+
+```{r}
+full$FsizeD[full$Fsize == 1] <- "singleton"
+full$FsizeD[full$Fsize <5 & full$Fsize > 1] <- "small"
+full$FsizeD[full$Fsize > 4] <- "large"
+mosaicplot(table(full$FsizeD, full$Survived), main = "Family Size by Survival", shade = T)
+```
+
+```{r}
+head(full$Cabin)
+#count na 
+sum(is.na(full$Cabin))
+#the number that contain a value
+sum(full$Cabin != "")
+```
+
+```{r}
+#splitting up the Cabin, if one is indicated
+strsplit(full$Cabin[2], NULL[[1]])
+#applying this to the entire column
+full$Deck <- factor(sapply(full$Cabin, function(x) strsplit(x, NULL)[[1]][1]))
+head(full, 20)
+
+```
+
+###NA
+
+```{r}
+#titanicTrain[titanicTrain=='NA'] <- NA
+titanicTrain %>% group_by(Embarked) %>% summarise(n = n())
+#which rows are missing values in embarked
+titanicTrain %>% filter(Embarked == "")
+
+
+
+```
+
+
+```{r}
+
+#these are rows that have NA values
+library(purrr)
+library(Amelia)
+#missmap(titanicTrain)
+row.has.na <- apply(titanicTrain, 1, function(x){any(is.na(x))})
+row.has.na <- as.data.frame(row.has.na)
+dim(row.has.na)
+row.has.na$rowNumber <- seq(1:891)
+row.has.na <- row.has.na %>% select(rowNumber, row.has.na)
+head(row.has.na)
+trainTitanicNA <- cbind(row.has.na, titanicTrain)
+row.has.na[c(62,830),]
+# head(trainTitanicNA)
+# trainTitanicNA <- trainTitanicNA %>% filter(row.has.na == "TRUE")
+# head(trainTitanicNA)
+titanicTrain[c(62,830),]
+
+
+```
+
+Imputation
+
+```{r}
+cat(paste('We will infer their values for **embarkment** based on present data that we can imagine may be relevant: **passenger class** and **fare**. We see that they paid<b> $', full[c(62, 830), 'Fare'][[1]][1], '</b>and<b> $', full[c(62, 830), 'Fare'][[1]][2], '</b>respectively and their classes are<b>', full[c(62, 830), 'Pclass'][[1]][1], '</b>and<b>', full[c(62, 830), 'Pclass'][[1]][2], '</b>. So from where did they embark?'))
+```
+
