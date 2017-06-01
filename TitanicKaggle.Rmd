@@ -132,6 +132,7 @@ unlist(lapply(full, function(x) any(is.na(x))))
 summary(full)
 kable(head(full %>% filter(complete.cases(.))))
 kable(head(full %>% filter(!complete.cases(.))))
+
 ```
 
 
@@ -152,10 +153,45 @@ titanicTrain %>% filter(Embarked == "")
 
 
 ```{r}
-unlist(lapply(titanicTrain, function(x) any(is.na(x))))
-
+unlist(lapply(full, function(x) any(is.na(x))))
+full[!complete.cases(full),]
+which(is.na(full$Fare))
+which(is.na(full$Age))
+#doesn't work for chr vactors.
+which(is.na(full$Embarked))
+full[1044,]
+#3rd class passenger who mbarked at S
 ```
 
+Visualize what 3rd class passengers paid when embarking at S.
+
+
+```{r}
+ggplot(full[full$Pclass == "3" & full$Embarked == "S", ], aes(x = Fare)) +
+  geom_density(fill = "#99D6ff", alpha = 0.4)+
+  geom_vline(aes(xintercept = median(Fare, na.rm = T)),color = "red", linetype = "dashed", lwd = 1)+
+  scale_x_continuous(labels = dollar_format()) + 
+  theme_few()
+#missing value
+xxxxx <- median(full[full$Pclass == "3" & full$Embarked == "S", ]$Fare, na.rm = T)
+xxxxx
+#replace value
+full$Fare[1044] <- xxxxx
+full[1044,]
+```
+
+```{r}
+head(full)
+```
+
+
+```{r}
+sum(is.na(full$Age))
+#factorize
+factor_vars <- c("PassengerID", "Pclass", "Sex", "Embarked", "Title", "Surname", "Family", "FsizeD")
+full[factor_vars] <- lapply(full[factor_vars], function(x) as.factor(x))
+
+```
 
 ```{r}
 
