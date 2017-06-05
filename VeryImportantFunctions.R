@@ -2,9 +2,6 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 library(zoo)
-
-
-
 #Reading in a csv with blanks and want to convert them to NA first
 newRain <- read.csv("NewRainWithBlanks.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c(""))
 head(newRain)
@@ -132,3 +129,7 @@ Homicide <- cbind.data.frame(homicide1, homicide)
 head(Homicide)
 Homicide <- Homicide %>% select(1, 6:7, 10:23)
 head(Homicide)
+#read data from git hub
+x <- getURL("https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2017.csv")
+y <- read.csv(text = x)
+head(y)
