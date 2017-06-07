@@ -50,7 +50,7 @@ summary(Cluster)
 
 ```{r}
 set.seed(121)
-sampleSet <- sample_n(Cluster, 1000)
+sampleSet <- sample_n(Cluster, 30)
 str(sampleSet)
 head(sampleSet)
 ggplot(sampleSet, aes(x = Profitability, y = Card_Fees_Amt)) + geom_point(alpha = 0.1, color = "blue")+ geom_smooth(method = "lm")
@@ -76,6 +76,8 @@ summary(mod1)
 ```{r}
 names(newdata)
 ```
+
+
 ```{r}
 mod2 = lm(Positive_Profitability ~ Average_Gallons_Card + Max_of_Cards + Net_Late_Fee_Count + Total_Expense_Amt + Net_Profit + Net_Profit_Card + Years_on_Books + Card_Fees_Amt + No_Accounts_by_Customer + Rebate_Amt + Average_Risk_Grade + Gross_Revenue_Amt+ Purchase_Gallons_Qty + Acquisition_Cost, data=sampleSet)
 summary(mod2)
@@ -155,7 +157,7 @@ summary(c4)
 head(Cluster1)
 summary(Cluster1)
 set.seed(201)
-cluster1Smple <- sample_n(Cluster1, 1000) %>% na.omit()
+cluster1Smple <- sample_n(Cluster1, 30) %>% na.omit()
 summary(cluster1Smple)
 head(cluster1Smple)
 kc <- kmeans(cluster1Smple[, 3:9], 4, nstart = 20)
@@ -168,8 +170,61 @@ kc$cluster <- as.factor(kc$cluster)
 ggplot(cluster1Smple, aes(Total_Expense_Amt, Years_on_Books, color = kc$cluster, alpha = 0.1)) + geom_point()
 
 ggplot(cluster1Smple, aes(Max_of_Cards, Total_Expense_Amt, color = kc$cluster, alpha = 0.5)) + geom_point()
+
+head(cluster1Smple)
+
+
+# clusters <- hclust(dist(cluster1Smple[, 3:9],3, nstart = 20))
+# plot(clusters)
+
+
 ```
 
+```{r}
+library(dendextend)
+library(circlize)
+
+irisCluster <- kmeans(cluster1Smple[, 3:9], 3, nstart = 20)
+irisCluster$centers
+
+# create a dendrogram
+hc <- hclust(dist(cluster1Smple[, 3:9]))
+dend <- as.dendrogram(hc)
+
+# modify the dendrogram to have some colors in the branches and labels
+dend <- dend %>% 
+   color_branches(k=4) %>% 
+   color_labels
+
+# plot the radial plot
+par(mar = rep(0,4))
+# circlize_dendrogram(dend, dend_track_height = 0.8) 
+circlize_dendrogram(dend, labels_track_height = NA, dend_track_height = .3) 
+```
+
+
+```{r}
+# Create the dend:
+hc <- hclust(dist(cluster1Smple), "ave")
+d <- as.dendrogram(hc)
+library(dendextend)
+d <- d %>% color_branches(k=3) %>% color_labels
+
+# horiz normal version
+par(mar = c(3,1,1,7))
+plot(d, horiz  = TRUE)
+```
+
+
+```{r}
+library(HSAUR)
+library(cluster)
+km    <- kmeans(cluster1Smple,3)
+dissE <- daisy(cluster1Smple) 
+dE2   <- dissE^2
+sk2   <- silhouette(km$cl, dE2)
+plot(sk2)
+```
 
 
 ```{r}
@@ -179,6 +234,8 @@ set.seed(20)
 irisCluster <- kmeans(iris[, 3:4], 3, nstart = 20)
 irisCluster
 ```
+
+
 ```{r}
 
 ggcorr(Cluster1, label = T)
