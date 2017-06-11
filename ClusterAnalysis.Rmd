@@ -21,8 +21,6 @@ library(corrgram)
 ```{r}
 Cluster <- read.csv("clusteringData.csv", 
                    header = T, stringsAsFactors = F)
-kable(head(Cluster))
-sapply(Cluster, class)
 ```
 
 ```{r}
@@ -39,9 +37,6 @@ Cluster$Profitability <- as.numeric(Cluster$Profitability)
 # Cluster$Profitability <- as.integer(Cluster$Profitability)
 # Cluster$Positive_Profitability <- as.integer(Cluster$Positive_Profitability)
 Cluster$Account_Open_Date <- as.Date(Cluster$Account_Open_Date , format = "%m/%d/%Y")
-#verify class change
-sapply(Cluster, class)
-kable(head(Cluster)) 
 ```
 
 
@@ -53,8 +48,6 @@ summary(Cluster)
 ```{r}
 set.seed(121)
 sampleSet <- sample_n(Cluster, 30)
-str(sampleSet)
-head(sampleSet)
 ggplot(sampleSet, aes(x = Profitability, y = Card_Fees_Amt)) + geom_point(alpha = 0.1, color = "blue")+ geom_smooth(method = "lm")
 ggplot(sampleSet, aes(x = Profitability, y = Card_Fees_Amt)) + geom_point() + scale_x_log10() + scale_y_log10() + geom_smooth(method = "lm")
 
@@ -75,9 +68,6 @@ mod1 = lm(Positive_Profitability ~ Average_Gallons_Card + Net_Late_Fee_Count +Ne
 summary(mod1)
 ```
 
-```{r}
-names(newdata)
-```
 
 
 ```{r}
@@ -93,22 +83,13 @@ summary(mod3)
 ```
 
 ```{r}
-library(dplyr)
-head(sampleSet)
-dim(sampleSet)
-names(sampleSet)
 sampleSet <- sampleSet[, -c(1:3, 5, 7, 9, 11:13, 17:19 )]
-dim(sampleSet)
-head(sampleSet)
-
-head(Cluster)
-
 Cluster1 <- Cluster %>% dplyr::select(Positive_Profitability, Average_Risk_Grade, Average_Gallons_Card, Max_of_Cards, Total_Expense_Amt, Net_Profit_Card, Years_on_Books, Purchase_Gallons_Qty, Acquisition_Cost)
 #Sig Variables 56%
 c1 <- lm(Positive_Profitability ~  Average_Gallons_Card+ Max_of_Cards + Total_Expense_Amt + Net_Profit_Card + Years_on_Books + Purchase_Gallons_Qty + Acquisition_Cost, data = Cluster1)
 summary(c1)
 
-#Removed acquiaition 49%
+#Removed acquisition 49%
 c2 <- lm(Positive_Profitability ~ Average_Gallons_Card+ Max_of_Cards + Total_Expense_Amt + Net_Profit_Card + Years_on_Books + Purchase_Gallons_Qty, data = Cluster1)
 summary(c2)
 
@@ -154,14 +135,12 @@ c4<- lm(Positive_Profitability ~ Acquisition_Cost,  data = Cluster1)
 summary(c4)
 
 
+```
 
-
-head(Cluster1)
-summary(Cluster1)
+```{r}
 set.seed(201)
 cluster1Smple <- sample_n(Cluster1, 40) %>% na.omit()
 summary(cluster1Smple)
-head(cluster1Smple)
 kc <- kmeans(cluster1Smple[, 3:9], 4, nstart = 20)
 kc$centers
 kc$size
@@ -176,11 +155,8 @@ ggplot(cluster1Smple, aes(Max_of_Cards, Total_Expense_Amt, color = kc$cluster, a
 head(cluster1Smple)
 
 
-# clusters <- hclust(dist(cluster1Smple[, 3:9],3, nstart = 20))
-# plot(clusters)
-
-
 ```
+
 
 ```{r}
 library(dendextend)
@@ -328,38 +304,41 @@ fviz_pca_contrib(res.pca, choice = "ind", axes = 1, top = 10)
 
 ```{r}
 clusterZ <- cluster1Smple %>% mutate(marketingCost = Acquisition_Cost + 5)
-head(clusterZ)
-
 cs <- clusterZ %>% mutate(Positive_ProfitabilityZ = scale(Positive_Profitability), AvRiskGrZ = scale(Average_Risk_Grade) ,AvGallCardZ = scale(Average_Gallons_Card), NetProfitCardZ = scale(Net_Profit_Card), YrZ = scale(Years_on_Books), MarketZ = scale(marketingCost))
-dim(cs)
 cs <- cs %>% dplyr::select(Positive_ProfitabilityZ, AvRiskGrZ, AvGallCardZ, NetProfitCardZ, YrZ)
-head(cs)
-dim(cs)
-
-Customer <- seq(from=1, to=200, by=1)
-head(Customer)
-names(cluster1Smple)
+Customer <- seq(from=1, to=195, by=1)
 clusterLong <- gather(cs, variable, value,Positive_ProfitabilityZ:YrZ)
-dim(clusterLong)
 ClusterData <- cbind.data.frame(Customer, clusterLong)
-
 ClusterData$variable <- as.factor(ClusterData$variable)
 ClusterData$Customer <- as.character(ClusterData$Customer)
-head(ClusterData)
-ggplot(ClusterData, aes(x = value, fill = variable)) + geom_histogram() + facet_grid(~variable)
-ggplot(ClusterData, aes(x=value, fill=variable)) + geom_density()
-ggplot(ClusterData, aes(x=value, colour=variable)) + geom_density(size = 2) + theme_bw()
+ggplot(ClusterData, aes(x = value, fill = variable)) + geom_histogram() + facet_grid(~variable) + theme_bw()
+ggplot(ClusterData, aes(x=value, fill=variable)) + geom_density() + theme_bw()
+ggplot(ClusterData, aes(x=value, colour=variable)) + geom_density(size = 2) + facet_wrap(~variable) + theme_bw()
+```
+
+```{r}
+ggplot(ClusterData, aes(x=value)) + geom_histogram(binwidth=.5, colour="black", fill="white") + 
+    facet_grid(variable ~ .) + theme_bw()
 ```
 
 
 ```{r}
 # Density plots with semi-transparent fill
-ggplot(ClusterData, aes(x=rating, fill=cond)) + geom_density(alpha=.3)
+ggplot(ClusterData, aes(x=value, fill=variable)) + geom_density(alpha=.3)
 ```
 
 ```{r}
 ggplot(ClusterData, aes(x=value)) + geom_histogram(binwidth=.5, colour="black", fill="white") + 
-    facet_grid(variable ~ .)
+    facet_grid(~ variable) + theme_bw()
+
+
+# Histogram overlaid with kernel density curve
+ggplot(ClusterData, aes(x=value)) + 
+    geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                   binwidth=.5,
+                   colour="black", fill="white") +
+    geom_density(alpha=.2, fill="#FF6666")  + facet_grid(~ variable) + theme_bw()# Overlay with transparent density plot
+
 ```
 
 
@@ -428,42 +407,23 @@ plotcluster(dat, clus$cluster)
 ```
 
 ```{r}
-head(iris)
-dim(iris)
-set.seed(20)
-irisCluster <- kmeans(iris[, 3:4], 3, nstart = 20)
-irisCluster
-```
-
-
-```{r}
 
 ggcorr(Cluster1, label = T)
-corrgram(as.matrix(Cluster1), order = NULL, panel = panel.shade, text.panel = panel.txt, main = "Correlogram")
+corrgram(as.matrix(Cluster1), order = NULL, panel = panel.shade, text.panel = panel.txt, main = "Correlogram") 
 ```
 
 
 
 
 ```{r, echo=TRUE}
-
 fit <- lm(Profitability ~  Net_Late_Fee_Count + Acquisition_Cost + Net_Profit +  Years_on_Books +  Average_Risk_Grade, data=Cluster)
 summary(fit) # show results
 Cluster <- Cluster %>% dplyr::select(Random, Customer_Index, Profitability, Net_Late_Fee_Count, Acquisition_Cost, Net_Profit, Years_on_Books)
 Cluster <- as.matrix(Cluster)
-head(Cluster)
-
-
 ```
 
 
-
-
 ```{r}
-library(reshape2)
-Long <- melt(sampleSet, id= c("Random", "Customer_Index"))
-Long[8000, ]
-head(newdata)
 ggplot(newdata, aes(x = Positive_Profitability, y = Max_of_Cards )) + geom_point() + geom_smooth(method = "lm")
                       #,color = factor(Years_on_Books
                                      
