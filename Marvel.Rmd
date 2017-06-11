@@ -1,0 +1,70 @@
+---
+title: "MARVEL"
+author: "Christine Iyer"
+date: "June 11, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(knitr)
+library(fpc)
+```
+
+
+
+```{r}
+
+#read data from git hub
+x <- getURL("https://raw.githubusercontent.com/fivethirtyeight/data/master/comic-characters/dc-wikia-data.csv")
+y <- read.csv(text = x, na.strings=c("","NA"))
+y <- y %>% arrange(SEX) %>% na.omit()
+kable(y)
+ggplot(y, aes(x = ALIGN, fill = SEX)) + geom_bar()
+
+head(y)
+dim(y)
+
+ggplot(y, aes(x = ID, fill = SEX)) + geom_bar()
+levels(y$SEX)
+
+g <- ggplot(y, aes(ALIGN)) 
+
+g + geom_bar(aes(fill = EYE), position ="fill")+
+scale_fill_manual("legend", values = c("Black Eyes" = "black", "Blue Eyes" = "blue", "Brown Eyes" = "burlywood4", "Green Eyes" = "green", "White Eyes" = "white"))
+
+y$ALIGN <- as.numeric(y$ALIGN)
+y$EYE <- as.numeric(y$EYE)
+y$SEX <- as.numeric(y$SEX)
+y$HAIR <- as.numeric(y$HAIR)
+y$GSM <- as.numeric(y$GSM)
+y$ALIVE <- as.numeric(y$ALIVE)
+y$APPEARANCES <- as.numeric(y$APPEARANCES)
+
+
+dim(y)
+reg <- lm(ALIGN ~ EYE + SEX + HAIR + GSM + ALIVE + APPEARANCES, data = y)
+head(y)
+reg <- lm(factor(ALIGN) ~ factor(EYE), data = y)
+summary(reg)
+
+
+mydata <- y %>% dplyr::select(page_id, ALIGN, EYE, SEX, HAIR, GSM, ALIVE, APPEARANCES)
+
+mydata <- as.matrix(y)
+# K-Means Cluster Analysis
+fit <- kmeans(mydata, 5) # 5 cluster solution
+# get cluster means 
+aggregate(mydata,by=list(fit$cluster),FUN=mean)
+# append cluster assignment
+mydata <- data.frame(mydata, fit$cluster)
+mydata
+
+```
+
