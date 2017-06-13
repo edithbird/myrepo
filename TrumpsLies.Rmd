@@ -1,0 +1,98 @@
+---
+title: "Lies"
+author: "Christine Iyer"
+date: "June 13, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rvest)
+library(stringr)
+library(reshape2)
+library(knitr)
+```
+
+```{r}
+Lies1 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/")
+Statement <- Lies1 %>% html_nodes(".statement__text") %>% html_text()
+month <- Lies1 %>% html_nodes(".article__meta") %>% html_text()
+page1 <- cbind(month, Statement)
+page1
+
+Lies2 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/?page=2")
+Statement2 <- Lies2 %>% html_nodes(".statement__text") %>% html_text()
+month2 <- Lies2 %>% html_nodes(".article__meta") %>% html_text()
+page2 <- cbind(month2, Statement2)
+
+Lies3 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/?page=3")
+Statement3 <- Lies3 %>% html_nodes(".statement__text") %>% html_text()
+month3 <- Lies3 %>% html_nodes(".article__meta") %>% html_text()
+page3 <- cbind(month3, Statement3)
+page3
+
+Lies4 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/?page=4")
+Statement4 <- Lies4 %>% html_nodes(".statement__text") %>% html_text()
+month4 <- Lies4 %>% html_nodes(".article__meta") %>% html_text()
+page4 <- cbind(month4, Statement4)
+
+Lies5 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/?page=5")
+Statement5 <- Lies5 %>% html_nodes(".statement__text") %>% html_text()
+month5 <- Lies5 %>% html_nodes(".article__meta") %>% html_text()
+page5 <- cbind(month5, Statement5)
+
+Lies6 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/?page=6")
+Statement6 <- Lies6 %>% html_nodes(".statement__text") %>% html_text()
+month6 <- Lies6 %>% html_nodes(".article__meta") %>% html_text()
+page6 <- cbind(month6, Statement6)
+
+Lies7 <- read_html("http://www.politifact.com/personalities/donald-trump/statements/byruling/false/?page=7")
+Statement7 <- Lies7 %>% html_nodes(".statement__text") %>% html_text()
+month7 <- Lies7 %>% html_nodes(".article__meta") %>% html_text()
+page7 <- cbind(month7, Statement7)
+```
+
+```{r}
+x <- rbind(page1, page2, page3, page4, page5, page6, page7)
+class(x)
+kable(head(x))
+x <- as.data.frame(x)
+str(x)
+x$month <- gsub("on ", "", paste(x$month))
+kable(head(x))
+
+```
+
+```{r}
+# events1 <- cbind(month, Statement)
+# kable(head(events1))
+# 
+# events2 <- cbind(month2, Statement2)
+# kable(head(events2))
+# 
+# events3 <- cbind(month3, Statement3)
+# kable(head(events3))
+# 
+# events4 <- cbind(month4, Statement4)
+# kable(head(events4))
+# 
+# events5 <- cbind(month5, Statement5)
+# kable(head(events5))
+# 
+# events6 <- cbind(month6, Statement6)
+# kable(head(events6))
+# 
+# events7 <- cbind(month7, Statement7)
+# kable(head(events7))
+```
+
+
+```{r}
+# allStatements <- rbind.data.frame(events1, events2, events3, events4, events5, events6, events7)
+# kable(allStatements)
+# dim(allStatements)
+```
+
