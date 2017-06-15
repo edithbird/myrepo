@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+[Tutorial on NLP](https://juliasilge.com/blog/life-changing-magic/)
+
+
 ```{r}
 
 library(rvest)
@@ -129,26 +133,33 @@ words_df <- df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
          str_detect(word, "[a-z]"))
 head(words_df)
 bing <- sentiments %>%
-  filter(lexicon == "bing")
+  filter(lexicon == "bing") 
+
+
 finn <- sentiments %>%
   filter(lexicon == "AFINN")
 nrc <- sentiments %>%
   filter(lexicon == "nrc")
 
+head(words_df)
 #bing
-# kable(head(words_df %>% inner_join(bing, by="word")%>%   group_by(string) %>% 
-#   summarize(score = sum(score)) %>%
-#   inner_join(df, by = "string")))
+kable(words_df %>% inner_join(bing, by="word")%>%   group_by(string) %>% 
+  summarize(score = sum(score)) %>%
+  inner_join(df, by = "string"))
+
+
+
+
 #finn
 kable(words_df %>% inner_join(finn, by="word")%>% 
   group_by(string) %>% 
   summarize(score = sum(score)) %>%
   inner_join(df, by = "string"))
 #nrc
-# kable(words_df %>% inner_join(nrc, by="word") %>% 
-#   group_by(string) %>% 
-#   summarize(score = sum(score)) %>%
-#   inner_join(df, by = "string"))
+kable(words_df %>% inner_join(nrc, by="word") %>%
+  group_by(string) %>%
+  summarize(score = sum(score)) %>%
+  inner_join(df, by = "string"))
 ```
 
 ```{r}
