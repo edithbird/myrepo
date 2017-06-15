@@ -10,12 +10,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+
 library(rvest)
+library(tidytext)
+library(dplyr)
 library(stringr)
+
+
+library(tidyr)
 library(reshape2)
 library(knitr)
 library(lubridate)
-library(dplyr)
+
 ```
 
 ```{r}
@@ -75,11 +81,6 @@ suffix <- c("th", "nd", "st", "rd")
 x$month <-  gsub(suffix, '', x$month)
 
 x$month <- substring(x$month, 8)
-
-nchar(x$month[1])
-
-nchar(x$month[15])
-
 x[c(4, 6, 11,14,18,26, 30:31, 38, 54, 58, 60, 66:67, 70, 83:84, 86, 88,91:93,97:99, 102, 105:106, 113, 120, 127,133),1]<- substring(x[c(4, 6, 11,14,18,26, 30:31, 38, 54, 58, 60, 66:67, 70, 83:84, 86, 88,91:93,97:99, 102, 105:106, 113, 120,127, 133),1], 3)
 
 x[c(15, 20, 27, 46, 49:51, 61, 68:69, 72:74, 78:80, 85, 104, 109, 112, 123 ),1]<- substring(x[c(15, 20, 27, 46, 49:51, 61, 68:69, 72:74, 78:80, 85, 104, 109, 112, 123 ),1], 4)
@@ -106,13 +107,79 @@ x$month <- gsub("st", "", paste(x$month))
 x$month <- gsub("nd", "", paste(x$month))
 x$month <- gsub("rd", "", paste(x$month))
 x$month <- as.Date(x$month, format = "%m-%d-%Y")
-kable(x %>% mutate(id = row_number()) %>% select(id, month, Statement))
+
+x$ID <- seq.int(nrow(x))
+kable(head(x %>%  select(ID, month, Statement)))
+
+
+
 ```
-
-
-
 
 ```{r}
-str(x)
+dim(x)
+reg <- "([^A-Za-z\\d#@']|'(?![A-Za-z\\d#@]))"
+df <- data.frame(string = c(1:134), x$month, text = x$Statement)
+kable(head(df))
+df %>% unnest_tokens(word, text, token = "regex", pattern = reg)
+# stop words and can use the stop_words list that comes with tidytext
+df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
+  filter(!word %in% stop_words$word)
+words_df <- df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
+  filter(!word %in% stop_words$word,
+         str_detect(word, "[a-z]"))
+head(words_df)
+bing <- sentiments %>%
+  filter(lexicon == "bing")
+finn <- sentiments %>%
+  filter(lexicon == "AFINN")
+nrc <- sentiments %>%
+  filter(lexicon == "nrc")
+
+#bing
+# kable(head(words_df %>% inner_join(bing, by="word")%>%   group_by(string) %>% 
+#   summarize(score = sum(score)) %>%
+#   inner_join(df, by = "string")))
+#finn
+kable(words_df %>% inner_join(finn, by="word")%>% 
+  group_by(string) %>% 
+  summarize(score = sum(score)) %>%
+  inner_join(df, by = "string"))
+#nrc
+# kable(words_df %>% inner_join(nrc, by="word") %>% 
+#   group_by(string) %>% 
+#   summarize(score = sum(score)) %>%
+#   inner_join(df, by = "string"))
+
+
 ```
+
+
+
+```{r, echo=TRUE}
+dim(df)
+#df <- data.frame(string, text)
+reg <- "([^A-Za-z\\d@']|'(?![A-Za-z\\d@]))"
+words_df <- df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
+  filter(!word %in% stop_words$word,
+         str_detect(word, "[a-z]"))
+
+dim(words_df)
+words_df <- words_df %>% inner_join(finn, by = "word") %>% 
+  group_by(string) %>% 
+   summarize(score = sum(score)) %>%
+  inner_join(df, by = "string")
+
+words_df
+```
+
+```{r}
+library(ggplot2)
+range(words_df$score)
+words_df <- words_df %>% mutate(Negativity_Scale = ifelse(score <= 0, "Negative Tone", "Positive Tone"))
+
+words_df <- words_df %>% filter(x.month > "2016-11-09")
+g <- ggplot(words_df, aes(x = x.month, y = score, color = factor(Negativity_Scale), size = score)) + geom_point(values = c("red", "blue")) 
+g
+```
+
 
