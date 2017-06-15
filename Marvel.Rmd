@@ -16,6 +16,8 @@ library(dplyr)
 library(scales)
 library(knitr)
 library(fpc)
+library(stringr)
+
 ```
 
 
@@ -24,13 +26,32 @@ x <- getURL("https://raw.githubusercontent.com/fivethirtyeight/data/master/comic
 ```
 
 ```{r}
+yyy <- read.csv(text = x, na.strings=c("","NA"))
+names(yyy)
+yyy1 <- yyy %>% select(YEAR, SEX)
+yyy1 <- yyy1 %>% na.omit()
+dim(yyy1)
+
+#yyy1$SEX <-  as.numeric(yyy1$SEX)
+head(yyy1)
+str(yyy1)
+
+
+#ggplot(yyy1, aes(x = YEAR, fill = factor(SEX))) + geom_bar(stat = "identity", position = "fill")
+```
+
+
+
+
+```{r}
 
 #read data from git hub
 
 y <- read.csv(text = x, na.strings=c("","NA"))
 kable(head(y))
 
-y <- y %>% arrange(SEX) %>% na.omit()
+xx <- y %>% arrange(SEX) %>% na.omit()
+y <- y %>% na.omit()
 y$ID <- as.numeric(y$ID)
 y$ALIGN <- as.numeric(y$ALIGN)
 y$EYE <- as.numeric(y$EYE)
@@ -39,42 +60,73 @@ y$HAIR <- as.numeric(y$HAIR)
 y$GSM <- as.numeric(y$GSM)
 y$ALIVE <- as.numeric(y$ALIVE)
 y$APPEARANCES <- as.numeric(y$APPEARANCES)
-y[, -c(3)]
-foo <- data.frame(do.call('rbind', strsplit(as.character(y$name),'(',fixed=TRUE)))
+y <- y[, -c(3)]
 
-kable(y)
+
+
 str(y)
+kable(y)
+xx$name <- gsub("[()]", "", xx$name)
+kable(head(xx))
 
 
+```
+
+```{r}
+library(stringr)
+library(tidyr)
+
+
+
+yy <- read.csv("y.csv", header = T)
+yy <- yy[, -c(12)]
 
 ```
 
 
 
+```{r}
+ggplot(xx, aes(x = ID, fill = SEX)) + geom_bar()
+```
 
 
+```{r}
+ggplot(yy, aes(x = factor(ID), fill = Nick_Name)) + geom_bar()
+```
 
-ggplot(y, aes(x = ALIGN, fill = SEX)) + geom_bar()
+```{r}
+head(yy)
+tryThis <- (xx %>% group_by(YEAR, SEX) %>% summarise(n = n()))
+head(tryThis)
+ggplot(xx, aes(x = YEAR,  fill = SEX)) + geom_bar()
 
-head(y)
-dim(y)
+ggplot(yy, aes(x = YEAR, fill = factor(SEX))) + geom_bar()
+```
 
-ggplot(y, aes(x = ID, fill = SEX)) + geom_bar()
-levels(y$SEX)
-
-g <- ggplot(y, aes(ALIGN)) 
-
-g + geom_bar(aes(fill = EYE), position ="fill")+
+```{r}
+g <- ggplot(y, aes(ALIGN))
+g + geom_bar(aes(fill = EYE), position ="fill", fill = "identity")+
 scale_fill_manual("legend", values = c("Black Eyes" = "black", "Blue Eyes" = "blue", "Brown Eyes" = "burlywood4", "Green Eyes" = "green", "White Eyes" = "white"))
 
+```
 
 
-
+```{r}
 dim(y)
 reg <- lm(ALIGN ~ EYE + SEX + HAIR + GSM + ALIVE + APPEARANCES, data = y)
 head(y)
 reg <- lm(factor(ALIGN) ~ factor(EYE), data = y)
 summary(reg)
+```
+
+ 
+
+
+
+
+
+
+
 
 
 mydata <- y %>% dplyr::select(page_id, ALIGN, EYE, SEX, HAIR, GSM, ALIVE, APPEARANCES)
