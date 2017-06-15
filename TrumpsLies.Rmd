@@ -149,10 +149,13 @@ kable(words_df %>% inner_join(finn, by="word")%>%
 #   group_by(string) %>% 
 #   summarize(score = sum(score)) %>%
 #   inner_join(df, by = "string"))
-
-
 ```
 
+```{r}
+
+kable(head(words_df %>%
+        count(word, sort = TRUE), 50))
+```
 
 
 ```{r, echo=TRUE}
