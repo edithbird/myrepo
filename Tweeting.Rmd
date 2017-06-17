@@ -6,7 +6,11 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
 
@@ -43,7 +47,7 @@ colors <- c("#A7A7A7",
 ```
 
 ```{r}
-sbT <- userTimeline("Fire_The_Fool", n = 5)
+sbT <- userTimeline("@Potus", n = 1000)
 
 sbT_df <- tbl_df(map_df(sbT, as.data.frame))
 tweets <- sbT_df %>% select(#id, statusSource,
@@ -59,6 +63,34 @@ tweet_words %>% count(word) %>% arrange(n) %>% with(wordcloud(word, n, max.words
 
 ```{r}
 names(tweets)
-pander(tweets, n = 20)
+pander(tweets, n = 50)
+```
+
+
+```{r}
+sbT <- userTimeline("@realDonaldTrump", n = 1000)
+
+sbT_df <- tbl_df(map_df(sbT, as.data.frame))
+tweets <- sbT_df %>% select(#id, statusSource,
+  text, created) #%>% extract(statusSource, "source", "Twitter for (.*?)<")
+reg <- "([^A-Za-z\\d#@']|'('?![A-Za-z\\d#@]))"
+tweet_words <- tweets %>% filter(!str_detect(text, '^"')) %>% mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|&amp;", "")) %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>% filter (!word %in% stop_words$word, str_detect(word, "[a-z]"))
+#kable(head(tweet_words))
+nrc <- sentiments %>% filter( lexicon == "nrc") %>% select(word, sentiment)
+#kable(head(nrc))
+#kable(head(tweets, 5))
+tweet_words %>% count(word) %>% arrange(n) %>% with(wordcloud(word, n, max.words = 100, scale=c(5,.5),min.freq=5, random.order=FALSE, rot.per=.15, colors=brewer.pal(9,"YlOrRd")))
+```
+
+```{r}
+names(tweets)
+pander(tweets, n = 50)
+```
+
+```{r}
+
+class(tweets)
+tweets <- as.data.frame(tweets)
+#write.csv(tweets, "tweets.csv", row.names = F)
 ```
 
