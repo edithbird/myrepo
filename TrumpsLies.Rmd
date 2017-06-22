@@ -120,10 +120,8 @@ kable(head(x %>%  select(ID, month, Statement)))
 ```
 
 ```{r}
-dim(x)
 reg <- "([^A-Za-z\\d#@']|'(?![A-Za-z\\d#@]))"
 df <- data.frame(string = c(1:134), x$month, text = x$Statement)
-kable(head(df))
 df %>% unnest_tokens(word, text, token = "regex", pattern = reg)
 # stop words and can use the stop_words list that comes with tidytext
 df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
@@ -131,25 +129,16 @@ df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
 words_df <- df %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>%
   filter(!word %in% stop_words$word,
          str_detect(word, "[a-z]"))
-head(words_df)
 bing <- sentiments %>%
   filter(lexicon == "bing") 
-
-
 finn <- sentiments %>%
   filter(lexicon == "AFINN")
 nrc <- sentiments %>%
   filter(lexicon == "nrc")
-
-head(words_df)
 #bing
 kable(words_df %>% inner_join(bing, by="word")%>%   group_by(string) %>% 
   summarize(score = sum(score)) %>%
   inner_join(df, by = "string"))
-
-
-
-
 #finn
 kable(words_df %>% inner_join(finn, by="word")%>% 
   group_by(string) %>% 
@@ -163,7 +152,13 @@ kable(words_df %>% inner_join(nrc, by="word") %>%
 ```
 
 ```{r}
+#df 
+head(df)
+dim(df)
 
+#broken down into single words with stop words removed
+dim(words_df)
+head(words_df, 25)
 kable(head(words_df %>%
         count(word, sort = TRUE), 50))
 ```
@@ -196,4 +191,15 @@ g <- ggplot(words_df, aes(x = x.month, y = score, color = factor(Negativity_Scal
 g
 ```
 
+```{r}
+library(syuzhet)
+```
+
+```{r}
+tweets <- read.csv("tweets.csv", header = T, stringsAsFactors = F)
+head(tweets)
+tweets$created <- strptime(tweets$created,format='%d/%b/%Y:%H:%M:%S')
+head(tweets)
+str(tweets)
+```
 

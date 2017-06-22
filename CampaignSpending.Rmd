@@ -1,0 +1,35 @@
+---
+title: "CampaignSpending"
+author: "Christine Iyer"
+date: "June 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(knitr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+df <- read.csv("https://query.data.world/s/6iwl84yn77k9z2ubwpxwf72h0",header=T);
+df <- read.csv("https://query.data.world/s/73lhgv3g9xlzrizv6g8fnpo6q",header=T);
+df <- df %>% filter(state == "ME")
+
+df$date <- as.Date(df$date)
+str(df)
+kable(head(df %>% arrange(desc(amount)), 25))
+ggplot(df, (aes(x = date))) + geom_bar()
+```
+
+```{r}
+df <- df %>% group_by(payee) %>% summarise(number = n()) %>% arrange(desc(number)) 
+df
+```
+
+
+

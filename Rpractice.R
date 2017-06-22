@@ -1,3 +1,4 @@
+#https://juliasilge.com/blog/you-must-allow-me/
 library(readr)
 library(stringr)
 rawPandP <- read_lines("PandP.txt", skip = 30, n_max = 13032)
@@ -18,3 +19,18 @@ for (i in seq_along(rawPandP)){
 }
 library(syuzhet)
 get_nrc_sentiment("I love dogs")
+PandPnrc <- cbind(linenumber = seq_along(PandP), get_nrc_sentiment(PandP))
+PandP$volume <- "Volume I"
+PandPnrc[grep("Chapter 24", PandP):length(PandP), 'volume']
+PandPnrc[grep("Chapter 43", PandP):length(PandP), 'volume']
+PandPnrc$volume <- as.factor(PandPnrc$volume)
+PandPnrc$linenumber[PandPnrc$volume == "Volume II"] <- seq_along(PandP)
+PandPnrc$linenumber[PandPnrc$volume == "Volume III"] <- seq_along(PandP)
+library(dplyr)
+library(reshape2)
+names(PandPnrc)
+PandPnrc$negative <- -PandPnrc$negative
+posneg <- PandPnrc %>% select(linenumber, volume, positive, negative) %>% 
+  melt(id = c("linenumber", "volume"))
+
+
