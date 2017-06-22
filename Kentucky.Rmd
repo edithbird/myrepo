@@ -40,21 +40,36 @@ head(Kentucky)
 
 
 Kentucky1 <- data.frame(do.call('rbind', strsplit(as.character(Kentucky$Gender),'_',fixed=TRUE)))
-Kentucky1 <- Kentucky1 %>% mutate(Year_Number = ifelse(X2 == "1985", 0, ifelse(X2 =="1990", 5,ifelse(X2 == "1995", 10, ifelse(X2 == "2000", 15, ifelse(X2 == "2005", 20,25))))))
+Kentucky1 <- Kentucky1 %>% mutate(Year_Number = ifelse(X2 == 1985, 0, ifelse(X2 ==1990, 5,ifelse(X2 == 1995, 10, ifelse(X2 == 2000, 15, ifelse(X2 == 2005, 20,25))))))
 head(Kentucky1)
 #Kentucky <-  do.call(rbind,str_split(Kentucky$Gender, '_'))
 
 Kentucky11 <- cbind.data.frame(Kentucky, Kentucky1)
 head(Kentucky11)
-
 Kentucky11 <- Kentucky11 %>% rename(Gender = X1, Year = X2) %>% select(State.County, Year, Gender, Age, Year_Number)
-kable(head(Kentucky11, 20))
-kable(tail(Kentucky11, 20))
-Kentucky11$Year_Number <- as.integer(Kentucky11$Year_Number)
-Kentucky11$Age <- as.numeric(Kentucky11$Age)
-head(Kentucky11)
+head(Kentucky11, 20)
+tail(Kentucky11, 20)
+
 
 ```
+
+
+```{r}
+
+head(Kentucky11)
+dim(Kentucky11)
+#convert year from factor to numeric
+Kentucky11$Year <-as.numeric (as.character(Kentucky11$Year)) 
+
+
+                              
+```
+
+```{r}
+
+```
+
+
 
 ```{r}
 USnewDate <- data.frame("State.County" = character(), "Year" = character(), "Year_Number" = integer(), "Gender" = character(), "Age" = double(), stringsAsFactors = FALSE)
@@ -63,12 +78,13 @@ USnewDate[nrow(USnewDate)+1, ] <- c("United States", "2014", 29, "Female", 81.45
 USnewDate
 USnewDate1 <- USnewDate[1,]
 USnewDate2 <- USnewDate[2,]
-USnewDate1
-USnewDate2
+# USnewDate1$Senator1 <- "Mitch McConnell"
+# USnewDate2$Senator2 <- "Rand Paul"
 ```
 
 ```{r}
-KnewDate <- data.frame("State.County" = character(), "Year" = character(), "Year_Number" = integer(), "Gender" = character(), "Age" = double(), stringsAsFactors = FALSE)
+KnewDate <- data.frame("State.County" = character(), "Year" = character(), "Year_Number" = integer(), "Gender" = character(), "Age" = double(),
+                       stringsAsFactors = FALSE)
 KnewDate[nrow(KnewDate)+1, ] <- c("Kentucky", "2014", 29, "Male", 73.71)
 KnewDate[nrow(KnewDate)+1, ] <- c("Kentucky", "2014", 29, "Female", 78.82)
 KnewDate
@@ -119,9 +135,22 @@ colnames(z) <- c("State","YearK","Year_NumberK", "GenderK", "AgeK")
 z
 ```
 
+
+
+
+
+head(Kentucky11)
+tail(Kentucky11, 40)
+
 ```{r}
 combine <- cbind.data.frame(y,z)
-combine
+
+head(combine)
+```
+
+
+```{r}
+
 combine <- combine %>% mutate(difference = Age - AgeK, differenceK = Age - AgeK)
 dim(combine)
 combine
@@ -143,7 +172,43 @@ minmax <- cbind.data.frame(ymin, ymax)
 minmax <- minmax %>% mutate(diff = ymax - ymin)
 minmax
 ```
+combine$Senator1 <- 
+Kentucky11 <- Kentucky11 
 
+```{r}
+z$YearK <- as.numeric (as.character(z$YearK))
+tail(z, 7)
+z$Senator1 <- "Mitch McConnell"
+z <- z %>% mutate(Senator2 = ifelse(YearK >= 1985 & YearK <= 1995, "Wendell Ford", ifelse(YearK >=2000 & YearK <= 2010, "Jim Bunning", "Rand Paul" )))
+z
+
+ggplot(data = z, aes(x = YearK, y = AgeK, group = GenderK, color = Senator2)) + geom_line(size = 2) +
+    geom_text(aes(label=AgeK), vjust=0)
+
+```
+
+
+```{r}
+subsetWendellFord <- z %>% filter(YearK>=1985 & YearK <= 1995)
+subsetWendellFordFemale <- subsetWendellFord %>% filter(GenderK == "Female")
+subsetWendellFordMale <-  subsetWendellFord %>% filter(GenderK == "Male") 
+subsetJimBunning <- z %>% filter(YearK>=2000 & YearK <= 2010)
+subsetJimBunningFemale <- subsetJimBunning %>% filter(GenderK == "Female")
+subsetJimBunningMale <-   subsetJimBunning %>% filter(GenderK == "Male")
+```
+
+
+
+
+```{r}
+fitWendellFemale <- lm(YearK ~ AgeK, data = subsetWendellFordFemale)
+summary(fitWendellFemale)
+
+print(paste("GRADE = ", round(fitWendellFemale$coeff[1], digits = 2), " + ", round(fitWendellFemale$coeff[2], 
+digits = 2), "*ATTEND + e", sep = ""))
+```
+
+fit1 <- lm(Sepal.Length ~ Petal.Width, data = iris)
 
 ```{r}
 mm <- ggplot(data = NewlyCombined, aes(x = Year, y = Difference, group = Gender, color = Gender)) + geom_line(size = 2) +
