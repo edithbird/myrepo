@@ -47,14 +47,15 @@ colors <- c("#A7A7A7",
 ```
 
 ```{r}
-sbT <- userTimeline("@Potus", n = 1000)
-
+sbT <- searchTwitter("#Trumpcare", n = 1000)
+head(sbT_df)
+head(sbT_df %>% group_by(text) %>% summarise(number = n()) %>%  arrange(desc(number)))
 sbT_df <- tbl_df(map_df(sbT, as.data.frame))
 tweets <- sbT_df %>% select(#id, statusSource,
   text, created) #%>% extract(statusSource, "source", "Twitter for (.*?)<")
 reg <- "([^A-Za-z\\d#@']|'('?![A-Za-z\\d#@]))"
 tweet_words <- tweets %>% filter(!str_detect(text, '^"')) %>% mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|&amp;", "")) %>% unnest_tokens(word, text, token = "regex", pattern = reg) %>% filter (!word %in% stop_words$word, str_detect(word, "[a-z]"))
-#kable(head(tweet_words))
+kable(head(tweet_words))
 nrc <- sentiments %>% filter( lexicon == "nrc") %>% select(word, sentiment)
 #kable(head(nrc))
 #kable(head(tweets, 5))
