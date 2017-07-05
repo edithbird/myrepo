@@ -133,3 +133,18 @@ head(Homicide)
 x <- getURL("https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2017.csv")
 y <- read.csv(text = x)
 head(y)
+
+
+
+#using rvest and converting factor to numeric with decimals
+#https://stackoverflow.com/questions/1523126/how-to-read-data-when-some-numbers-contain-commas-as-thousand-separator
+library(rvest)
+Pops <- read_html("http://worldpopulationreview.com/states/")
+StateName <- Pops %>% html_nodes("td:nth-child(2)") %>% html_text()
+StateName
+StatePopul <- Pops %>% html_nodes("td~ td+ td") %>% html_text()
+StatePopul
+StatePopul <- as.numeric(gsub(",", "", StatePopul))
+Population <- cbind.data.frame(StateName, StatePopul)
+str(Population)
+Population
