@@ -1,0 +1,66 @@
+---
+title: "SalesPipeline"
+author: "Christine Iyer"
+date: "August 9, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(cowplot)
+
+
+```
+
+
+
+
+```{r}
+salesData <- read.csv("SalesData.csv", header = T)
+names(salesData)
+max(salesData$Opportunity.Number) - min(salesData$Opportunity.Number)
+dim(salesData)
+str(salesData)
+kable(head(salesData))
+
+```
+
+
+```{r}
+ggplot(salesData, aes(x = Supplies.Subgroup, fill = Opportunity.Result)) + geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip()+ labs(y = "Count") + 
+    scale_fill_manual(values=c("#44AA77", "#114477")) + theme_bw()
+```
+
+```{r}
+ggplot(salesData, aes(x = Region, fill = Opportunity.Result)) + geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip()+ labs(y = "Count") + 
+    scale_fill_manual(values=c("#44AA77", "#114477")) + theme_bw()
+```
+
+[Nice Colors](https://www.r-bloggers.com/the-paul-tol-21-color-salute/)
+
+```{r}
+tim12equal = c("#00008F", "#0000EA", "#0047FF", "#00A2FF", "#00FEFF", "#5AFFA5", "#B5FF4A", "#FFED00", "#FF9200", "#FF3700", "#DB0000", "#800000", "#6699CC", "#88CCEE")
+tol11qualitative=c("#332288", "#6699CC", "#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#661100", "#CC6677", "#00A2FF", "#00FEFF")
+tol21rainbow= c("#771155", "#AA4488", "#CC99BB", "#114477", "#4477AA", "#77AADD", "#117777", "#44AAAA", "#77CCCC", "#117744", "#44AA77", "#88CCAA", "#777711", "#AAAA44", "#DDDD77", "#774411", "#AA7744", "#DDAA77", "#771122", "#AA4455", "#DD7788")
+
+
+
+salesPlotx <- ggplot(salesData, aes(x = Region, fill = Supplies.Subgroup)) + geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip()  + theme_bw() + labs(y = "Count")  +
+    scale_fill_manual(values=tol21rainbow) + theme(legend.position="none")
+
+
+salesPlotx
+salesPlotxx <- salesPlotx %+% subset(salesData, Opportunity.Result %in% c("Won") )
+plot_grid(salesPlotx, salesPlotxx, align='h', labels=c('All', 'Won')) + scale_x_discrete(name ="Dose (mg)", 
+                    limits=c("0","60000","1000"))
+```
+
