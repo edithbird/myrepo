@@ -50,17 +50,36 @@ ggplot(salesData, aes(x = Region, fill = Opportunity.Result)) + geom_bar() + the
 tim12equal = c("#00008F", "#0000EA", "#0047FF", "#00A2FF", "#00FEFF", "#5AFFA5", "#B5FF4A", "#FFED00", "#FF9200", "#FF3700", "#DB0000", "#800000", "#6699CC", "#88CCEE")
 tol11qualitative=c("#332288", "#6699CC", "#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#661100", "#CC6677", "#00A2FF", "#00FEFF")
 tol21rainbow= c("#771155", "#AA4488", "#CC99BB", "#114477", "#4477AA", "#77AADD", "#117777", "#44AAAA", "#77CCCC", "#117744", "#44AA77", "#88CCAA", "#777711", "#AAAA44", "#DDDD77", "#774411", "#AA7744", "#DDAA77", "#771122", "#AA4455", "#DD7788")
-
-
-
 salesPlotx <- ggplot(salesData, aes(x = Region, fill = Supplies.Subgroup)) + geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip()  + theme_bw() + labs(y = "Count")  +
-    scale_fill_manual(values=tol21rainbow) + theme(legend.position="none")
-
-
+    scale_fill_manual(values=tol21rainbow)
+#+ theme(legend.position="none")
 salesPlotx
 salesPlotxx <- salesPlotx %+% subset(salesData, Opportunity.Result %in% c("Won") )
 plot_grid(salesPlotx, salesPlotxx, align='h', labels=c('All', 'Won')) + scale_x_discrete(name ="Dose (mg)", 
                     limits=c("0","60000","1000"))
+```
+
+Route to Market
+
+```{r}
+ggplot(salesData, aes(x = Region, fill = Route.To.Market)) + geom_bar()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip()  + theme_bw() + labs(y = "Count")  +
+    scale_fill_manual(values=tol21rainbow)
+```
+
+```{r}
+
+groupedSalesData <- salesData %>% group_by(Supplies.Subgroup) %>% summarise(n = n(), amount = sum(Opportunity.Amount.USD)) %>% mutate(freq = (n/sum(n)))
+
+groupedSalesXXX <- aggregate(salesData$Opportunity.Amount.USD, by = list(salesData$Supplies.Subgroup), sum)
+
+groupedSalesXXX <-  groupedSalesXXX %>% mutate(OpporResultInMillions = (round(x/1000000 ,0))) %>% rename(Supplies.Subgroup = Group.1)
+kable(groupedSalesXXX)
+
+salesData1 <- inner_join(salesData, groupedSalesXXX)
+dim(salesData1)
+ggplot(salesData1, aes(x = Region, y = Opportunity.Amount.USD/1000000, fill = factor(OpporResultInMillions))) + geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(y = "Sales in $ (millions)", title = "Supplies Sales by Region") + theme_bw() + scale_fill_manual(values = tol21rainbow,name="Supplies\nSubgroup",
+labels=c("Car Electronics","Tires & Wheels","Performance Parts", "Towing & Hitches", "Replacement Parts", "Garage & Car Care", "Interior Accessories", "Batteries & Accessories", "Motorcycle Parts", "Exterior Accessories", "Shelters & RV"))
 ```
 
