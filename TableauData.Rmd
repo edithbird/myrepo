@@ -39,6 +39,7 @@ Thank you!
 ```{r}
 fullData <- read.csv("FullData.csv", header = T)
 startDates <- read.csv("startDates.csv", header = T)
+Combined <- read.csv("vLoolUp.csv", header = T, stringsAsFactors = F)
 ```
 
 ###This is the actual data
@@ -63,8 +64,25 @@ fullData$Actual.Activity.Date <- as.POSIXct(fullData$Actual.Activity.Date, forma
 fullData$Week.Ending <- as.POSIXct(fullData$Week.Ending, format = "%m/%d/%Y")
 fullData$Activity.Recorded.On <- as.POSIXct(fullData$Activity.Recorded.On, format = "%m/%d/%Y")
 #make sure the conversion worked
-head(fullData)
-tail(fullData)
+
+```
+
+```{r}
+
+Combined$Actual.Activity.Date <- as.POSIXct(Combined$Actual.Activity.Date, format = "%m/%d/%Y")
+Combined$Week.Ending <- as.POSIXct(Combined$Week.Ending, format = "%m/%d/%Y")
+Combined$Activity.Recorded.On <- as.POSIXct(Combined$Activity.Recorded.On, format = "%m/%d/%Y")
+Combined$HireDate <- as.POSIXct(Combined$HireDate, format = "%m/%d/%Y")
+
+```
+
+
+```{r}
+workersPerStatus <- Combined %>% group_by(FSR, Status) %>% summarise(n=n())
+
+Averages <- Combined %>% group_by(WNumber, Status) %>% summarise(visitsPerWeek = mean(n()))
+
+
 ```
 
 This is a new dataset reengineering the FSR names
@@ -84,8 +102,7 @@ This puts the days of the week in
 
 ```{r}
 a <- fullData %>% arrange(Actual.Activity.Date)
-head(a)
-tail(a)
+
 
 # a <- a %>% mutate(Day = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
 #     "Friday", "Saturday")[as.POSIXlt(a$Actual.Activity.Date)$wday + 1])
@@ -101,19 +118,12 @@ This numbers the days of the week
 ```{r}
 c <- a %>% mutate(Day = ifelse(wday(a$Actual.Activity.Date)==1,6,wday(a$Actual.Activity.Date)-2)) 
 c <-  c %>% mutate(DayWkEnd = ifelse(wday(a$Week.Ending)==1,6,wday(a$Week.Ending)-2))
-head(c)
-tail(c)
+
 
 c %>% group_by(Day) %>% summarise(n = n())
 c %>% group_by(DayWkEnd) %>% summarise(n = n())
 
 ```
-
-#add a day of the week column
-
-
-#Sunday = 6
-
 
 
 ```{r}
@@ -137,7 +147,7 @@ dim(perfectFullSet)
 #eliminate duplicate column
 perfectFullSet <- perfectFullSet[, -21 ]
 
-head(perfectFullSet)
+
 perfectFullSet1 <-  perfectFullSet %>% group_by(WNumber) %>% summarise(n = n())
 
 ggplot(perfectFullSet1, aes(x = WNumber , y = n)) + geom_line()
@@ -158,8 +168,7 @@ ggplot(perfectFullSet1, aes(x = WNumber , y = n)) + geom_line()
 ```{r, eval=FALSE, include=FALSE}
 d <- c %>% mutate(ActualDay = ifelse(Day == 0, "Monday", ifelse(Day == 1, "Tuesday", ifelse(Day == 2, "Wednesday", ifelse(Day == 3, "Thursday", ifelse(Day == 4, "Friday", ifelse(Day == 5, "Saturday", "Sunday")))))))
 d <- d %>% mutate(ActualDayWkEnd = ifelse(DayWkEnd == 0, "Monday", ifelse(DayWkEnd == 1, "Tuesday", ifelse(DayWkEnd == 2, "Wednesday", ifelse(DayWkEnd == 3, "Thursday", ifelse(DayWkEnd == 4, "Friday", ifelse(DayWkEnd == 5, "Saturday", "Sunday")))))))
-head(d)
-tail(d)
+
 ```
 
 
@@ -167,24 +176,15 @@ tail(d)
 #have to make the DayWkEnd total to 6
 
 ```{r, eval=FALSE, include=FALSE}
+
 #Weeks end on Sundays and these are all the mising values
 b <- a %>% group_by(DayWeekEnding) %>% summarise(n = n()) 
-b
+
 a[c(32900:32999), ]
 b[c(32900:32999), ]
 ```
 
 
-
-
-dim(a)
-range(fullData1$Actual.Activity.Date)
-range(fullData1$Week.Ending)
-
-
-```{r}
-
-```
 
 
 Start Dates
@@ -207,10 +207,9 @@ fullData1 <- fullData1 %>% mutate(FSR = paste(LastName, ", ", FirstName))
 fullData1$Actual.Activity.Date <- as.POSIXct(fullData1$Actual.Activity.Date, format = "%m/%d/%Y")
 fullData1$Week.Ending <- as.POSIXct(fullData1$Week.Ending, format = "%m/%d/%Y")
 fullData1$Activity.Recorded.On <- as.POSIXct(fullData1$Activity.Recorded.On, format = "%m/%d/%Y")
-head(fullData1, 50)
-str(fullData1)
+
 c <- fullData1 %>% group_by(FSR, Actual.Activity.Date)
-head(c, 50)
+
 #concerned with RepRole
 ```
 
@@ -243,7 +242,7 @@ startDates1
 #startDates1$colNumber <- seq(1, 94, by = 1)
 startDatesFinal <- startDates1 %>% mutate(FSR = paste(LastName,", ", FirstName)) %>% select(FSR, Manager, Last.Hire.Date)
 startDatesFinal$Last.Hire.Date <- as.POSIXct(startDatesFinal$Last.Hire.Date, format = "%m/%d/%Y")
-startDatesFinal
+
 ```
 
 
@@ -253,7 +252,7 @@ lastNames <- c("Morocutti", "Woolum", "Morocutti", "Morocutti", "Morocutti", "Mo
 startDates1[c(15, 31, 32, 35, 41, 60, 76), 4] <- "Morocutti"
 startDates1[c(19, 53, 56, 57, 58, 73, 79,94), 4] <-  "Woolum"
 startDates1 <- startDates1%>% arrange(LastName)
-startDatesFinal
+
 ```
 
 
@@ -263,7 +262,7 @@ New Hires
 
 yellowHires <- startDatesFinal[c(52:70), ]
 yellowHires$Status <- rep("Yellow Hire")
-yellowHires
+
 ```
 
 
@@ -271,30 +270,24 @@ yellowHires
 
 oldHires <- startDatesFinal[c(1:51), ]
 oldHires$Status <- rep("Old Hire")
-oldHires
+
 ```
 ```{r}
 latestHires <- startDatesFinal[c(71:94),]
 latestHires$Status <- rep("Latest Hires")
-latestHires
+
 ```
 
 
 ```{r}
 perfectStartDates <- rbind(oldHires, yellowHires, latestHires)
 perfectStartDates[c(52:53), 3] <- as.POSIXct("2014-10-13")
-perfectStartDates
+
 
 ```
 
 
 ```{r}
-head(perfectStartDates)
-dim(perfectStartDates)
-head(perfectFullSet)
-dim(perfectFullSet)
-
-
 # write.csv(fullData1, "fullSet.csv", row.names = F)
 #write.csv(perfectStartDates, "perfectStartDates.csv", row.names = F)
 #write.csv(perfectFullSet, "perfectFullSet.csv", row.names = F)
@@ -304,10 +297,6 @@ dim(perfectFullSet)
 fullData1 Subsetting
 
 ```{r}
-head(fullDataNew)
-str(fullDataNew)
-
-
 fullDataNew <- fullDataNew %>% 
   separate(Activity.Recorded.By, c("LastName", "FirstName"), ",")
 fullDataNew <- fullDataNew %>% mutate(FSR = paste(LastName, ", ", FirstName))
@@ -323,63 +312,239 @@ list2env(split(fullDataNew, fullDataNew$FSR), envir = .GlobalEnv)
 ```
 ```{r}
 cleanStartDates <- perfectStartDates %>% arrange(Last.Hire.Date)
-head(cleanStartDates)
+
 x <- ggplot(cleanStartDates, aes(x = FSR, y = factor(Last.Hire.Date), fill = Status))+ geom_bar(stat = "identity") + theme(axis.text.y = element_text(angle = 90, hjust = 1)) + theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-x
+
 ```
 
 ```{r, fig.height=7, fig.width=9}
 dataHires <- read.csv("vLoolUp.csv", header = T)
 dataHires$HireDate <- as.Date(dataHires$HireDate, format = "%m/%d/%Y")
-head(dataHires)
-levels(dataHires$FSR)
+
 dataHiresGroups <- dataHires %>% group_by(FSR, HireDate, Status ) %>% summarise(n = n()) %>% mutate(Status1 = ifelse(Status == "Yellow Hire","Interest", "Everyone Else")) %>% arrange(HireDate)
-dataHires
+
 ggplot(dataHiresGroups, aes(x = FSR, y = n, color = Status1, fill = Status1)) + geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ```{r, fig.height=8, fig.width=9}
 ggplot(dataHiresGroups, aes(x = HireDate, y = FSR, color = Status1, fill = Status1, size = n)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
 ```
-```{r, fig.height=10, fig.width=10}
+```{r, eval=FALSE, fig.height=10, fig.width=10, include=FALSE}
 groupsByWeek <- dataHires %>% group_by(WNumber, FSR) %>% summarise(n = n())
-groupsByWeek
-ggplot(groupsByWeek, aes(x = WNumber, y = n, colour=FSR, group=FSR))+ geom_line(stat = "identity") + theme(legend.position="none")
+
+#ggplot(groupsByWeek, aes(x = WNumber, y = n, colour=FSR, group=FSR))+ geom_line(stat = "identity") + theme(legend.position="none")
 ```
 
 ```{r}
 yellows <- dataHires %>% filter(Status == "Yellow Hire") %>% group_by(WNumber, FSR, Status) %>% summarise(n = n())
-yellows
+
 #mean visits per week by yellows
 yellows %>% group_by(WNumber) %>% summarise(mean(n))
-ggplot(yellows, aes(WNumber, n, color = FSR, group = FSR))+ geom_line()
+#ggplot(yellows, aes(WNumber, n, color = FSR, group = FSR))+ geom_line()
 ```
 
 
 ```{r}
 list2env(split(dataHires, dataHires$FSR), envir = .GlobalEnv)
-`Willis ,   Jennifer`
+#`Willis ,   Jennifer`
 ```
 
 
 
 
 ```{r}
-#omitting na values because they are not on the list of FSR being analyzed
-names(dataHires)
-tail(dataHires)
-levels(dataHires$Status)
-dataHires1 <- dataHires[, c(20:23)] %>% na.omit()
-head(dataHires1)
-meanNotYellow <- dataHires1 %>% filter(Status != "Yellow Hire")  %>% group_by(WNumber, FSR, Status) %>% summarise(n = n()) 
+#FSR, WeekNumber, Hire Date, Status
+dataHires1 <- dataHires[, c(20:23)] 
+
+
+```
+
+```{r}
+#dataHires1 %>% group_by(FSR, Status, WNumber) %>% summarise(numberVisitsWeek = n())
+ #ggplot(dataHires1, aes(x = WNumber, y = sum(numberVisitsWeek)/count(numberVisitsWeek), group = Status )) + geom_line()
+```
+
+Group by Week
+
+```{r, fig.height=25, fig.width=10}
+aaaa <- dataHires1 %>% group_by(WNumber, FSR, Status) %>% summarise(numberVisitsPerWeek = n())
+
+aaaa %>% group_by(WNumber, Status) %>% summarise(n = n())
+
+ggplot(aaaa, aes(x = WNumber, y = numberVisitsPerWeek, group = FSR, color = Status)) + geom_line() + facet_wrap(~FSR, ncol = 4)
+aaaa1 <- aaaa %>% filter(Status == "Yellow Hire")
+
+aaaa2 <- aaaa %>% filter(Status == "Old Hire")
+both <- rbind.data.frame(aaaa1, aaaa2)
+
+colors <- c("blue", "gold")
+
+```
+
+
+Number of Records Per FSR
+
+
+```{r}
+cccc <- dataHires1 %>% group_by(FSR, Status) %>% summarise(totalVisitsPerWorker = n())
+dim(cccc)
+head(cccc)
+```
+
+Number of FSR per Status
+
+```{r}
+#number in each status
+bbbb <- cccc %>% group_by(Status) %>% summarise(workersNum = n())
+bbbb
+```
+
+
+```{r}
+eeee <- inner_join(aaaa, bbbb)
+head(eeee)
+dim(eeee)
+```
+```{r}
+ffff <- eeee %>% group_by(WNumber, Status) %>% summarise(n = n())
+dim(ffff)
+head(ffff)
+tail(ffff)
+```
+
+
+
+
+Old Hires Mean
+
+```{r}
+OldHiresMean <- dataHires1 %>% filter(Status == "Old Hire") %>% group_by(WNumber, FSR, Status)%>% summarise(n = n())
+OldHiresMean
+```
+
+
+```{r}
+
+meanNotYellow <- dataHires1 %>% filter(Status != "Yellow Hire")  %>% group_by(WNumber, FSR, Status) %>% summarise(n = n()) %>% mutate(Status = "Yellow Hire")
 head(meanNotYellow)
 tail(meanNotYellow)
 dim(meanNotYellow)
+meanNotYellow
+```
+
+```{r}
+yellowHiresNamed <- dataHires1 %>% filter(Status == "Yellow Hire") %>% group_by(FSR, WNumber) %>% summarise(n = n()) %>% mutate(Status = "Yellow Hire")
+```
+
+
+
+```{r}
+meanYellow <- dataHires1 %>% filter(Status == "Yellow Hire")  %>% group_by(WNumber) %>% summarise(AveragePerWrkPerWeek = round(n()/19, 2)) %>% mutate(Status = "Yellow Hire", FSR = "Yellow Hire Average") %>% select(WNumber, FSR, Status, n = AveragePerWrkPerWeek)
+
+meanYellow
+```
+
+
+Old Hired Worker Average per Week
+
+```{r}
+OldHiresMean <- dataHires1 %>% filter(Status == "Old Hire")  %>% group_by(WNumber) %>% summarise(AveragePerWrkPerWeek = round(n()/52, 2)) %>% mutate(Status = "Old Hire", FSR = "Old Hire FSR Average") %>% select(WNumber, FSR, Status, n = AveragePerWrkPerWeek)
+head(OldHiresMean)
+tail(OldHiresMean)
+dim(OldHiresMean)
+OldHiresMean
+head(meanNotYellow)
+```
+
+Latest = 9
+
+```{r}
+LatestHiresMean <- dataHires1 %>% filter(Status == "Latest Hires")  %>% group_by(WNumber) %>% summarise(AveragePerWrkPerWeek = round(n()/9, 2)) %>% mutate(Status = "Latest Hires", FSR = "Latest Hire FSR Average")%>% select(WNumber, FSR, Status, n = AveragePerWrkPerWeek)
+head(LatestHiresMean)
+tail(LatestHiresMean)
+
+LatestHiresMean
+```
+
+Unknowns = 26
+
+```{r}
+UnknownMean <- dataHires1 %>% filter(Status == "Unknown Hire Date")  %>% group_by(WNumber) %>% summarise(AveragePerWrkPerWeek = round(n()/26, 2)) %>% mutate(Status =  "Unknown Hire Date", FSR = "Unkn Hire Date FSR Average")%>% select(WNumber, FSR, Status, n = AveragePerWrkPerWeek)
+
+
+```
+
+
+```{r, eval=FALSE, fig.height=25, fig.width=9, include=FALSE}
+ggplot() + 
+  geom_line(aes(WNumber, n, alpha = 1), OldHiresMean) +  
+  geom_line(aes(WNumber, n, colour=FSR, alpha=0.4), meanNotYellow)+theme_bw() + theme(legend.position="none") 
+```
+
+
+```{r}
+theSet <- rbind.data.frame(meanNotYellow, OldHiresMean, LatestHiresMean, UnknownMean)
+theSet
+```
+
+
+```{r, fig.height=6, fig.width=8}
+head(OldHiresMean)
+head(yellowHiresNamed)
+ggplot(OldHiresMean, aes(x = WNumber, y = n)) + 
+  geom_line(colour="blue", size = 1.3, linetype = "dashed") + 
+  #geom_line(data=LatestHiresMean,aes(WNumber, n), size = 1.4, color = "grey") +       
+  #geom_line(data=UnknownMean,aes(WNumber, n), size = 1.4, color = "blue") + 
+  geom_line(data=meanYellow,aes(WNumber, n), size = 1.4, color = "yellow", size = 1.3) +theme_bw()
+```
+
+
+```{r, fig.height=20, fig.width=10}
+tail(OldHiresMean)
+yellowHiresNamed <- yellowHiresNamed %>% select(WNumber, FSR, Status, n)
+head(yellowHiresNamed)
+yellowHiresNamed1 <- rbind.data.frame(yellowHiresNamed, OldHiresMean)
+ggplot(yellowHiresNamed, aes(x = WNumber, y = n, group = FSR, color = Status)) + 
+  geom_line(color = "yellow") +
+  
+  
+  facet_wrap(~ FSR, ncol = 4) + 
+  geom_line(data = yellowHiresNamed1, aes(x = WNumber, y = n))  +
+  theme_bw()
+
+smallOldHires <- OldHiresMean %>% select(WNumber, AvNum = n)
+head(smallOldHires)
+newerYe <- inner_join(yellowHiresNamed, smallOldHires)
+head(newerYe)
+```
+
+```{r, fig.height=20, fig.width=9}
+ggplot(newerYe, aes(x = WNumber, y = n)) + geom_line(aes(y = AvNum, colour = AvNum)) + geom_line(aes(y = n, color = n)) + facet_wrap(~FSR, ncol = 4) +theme_bw()
+```
+
+
+
+```{r}
+head(yellowHiresNamed)
+ggplot(OldHiresMean, aes(WNumber, n)) + geom_line(color = "blue") + geom_line(data = yellowHiresNamed, aes(WNumber, n, color = "yellow")) + facet_wrap(~ FSR)
+```
+
+
+```{r}
 meanNotYellow <- meanNotYellow %>% group_by(WNumber, Status) %>% summarise(meanWeeklyActivity = mean(n)) 
+head(meanNotYellow)
+dim(meanNotYellow)
+tail(meanNotYellow)
+```
+Subsets 
+
+```{r}
+head(yellows)
 list2env(split(yellows, yellows$FSR), envir = .GlobalEnv)
-ggplot(`Willis ,   Jennifer`, aes(WNumber, n)) + geom_line() +ggtitle(label = "Jennifer Willis")
-ggplot(`Martin ,   Kristen`, aes(WNumber, n)) + geom_line() +ggtitle(label = "Kristen Martin")
-`Willis ,   Jennifer`
+`Willis , Jennifer`
+ggplot(`Willis , Jennifer`, aes(WNumber, n)) + geom_line() +ggtitle(label = "Jennifer Willis")
+ggplot(`Martin , Kristen`, aes(WNumber, n)) + geom_line() +ggtitle(label = "Kristen Martin")
+head(`Willis ,   Jennifer`)
 ```
 
 ```{r}
@@ -389,16 +554,41 @@ tol21rainbow= c("#771155", "#AA4488", "#CC99BB" )
                 
                
 head(meanNotYellow)
-ggplot(meanNotYellow, aes(WNumber, meanWeeklyActivity, group = Status, color = Status)) + geom_line(size = 1) + geom_line(data=`Pettinella ,   Stephanie`,aes(WNumber, n, color="Pettinella ,   Stephanie"), size = 1.4) + scale_color_manual(values=c("darkmagenta", "darkblue","darkslategray4")) + theme_bw() + scale_color_hue(l=60, c=45) 
+
+`Pettinella , Stephanie`
+ggplot(meanNotYellow, aes(WNumber, meanWeeklyActivity, group = Status, color = Status)) + geom_line(size = 1) + geom_line(data=`Pettinella , Stephanie` ,aes(WNumber, n, color="Pettinella ,   Stephanie"), size = 1.4) + scale_color_manual(values=c("darkmagenta", "darkblue","darkslategray4", "blue")) + theme_bw() 
+#+ scale_color_hue(l=60, c=45) 
     
 ```
 
 
 ```{r}
-ggplot(meanNotYellow, aes(WNumber, meanWeeklyActivity, group = Status, color = Status)) + geom_line(size = 1) + geom_line(data= `Luce ,   Heidi`,aes(WNumber, n, color="Heidi Luce"), size = 1.4) + scale_color_manual(values=c("darkmagenta", "darkblue","darkslategray4")) + theme_bw() + scale_color_hue(l=60, c=45) 
+ggplot(meanNotYellow, aes(WNumber, meanWeeklyActivity, group = Status, color = Status)) + geom_line(size = 1) + geom_line(data= `Luce , Heidi`,aes(WNumber, n, color="Heidi Luce"), size = 1.4) + scale_color_manual(values=c("darkmagenta", "darkblue","darkslategray4")) + theme_bw() + scale_color_hue(l=60, c=45) 
 ```
 
 ```{r}
-ggplot(meanNotYellow, aes(WNumber, meanWeeklyActivity, group = Status, color = Status)) + geom_line(size = 1) + geom_line(data=`Willis ,   Jennifer`,aes(WNumber, n, color="Jennifer Willis"), size = 1.4) + scale_color_manual(values=c("darkmagenta", "darkblue","darkslategray4")) + theme_bw() + scale_color_hue(l=60, c=45) 
+ggplot(meanNotYellow, aes(WNumber, meanWeeklyActivity, group = Status, color = Status)) + geom_line(size = 1) + geom_line(data=`Willis , Jennifer`,aes(WNumber, n, color="Jennifer Willis"), size = 1.4) + scale_color_manual(values=c("darkmagenta", "darkblue","darkslategray4")) + theme_bw() + scale_color_hue(l=60, c=45) 
+```
+
+```{r}
+str(dataHires$DPC.Territory)
+dataHires$DPC.Territory <- as.character(dataHires$DPC.Territory)
+str(dataHires$Practice.Name)
+str(dataHires$Sales.Region)
+levels(dataHires$Sales.Region)
+levels(dataHires$DPC.Territory)
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+
+library(ggmap)
+library(leaflet)
+coordinatesDPC <- dataHires %>% group_by(DPC.Territory) %>% summarise(n = n())
+head(coordinatesDPC)
+#Coord <- geocode(coordinatesDPC$DPC.Territory)
+tail(Coord)
+Coord <- cbind.data.frame(coordinatesDPC, Coord)
+#write.csv(Coord, "DPCTerritories.csv", row.names = F)
 ```
 
