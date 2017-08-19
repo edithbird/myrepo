@@ -518,8 +518,31 @@ newerYe <- inner_join(yellowHiresNamed, smallOldHires)
 head(newerYe)
 ```
 
+
+We are given hiring date data for Field Service Reps. A subset of these reps were hired in roughly the last 3 weeks of October 2014. 
+
+1. We don't have week ending dates for 2016
+2. Values are different between the full activity data set and the hiring date data set. Data needed to be cross validated and cleaned up in order for me to be able to join the two tables. 
+3. I had to make a few assumptions. For example, one FSR had totally different first names, Max and Jordan, but the last name was so unusual, Petru, that I figured they were the same person. 
+I only ran this analysis on the FSR who had a clear hiring date; there were other reps on the full data and I decided to omit them from the analysis. 
+4. I decided to analyze by the week end, Sunday. 
+5. I could do a daily analysis. 
+6. Grouping by days of the week is probably interesting. See if there is a difference between old and new and their day to day practices. 
+7. There were other hires in the start date set. Because they are newer than the the yellow subset, I did not use them in the analysis because it would likely decrease the average weekly visits of the employees who have been arounf for a while. 
+8. Are there more visits per FSR in certain regions?
+9. Do FSR who have a larger cachement area, see fewer clinics?
+
+```{r}
+head(dataHires1)
+noUnkn <- dataHires1 %>% filter(Status!= "Unknown Hire Date")
+range(noUnkn$Actual.Activity.Date)
+Yell <- noUnkn %>% filter(Status == "Yellow Hire")
+range(Yell$HireDate)
+```
+
+
 ```{r, fig.height=20, fig.width=9}
-ggplot(newerYe, aes(x = WNumber, y = n)) + geom_line(aes(y = AvNum, colour = AvNum)) + geom_line(aes(y = n, color = n)) + facet_wrap(~FSR, ncol = 4) +theme_bw()
+ggplot(newerYe, aes(x = WNumber, y = n)) + geom_line(aes(y = AvNum, colour = 'grey80')) + geom_line(aes(y = n)) + facet_wrap(~FSR, ncol = 4) +theme_bw()
 ```
 
 
