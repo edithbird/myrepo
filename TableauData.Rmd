@@ -300,12 +300,11 @@ fullData1 Subsetting
 fullDataNew <- fullDataNew %>% 
   separate(Activity.Recorded.By, c("LastName", "FirstName"), ",")
 fullDataNew <- fullDataNew %>% mutate(FSR = paste(LastName, ", ", FirstName))
-head(fullDataNew)
+
 
 
 list2env(split(fullDataNew, fullDataNew$FSR), envir = .GlobalEnv)
-`Pettinella ,   Stephanie`
-`Munsen ,   Karen`
+
 `Munsen ,   Karen` %>% group_by(Actual.Activity.Date) %>% summarise(n = n())
 `Munsen ,   Karen`$Actual.Activity.Date <- as.Date(`Munsen ,   Karen`$Actual.Activity.Date, format = "%m/%d/%Y")
 
@@ -613,5 +612,13 @@ head(coordinatesDPC)
 tail(Coord)
 Coord <- cbind.data.frame(coordinatesDPC, Coord)
 #write.csv(Coord, "DPCTerritories.csv", row.names = F)
+```
+
+```{r, eval=FALSE, include=FALSE}
+yellowHiresNamed
+library(treemap)
+str(theSet)
+levels(theSet$Status)
+treemap(theSet, index = c("Yellow Hire", ""), vsize = n,vcolor = FSR)
 ```
 
