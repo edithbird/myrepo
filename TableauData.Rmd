@@ -47,42 +47,17 @@ Combined <- read.csv("vLoolUp.csv", header = T, stringsAsFactors = F)
 Full Data
 
 ```{r}
-head(fullData)
-tail(fullData)
-dim(fullData)
-
+kable(head(fullData))
 ```
 
-```{r}
-#make a copy of the data
-fullDataNew <- fullData
-```
+Convert Dates 
 
 ```{r}
 #convert factor dates to Posixct
 fullData$Actual.Activity.Date <- as.POSIXct(fullData$Actual.Activity.Date, format = "%m/%d/%Y")
 fullData$Week.Ending <- as.POSIXct(fullData$Week.Ending, format = "%m/%d/%Y")
 fullData$Activity.Recorded.On <- as.POSIXct(fullData$Activity.Recorded.On, format = "%m/%d/%Y")
-#make sure the conversion worked
-
-```
-
-```{r}
-
-Combined$Actual.Activity.Date <- as.POSIXct(Combined$Actual.Activity.Date, format = "%m/%d/%Y")
-Combined$Week.Ending <- as.POSIXct(Combined$Week.Ending, format = "%m/%d/%Y")
-Combined$Activity.Recorded.On <- as.POSIXct(Combined$Activity.Recorded.On, format = "%m/%d/%Y")
-Combined$HireDate <- as.POSIXct(Combined$HireDate, format = "%m/%d/%Y")
-
-```
-
-
-```{r}
-workersPerStatus <- Combined %>% group_by(FSR, Status) %>% summarise(n=n())
-
-Averages <- Combined %>% group_by(WNumber, Status) %>% summarise(visitsPerWeek = mean(n()))
-
-
+head(fullData)
 ```
 
 This is a new dataset reengineering the FSR names
@@ -98,69 +73,146 @@ fullData <- fullData %>% mutate(FSR = paste(LastName, ", ", FirstName)) %>% arra
 fullData[c(19900:19920), ]
 ```
 
-This puts the days of the week in
+
 
 ```{r}
-a <- fullData %>% arrange(Actual.Activity.Date)
+fullData <-  fullData %>% arrange(Actual.Activity.Date)
+fullData <- fullData %>% mutate(Day = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+    "Friday", "Saturday")[as.POSIXlt(a$Actual.Activity.Date)$wday + 1])
+
+fullData <- fullData %>% mutate(DayWeekEnding = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+    "Friday", "Saturday")[as.POSIXlt(a$Week.Ending)$wday + 1])
+
+dim(fullData)
+head(fullData)
+tail(fullData)
+
+#added a week number
+fullData <- fullData %>%  mutate(WeekNumber = format(Actual.Activity.Date, format = "%W"))
+
+dim(fullData)
+head(fullData)
+tail(fullData)
+
+fullData <- fullData %>% mutate(DayNumber = ifelse(wday(Actual.Activity.Date)==1,6,wday(Actual.Activity.Date)-2)) 
+
+fullData <- fullData%>% mutate(DayWkEnd = ifelse(wday(Week.Ending)==1,6,wday(Week.Ending)-2))
+
+dim(fullData)
+head(fullData)
+tail(fullData)
 
 
-# a <- a %>% mutate(Day = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
-#     "Friday", "Saturday")[as.POSIXlt(a$Actual.Activity.Date)$wday + 1])
-# a <- a %>% mutate(DayWeekEnding = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
-#     "Friday", "Saturday")[as.POSIXlt(a$Week.Ending)$wday + 1])
-# 
-# head(a)
-# tail(a, 100)
+######################################################
+
+
+
 ```
 
-This numbers the days of the week
+```{r}
+
+dim(fullData)
+head(fullData)
+tail(fullData)
+```
+
+________________________________________________
 
 ```{r}
-c <- a %>% mutate(Day = ifelse(wday(a$Actual.Activity.Date)==1,6,wday(a$Actual.Activity.Date)-2)) 
-c <-  c %>% mutate(DayWkEnd = ifelse(wday(a$Week.Ending)==1,6,wday(a$Week.Ending)-2))
-
-
-c %>% group_by(Day) %>% summarise(n = n())
-c %>% group_by(DayWkEnd) %>% summarise(n = n())
+fullData$WeekNumberP <- as.numeric(fullData$WeekNumber)
 
 ```
 
 
 ```{r}
-#add week number as a new column
-e <- a %>% mutate(WeekNumber = format(Actual.Activity.Date, format = "%W"))
-e$WeekNumber <- as.numeric(e$WeekNumber)
 
 #Split 2015 and 2016
 #2015
-e1 <- e[c(1:32967), ]
+e1 <- fullData[c(1:32967), ]
 #add week number to 2015 (this is a duplicate column so it will match with 2016)
 e1 <- e1 %>% mutate(WNumber = WeekNumber + 0)
+head(e1)
 #2016
-e2 <- e[c(32968:46755), ]
+fullData[c(32960:32970), ]
+e2 <- fullData[c(32968:46755), ]
 #add week number (+52) to 2016
 e2 <- e2 %>% mutate(WNumber = WeekNumber + 52)
+dim(e2)
+head(e2, 25)
+range(e2$Running.Count)
 #Recombine 2015 and 2016 so there's a continuous flow of week numbers
 perfectFullSet <- rbind.data.frame(e1, e2)
 #verify the dimensions are the same as the original data
 dim(perfectFullSet)
+head(perfectFullSet)
+tail(perfectFullSet)
 #eliminate duplicate column
-perfectFullSet <- perfectFullSet[, -21 ]
+perfectFullSet <- perfectFullSet[, -c(22,25) ]
+head(perfectFullSet)
+dim(perfectFullSet)
+tail(perfectFullSet)
+perfectFullSet[32966:32970, ]
 
-
+str(perfectFullSet)
 perfectFullSet1 <-  perfectFullSet %>% group_by(WNumber) %>% summarise(n = n())
+perfectFullSet1
 
-ggplot(perfectFullSet1, aes(x = WNumber , y = n)) + geom_line()
+#################################################
+wday()
+perfectFullSet[32966:32970, ]
+weekdays(as.Date("2016-01-10"))
+weekdays(as.Date("2016-07-03"))
+```
 
+
+
+This is where to start. 
+
+```{r}
+e2 <- e2 %>% mutate(Date = ifelse(e2$WNumber = 52, as.POSIXct("2016-01-03")))
+```
+
+```{r}
+datesSundays <- seq(as.POSIXct("2016-01-03":"2016-07-03"), "weeks")
+
+
+datesSundays <-seq(
+     from=as.POSIXct("2016-01-10","%Y-%m-%d", tz="EST"),
+     to=as.POSIXct("2016-07-03", "%Y-%m-%d", tz="EST"),
+     by="week"
+   )
+datesSundays
+WNumber <- seq(from = 53, to = 78, by = 1)
+WNumber
+dateDataFrame <- cbind.data.frame(datesSundays, WNumber)
+dateDataFrame
+```
+
+```{r}
+y <- inner_join(e2, dateDataFrame)
+head(y)
+tail(y)
+y$Running.Count <- seq(from = 32969, to = 46755, by = 1)
+head(y)
+tail(y)
+names(y)
+y <- y[, -c(3, 22)]
+head(y)
+tail(y)
+y <- y %>% select(Running.Count, Actual.Activity.Date, Week.Ending = datesSundays,YearMonth, LastName, FirstName, Activity.Recorded.On, Rep.Role,Case.Type.Name...SA, SAP.Number, Practice.Name, City, State, Zip, Sales.Region, DPC.Territory, Activity.ID, Visit.Objective, Method, Day, DayWeekEnding, DayNumber,DayWkEnd, WNumber)
 
 
 ```
 
 
 
-#Week Number
-
-
+```{r}
+ggplot(perfectFullSet1, aes(x = WNumber , y = n)) + geom_line() + ggtitle(label = "Visits made each week by all FSRs")
+#verify that the sum is correct by using a simple data set
+f <- data.frame(Day = c("a", "b", "c"), Visits = c(3,4,3))
+f
+sum(f$Visits)
+```
 
 
 #This has the days of the actual and the week ending Day
@@ -168,6 +220,8 @@ ggplot(perfectFullSet1, aes(x = WNumber , y = n)) + geom_line()
 ```{r, eval=FALSE, include=FALSE}
 d <- c %>% mutate(ActualDay = ifelse(Day == 0, "Monday", ifelse(Day == 1, "Tuesday", ifelse(Day == 2, "Wednesday", ifelse(Day == 3, "Thursday", ifelse(Day == 4, "Friday", ifelse(Day == 5, "Saturday", "Sunday")))))))
 d <- d %>% mutate(ActualDayWkEnd = ifelse(DayWkEnd == 0, "Monday", ifelse(DayWkEnd == 1, "Tuesday", ifelse(DayWkEnd == 2, "Wednesday", ifelse(DayWkEnd == 3, "Thursday", ifelse(DayWkEnd == 4, "Friday", ifelse(DayWkEnd == 5, "Saturday", "Sunday")))))))
+tail(d)
+dim(d)
 
 ```
 
@@ -182,8 +236,42 @@ b <- a %>% group_by(DayWeekEnding) %>% summarise(n = n())
 
 a[c(32900:32999), ]
 b[c(32900:32999), ]
+
 ```
 
+
+Make a copy
+
+```{r}
+#make a copy of the data
+fullDataNew <- fullData
+```
+
+
+
+Convert Dates of Combined Set
+
+```{r}
+
+Combined$Actual.Activity.Date <- as.POSIXct(Combined$Actual.Activity.Date, format = "%m/%d/%Y")
+Combined$Week.Ending <- as.POSIXct(Combined$Week.Ending, format = "%m/%d/%Y")
+Combined$Activity.Recorded.On <- as.POSIXct(Combined$Activity.Recorded.On, format = "%m/%d/%Y")
+Combined$HireDate <- as.POSIXct(Combined$HireDate, format = "%m/%d/%Y")
+```
+
+Number of Records for each worker (includes their status)
+
+```{r}
+workersPerStatus <- Combined %>% group_by(FSR, Status) %>% summarise(n=n()) 
+head(workersPerStatus)
+dim(workersPerStatus)
+head(Combined)
+Averages <- Combined %>% group_by(WNumber, Status) %>% summarise(visitsPerWeek = mean(n()))
+Averages
+
+b <- Combined %>% group_by(WNumber, Status) %>% summarise(visitsPerW = n())
+head(b)
+```
 
 
 
@@ -270,11 +358,15 @@ yellowHires$Status <- rep("Yellow Hire")
 
 oldHires <- startDatesFinal[c(1:51), ]
 oldHires$Status <- rep("Old Hire")
+oldHires
 
 ```
+
+
 ```{r}
 latestHires <- startDatesFinal[c(71:94),]
 latestHires$Status <- rep("Latest Hires")
+latestHires
 
 ```
 
@@ -282,8 +374,8 @@ latestHires$Status <- rep("Latest Hires")
 ```{r}
 perfectStartDates <- rbind(oldHires, yellowHires, latestHires)
 perfectStartDates[c(52:53), 3] <- as.POSIXct("2014-10-13")
-
-
+head(perfectStartDates)
+dim(perfectStartDates)
 ```
 
 
@@ -301,7 +393,8 @@ fullDataNew <- fullDataNew %>%
   separate(Activity.Recorded.By, c("LastName", "FirstName"), ",")
 fullDataNew <- fullDataNew %>% mutate(FSR = paste(LastName, ", ", FirstName))
 
-
+head(fullDataNew)
+dim(fullDataNew)
 
 list2env(split(fullDataNew, fullDataNew$FSR), envir = .GlobalEnv)
 
