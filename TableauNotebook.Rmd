@@ -1,0 +1,185 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(scales)
+library(lubridate)
+```
+
+Here is the scenario:
+
+Given the start dates of the FSRs in yellow in the FSR (Field Service Reps) Team start date file, how long did it take for them to mature to the point where their average visits per week matched that of their peers?
+
+Please create a Tableau visualization that answers this question as well as visualizations for anything else interesting you see in the data set.
+
+Let me know if you would be willing to do this and a ball park for when you think you will be ready to present to the team and I will get something scheduled. Also please feel free to reach out with any questions.
+
+Thank you!
+
+
+```{r}
+fullData <- read.csv("FullData.csv", header = T, na.strings=c("","NA"))
+startDates <- read.csv("startDates.csv", header = T)
+Combined <- read.csv("vLoolUp.csv", header = T, stringsAsFactors = F)
+head(startDates)
+```
+
+###Full Data
+
+There are 18 columns and 46,755 rows of data recording the activity of Field Service Representatives from 2015-01-01 to 2016-06-30
+
+```{r}
+dim(fullData)
+head(fullData)
+tail(fullData)
+```
+
+**Clean Data**
+
+1. In order to make the Field Service Reps names recognizable for a table join with the Start Date dataset, the **Activity.Recorded.By** column has to be split and reengineered. This will add 2 new columns. 
+
+```{r}
+#Split FSR names so they match with the other dataset. This is a new dataframe
+fullData <- fullData %>% 
+  separate(Activity.Recorded.By, c("LastName", "FirstName"), ",")
+fullData <- fullData %>% mutate(FSR = paste(LastName, ", ", FirstName))
+```
+
+
+2. Note that all 3 date columns are in a string format and need to be converted to a date type so we can explore the activty chronologically. 
+
+```{r}
+#convert factor dates to Posixct
+fullData$Actual.Activity.Date <- as.POSIXct(fullData$Actual.Activity.Date, format = "%m/%d/%Y")
+fullData$Week.Ending <- as.POSIXct(fullData$Week.Ending, format = "%m/%d/%Y")
+fullData$Activity.Recorded.On <- as.POSIXct(fullData$Activity.Recorded.On, format = "%m/%d/%Y")
+#arrange chronologically by Activity Date
+fullData <-  fullData %>% arrange(Actual.Activity.Date)
+
+head(fullData)
+tail(fullData)
+```
+
+3. Add 2 new columns, the day names for **Actual.Activity.Date** and **Week.Ending**. 
+
+```{r}
+fullData <- fullData %>% mutate(Day = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+    "Friday", "Saturday")[as.POSIXlt(a$Actual.Activity.Date)$wday + 1])
+
+fullData <- fullData %>% mutate(DayWeekEnding = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+    "Friday", "Saturday")[as.POSIXlt(a$Week.Ending)$wday + 1])
+
+dim(fullData)
+head(fullData)
+tail(fullData)
+fullData[c(32960:32970), ]
+```
+
+4. To examine FSR activity by weeks, I add a WeekNumber column. 
+
+```{r}
+#added a week number
+fullData <- fullData %>%  mutate(WeekNumber = format(Actual.Activity.Date, format = "%W"))
+fullData$WeekNumber <- as.numeric(fullData$WeekNumber)
+head(fullData)
+tail(fullData)
+```
+
+
+
+
+4. A sample of the data reveals that starting on Jan 1, 2016, not all data is recorded;  Running.Count, Week.Ending, Activity.Recorded.On, City, State, Zip, and DayWeekEnding.  The WeekNumber column restarts at 0 at the beginning of 2016. This needs to be coorected as well. Each column will be filled or corrected separately. To do this, I'll break the data into 2 dataframes, one for 2016 and 2015, called e1 and e2 respectivally. 
+
+
+```{r}
+e1 <- fullData[c(1:32967), ]
+head(e1)
+names(e1)
+e2 <- fullData[c(32968:46755), ]
+```
+
+a. Running.Count
+
+```{r}
+e2$Running.Count <- seq(from = 32968, to = 46755, by = 1)
+head(e2)
+```
+
+b.  Week.Number
+
+This has to be corrected before Week.Ending. 
+
+```{r}
+e2$WeekNumber <- e2$WeekNumber + 52
+head(e2)
+```
+
+c. Week.Ending
+
+```{r}
+datesSundays <-seq(
+     from=as.POSIXct("2016-01-03","%Y-%m-%d", tz="EST"),
+     to=as.POSIXct("2016-07-03", "%Y-%m-%d", tz="EST"),
+     by="week")
+WeekNumber <- seq(from = 52, to = 78, by = 1)
+dateDataFrame <- cbind.data.frame(datesSundays, WeekNumber)
+dateDataFrame
+
+x <- inner_join(e2, dateDataFrame)
+head(x)
+tail(x)
+dim(x)
+x <- x[, -3]
+x <- x %>% select(Running.Count, Actual.Activity.Date,Week.Ending = datesSundays,          YearMonth,          
+LastName, FirstName, Activity.Recorded.On, Rep.Role, Case.Type.Name...SA, SAP.Number, Practice.Name, City, State, Zip,Sales.Region, DPC.Territory, Activity.ID, Visit.Objective,      Method, FSR, Day, DayWeekEnding, WeekNumber)
+head(x)
+names(x)
+```
+
+d. Activity.Recorded.On
+There is no way to determine this data from the data given and because it's not necessary for the analysis, we can eliminate it. 
+
+```{r}
+e1 <- e1[, -7]
+x <- x[, -7]
+head(x)
+```
+
+e. 
+
+```{r}
+names(x)
+
+
+
+levelse1Practice.Name <- unique(e1PractiecLocations)
+dim(levelse1Practice.Name)
+
+
+#THIS IS THE REFERENCE LIST
+head(levelse1Practice.Name)
+
+x$City <- levelse1Practice.Name$City[match(x$Practice.Name, levelse1Practice.Name$Practice.Name)]
+x$State <- levelse1Practice.Name$State[match(x$Practice.Name, levelse1Practice.Name$Practice.Name)]
+x$Zip <- levelse1Practice.Name$Zip[match(x$Practice.Name, levelse1Practice.Name$Practice.Name)]
+head(x)
+dim(x)
+```
+
+```{r}
+completeData <- rbind.data.frame(e1, x)
+dim(completeData)
+head(completeData)
+tail(completeData)
+tail(completeData %>% arrange(FSR), 25)
+completeData[c(2455:2555), ]
+```
+
+
