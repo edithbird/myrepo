@@ -28,7 +28,8 @@ Thank you!
 fullData <- read.csv("FullData.csv", header = T, na.strings=c("","NA"))
 startDates <- read.csv("startDates.csv", header = T)
 Combined <- read.csv("vLoolUp.csv", header = T, stringsAsFactors = F)
-head(startDates)
+
+
 ```
 
 ###Full Data
@@ -62,9 +63,6 @@ fullData$Week.Ending <- as.POSIXct(fullData$Week.Ending, format = "%m/%d/%Y")
 fullData$Activity.Recorded.On <- as.POSIXct(fullData$Activity.Recorded.On, format = "%m/%d/%Y")
 #arrange chronologically by Activity Date
 fullData <-  fullData %>% arrange(Actual.Activity.Date)
-
-head(fullData)
-tail(fullData)
 ```
 
 3. Add 2 new columns, the day names for **Actual.Activity.Date** and **Week.Ending**. 
@@ -72,13 +70,8 @@ tail(fullData)
 ```{r}
 fullData <- fullData %>% mutate(Day = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
     "Friday", "Saturday")[as.POSIXlt(a$Actual.Activity.Date)$wday + 1])
-
 fullData <- fullData %>% mutate(DayWeekEnding = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
     "Friday", "Saturday")[as.POSIXlt(a$Week.Ending)$wday + 1])
-
-dim(fullData)
-head(fullData)
-tail(fullData)
 fullData[c(32960:32970), ]
 ```
 
@@ -89,10 +82,7 @@ fullData[c(32960:32970), ]
 fullData <- fullData %>%  mutate(WeekNumber = format(Actual.Activity.Date, format = "%W"))
 fullData$WeekNumber <- as.numeric(fullData$WeekNumber)
 head(fullData)
-tail(fullData)
 ```
-
-
 
 
 4. A sample of the data reveals that starting on Jan 1, 2016, not all data is recorded;  Running.Count, Week.Ending, Activity.Recorded.On, City, State, Zip, and DayWeekEnding.  The WeekNumber column restarts at 0 at the beginning of 2016. This needs to be coorected as well. Each column will be filled or corrected separately. To do this, I'll break the data into 2 dataframes, one for 2016 and 2015, called e1 and e2 respectivally. 
@@ -100,8 +90,7 @@ tail(fullData)
 
 ```{r}
 e1 <- fullData[c(1:32967), ]
-head(e1)
-names(e1)
+
 e2 <- fullData[c(32968:46755), ]
 ```
 
@@ -109,7 +98,6 @@ a. Running.Count
 
 ```{r}
 e2$Running.Count <- seq(from = 32968, to = 46755, by = 1)
-head(e2)
 ```
 
 b.  Week.Number
@@ -118,7 +106,6 @@ This has to be corrected before Week.Ending.
 
 ```{r}
 e2$WeekNumber <- e2$WeekNumber + 52
-head(e2)
 ```
 
 c. Week.Ending
@@ -130,17 +117,15 @@ datesSundays <-seq(
      by="week")
 WeekNumber <- seq(from = 52, to = 78, by = 1)
 dateDataFrame <- cbind.data.frame(datesSundays, WeekNumber)
-dateDataFrame
-
 x <- inner_join(e2, dateDataFrame)
+
 head(x)
-tail(x)
 dim(x)
+
 x <- x[, -3]
-x <- x %>% select(Running.Count, Actual.Activity.Date,Week.Ending = datesSundays,          YearMonth,          
-LastName, FirstName, Activity.Recorded.On, Rep.Role, Case.Type.Name...SA, SAP.Number, Practice.Name, City, State, Zip,Sales.Region, DPC.Territory, Activity.ID, Visit.Objective,      Method, FSR, Day, DayWeekEnding, WeekNumber)
+x <- x %>% select(Running.Count, Actual.Activity.Date,Week.Ending = datesSundays, YearMonth, LastName, FirstName, Activity.Recorded.On, Rep.Role, Case.Type.Name...SA, SAP.Number, Practice.Name, City, State, Zip,Sales.Region, DPC.Territory, Activity.ID, Visit.Objective,      Method, FSR, Day, DayWeekEnding, WeekNumber)
 head(x)
-names(x)
+dim(x)
 ```
 
 d. Activity.Recorded.On
@@ -149,37 +134,71 @@ There is no way to determine this data from the data given and because it's not 
 ```{r}
 e1 <- e1[, -7]
 x <- x[, -7]
-head(x)
 ```
 
-e. 
+e. City, State, and Zip
+
+Using a table join function for the 2016 data and a list of the unique practices with their addresses from the previous year, I was able to get about 86% of the missing data. 
 
 ```{r}
-names(x)
-
-
-
-levelse1Practice.Name <- unique(e1PractiecLocations)
-dim(levelse1Practice.Name)
-
-
+deduped.data <- unique(e1)
+dim(deduped.data)
 #THIS IS THE REFERENCE LIST
-head(levelse1Practice.Name)
+referenceSet <- deduped.data %>% select(SAP.Number, Practice.Name, City, State, Zip)
+deduped.data <- unique(referenceSet)
+dim(deduped.data)
+#VLookup Function in R
 
-x$City <- levelse1Practice.Name$City[match(x$Practice.Name, levelse1Practice.Name$Practice.Name)]
-x$State <- levelse1Practice.Name$State[match(x$Practice.Name, levelse1Practice.Name$Practice.Name)]
-x$Zip <- levelse1Practice.Name$Zip[match(x$Practice.Name, levelse1Practice.Name$Practice.Name)]
-head(x)
-dim(x)
+#City
+x$City[is.na(x$City)] <- deduped.data$City[match(x$SAP.Number, deduped.data$SAP.Number)][which(is.na(x$City))]
+
+#State
+x$State[is.na(x$State)] <- deduped.data$State[match(x$SAP.Number,deduped.data$SAP.Number)][which(is.na(x$State))]
+
+#Zip
+x$Zip [is.na(x$Zip)] <- deduped.data$Zip[match(x$SAP.Number, deduped.data$SAP.Number)][which(is.na(x$Zip))]
+
+#Rejoin the data
+completeData <- rbind.data.frame(e1, x)
+tail(completeData %>% arrange(FSR), 25)
 ```
 
+f. DayWeekEnding
+The week always ends on Sundays. This column is simple to fill. 
+
 ```{r}
-completeData <- rbind.data.frame(e1, x)
-dim(completeData)
+completeData$DayWeekEnding <- "Sunday"
+
+completeData[5644, ]
+summary(completeData)
+```
+
+
+```{r}
 head(completeData)
-tail(completeData)
-tail(completeData %>% arrange(FSR), 25)
-completeData[c(2455:2555), ]
+summary(completeData)
+```
+
+5. Now this needs to be merged with the hiring date data. 
+
+```{r}
+head(startDates)
+dim(startDates)
+```
+miller munson russell shephard
+```{r}
+write.csv(completeData, "CompleteData1.csv", row.names = F)
+```
+
+
+```{r}
+xxxx <- read.csv("PerfectStartDates.csv", header = T, stringsAsFactors = F)
+#xxxx %>% filter(FSR == "Anderson, ")
+yyyy <- read.csv("CompleteData1.csv", header = T, stringsAsFactors = F)
+yyyy %>% filter(LastName == "Wallace")
+zzzz <- merge(x = xxxx,  y = yyyy, by = "FSR", all = T)
+head(zzzz, 50)
+dim(zzzz)
 ```
 
 
