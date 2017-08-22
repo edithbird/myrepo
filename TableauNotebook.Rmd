@@ -69,10 +69,11 @@ fullData <-  fullData %>% arrange(Actual.Activity.Date)
 
 ```{r}
 fullData <- fullData %>% mutate(Day = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-    "Friday", "Saturday")[as.POSIXlt(a$Actual.Activity.Date)$wday + 1])
+    "Friday", "Saturday")[as.POSIXlt(Actual.Activity.Date)$wday + 1])
 fullData <- fullData %>% mutate(DayWeekEnding = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-    "Friday", "Saturday")[as.POSIXlt(a$Week.Ending)$wday + 1])
+    "Friday", "Saturday")[as.POSIXlt(Week.Ending)$wday + 1])
 fullData[c(32960:32970), ]
+
 ```
 
 4. To examine FSR activity by weeks, I add a WeekNumber column. 
@@ -184,21 +185,172 @@ summary(completeData)
 ```{r}
 head(startDates)
 dim(startDates)
+startDates
 ```
-miller munson russell shephard
-```{r}
-write.csv(completeData, "CompleteData1.csv", row.names = F)
-```
-
 
 ```{r}
-xxxx <- read.csv("PerfectStartDates.csv", header = T, stringsAsFactors = F)
-#xxxx %>% filter(FSR == "Anderson, ")
-yyyy <- read.csv("CompleteData1.csv", header = T, stringsAsFactors = F)
-yyyy %>% filter(LastName == "Wallace")
-zzzz <- merge(x = xxxx,  y = yyyy, by = "FSR", all = T)
-head(zzzz, 50)
-dim(zzzz)
+#write.csv(completeData, "CompleteData1.csv", row.names = F)
 ```
 
 
+```{r}
+Start <- read.csv("PerfectStartDates.csv", header = T, stringsAsFactors = F, na.strings=c("","NA"))
+Complete <- read.csv("CompleteData1.csv", header = T, stringsAsFactors = F)
+
+
+```
+
+Aside, There are only 78 names in Common so this will be the analysis
+
+```{r}
+# Start
+# abcde <- Complete %>% group_by(LastName) %>% summarise(n = n())
+# names(fullData)
+# fghij <- Start %>% group_by(Last) %>% summarise(nmn = n())
+# fghij <- fghij %>%  rename(LastName = Last)
+# klmno <- inner_join(abcde, fghij) 
+# klmno
+```
+
+
+
+a. No Petru, No  Swanlund
+
+Some names aren't the same. Petru,Jordan in Complete, vs, Petru, Max in Start Dates. Swanlund, Skip in Complete vs Swanlund,Harry in StartDates. 
+
+```{r}
+
+tail(Complete)
+Start
+```
+
+
+Add the proper data here. This is just a pasted template.
+
+```{r}
+#Last.Hire.Date
+Complete$Last.Hire.Date[is.na(Complete$Last.Hire.Date)] <- Start$Last.Hire.Date[match(Complete$FSR, Start$FSR)][which(is.na(Complete$Last.Hire.Date))]
+
+#Status
+
+Complete$Status[is.na(Complete$Status)] <- Start$Status[match(Complete$FSR, Start$FSR)][which(is.na(Complete$Status))]
+```
+
+```{r}
+head(Complete)
+tail(Complete)
+Complete %>% group_by(FSR, Last.Hire.Date, Status) %>% summarise(n = n())
+Start %>% group_by(Status) %>% summarise(n=n())
+Complete[c(25443:25500), ]
+Complete <- Complete %>% arrange(Actual.Activity.Date)
+summary(Complete)
+#No Petra and Swanlund
+dim(Complete)
+write.csv(Complete, "NoPetraSwan.csv", row.names = F)
+```
+
+b. Includes Petru and Swanlund
+
+```{r}
+HirePetruSwan <- read.csv("HirePetruSwanlund.csv", header = T, stringsAsFactors = F, na.strings=c("","NA"))
+
+
+fullPetruSwanlund <- read.csv("CompletePetruSwanlund.csv", header = T)
+```
+
+
+```{r}
+#Last.Hire.Date
+fullPetruSwanlund$Last.Hire.Date[is.na(fullPetruSwanlund$Last.Hire.Date)] <- HirePetruSwan$Last.Hire.Date[match(fullPetruSwanlund$FSR, HirePetruSwan$FSR)][which(is.na(fullPetruSwanlund$Last.Hire.Date))]
+
+#Status
+
+fullPetruSwanlund$Status[is.na(fullPetruSwanlund$Status)] <- HirePetruSwan$Status[match(fullPetruSwanlund$FSR, HirePetruSwan$FSR)][which(is.na(fullPetruSwanlund$Status))]
+
+#PetraSwan csv
+#write.csv(fullPetruSwanlund, "PetraSwan.csv", row.names = F)
+```
+
+
+```{r}
+
+HirePetruSwan
+head(fullPetruSwanlund)
+names(HirePetruSwan)
+summary(fullPetruSwanlund)
+```
+
+For the Tableau Analysis, there are 2 datasets. 
+
+PetraSwan.csv includes them with hiring dates. Using this set means I am making the assumption that they are the same people. 
+
+NoPetraSwan.csv does not make the assumption that they are the same people. 
+
+Petra and Swan are both included here also with their hiring dates. 
+
+```{r}
+summary(fullPetruSwanlund)
+head(fullPetruSwanlund)
+fullPetruSwanlund %>% group_by(FSR, Last.Hire.Date, Status) %>% summarise(entries = n()) %>% arrange(Last.Hire.Date)
+fullPetruSwanlund$Week.Ending <- as.POSIXct(fullPetruSwanlund$Week.Ending, format = "%m/%d/%Y")
+fullPetruSwanlund$Last.Hire.Date <- as.POSIXct(fullPetruSwanlund$Last.Hire.Date, format = "%m/%d/%Y")
+```
+
+This is reformatted for Tableau analysis. 
+This has the geographical data
+
+
+
+```{r}
+head(fullPetruSwanlund)
+dim(fullPetruSwanlund)
+```
+
+
+```{r}
+
+fullPetruSwanlundGatheredTerritory1 %>% group_by(FSR, Status) %>% summarise(n = n()) %>% arrange(Status)
+fullPetruSwanlundGatheredTerritory1 <- fullPetruSwanlund %>% group_by(Week.Ending, FSR, Status, DPC.Territory, WeekNumber, Last.Hire.Date) %>% summarise(visits = n())
+
+tail(fullPetruSwanlundGatheredTerritory1, 20)
+dim(fullPetruSwanlundGathered)
+#write.csv(fullPetruSwanlundGatheredTerritory1, "Territories1.csv", row.names = F)
+```
+```{r}
+OldHiresAverage <- fullPetruSwanlundGatheredTerritory1 %>% filter(Status == "Old Hire") %>% group_by(WeekNumber, Week.Ending) %>% summarise(averageVisitsOldHires=round(mean(visits), 2))
+
+OldHiresAverage
+DataSource <- inner_join(fullPetruSwanlundGatheredTerritory1, OldHiresAverage)
+summary(DataSource)
+head(DataSource)
+DataSource %>% group_by(Last.Hire.Date, Status) %>% summarise(mean = mean(visits), sum(visits))
+```
+
+
+
+-----------------------------------------------
+
+
+
+
+This is Extra. Trying to fill in the locations for the NA values. 
+
+```{r}
+NAOnly <- read.csv("NAValuesFull.csv", header = T, stringsAsFactors = F, na.strings=c("","NA"))
+                              
+dim(NAOnly %>% filter(FSR == "Swanlund"))
+unique(NAOnly$FSR)
+dim(NAOnly)
+NAOnly %>% group_by(FSR) %>% summarise(n = n())
+head(NAOnly, 100)
+```
+
+
+```{r}
+NAOnly <- NAOnly %>% 
+  separate(DPC.Territory, c("City1", "State1"), " ")
+
+NAOnly
+fullData <- fullData %>% mutate(FSR = paste(LastName, ", ", FirstName))
+
+```
