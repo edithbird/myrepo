@@ -1,0 +1,68 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r data}
+data <- read.csv("FinalFullSet.csv", header = T, stringsAsFactors = F)
+#convert to posixct
+data$Week.Ending <- as.POSIXct(data$Week.Ending, format = "%m/%d/%Y")
+data$Last.Hire.Date <-  as.POSIXct(data$Last.Hire.Date, format = "%m/%d/%Y")
+### weeks between hire and week ending
+data1 <- data %>% mutate(x = difftime(Week.Ending, Last.Hire.Date, units = "weeks"))
+data1 <- data1 %>% mutate(x = round(x,0))
+data2 <- data1 %>% mutate(xWeeks = as.integer(data1$x))
+pipeline <- c("Strategic", "Pre-Install Site Survey", "New Install", "Post Installation Follow-up", "Defected")
+pipelineSales <- data2[data2$Visit.Objective %in% pipeline, ] 
+#Specific Long
+pipeLong <- pipelineSales %>% group_by(Week.Ending, FSR, Last.Hire.Date,Status, Visit.Objective,DPC.Territory, x, xWeeks) %>% summarise(numberOfVisits = n()) %>% rename(weeksEmployed = x)
+#General Long
+pipelineGeneral <- pipelineSales %>% group_by(FSR, Status, Week.Ending, Last.Hire.Date,x , xWeeks) %>% summarise(numberOfVisits = n()) %>% rename(Weeks.Employed = x)
+generalStatus <- pipelineSales %>% group_by(Week.Ending, Status) %>% summarise(visitsPerWeek = n())
+countFSR <- generalStatus %>% group_by(Week.Ending, Status) %>% summarise(n = n())
+#Step 1 Numerator
+a <- pipelineSales %>% group_by(Week.Ending, Status) %>% summarise(numberVisits = n())
+#Step 2a Denom
+b <- pipelineGeneral %>% group_by(Week.Ending, Status) %>% summarise(numberReps = n())
+#Average
+c <- inner_join(a,b)
+c <- c %>% mutate(averageVisitsPerWeek = round(numberVisits/numberReps, 0))
+#save c, pipelong, pipelineGeneral
+```
+
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+ggplot(c, aes(x = Week.Ending, y = averageVisitsPerWeek, group  = Status, color = Status)) + geom_line(size = 1) + scale_color_manual(values=c("turquoise", "firebrick1", "orange")) + theme_bw()
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+

@@ -18,7 +18,7 @@ Other Questions:
 1. Do certain managers cultivate more productive workers?
 
 
-```{r Load Libraries}
+```{r Load Libraries, message=FALSE, warning=FALSE}
 library(knitr)
 library(dplyr)
 library(tidyr)
@@ -37,11 +37,11 @@ Combined <- read.csv("vLoolUp.csv", header = T, stringsAsFactors = F)
 
 To answer the question, how long did it take for the subset of 19 FSR hired between 10/13/2014 - 11/3/2014 to match the productivity of their peers, requires a table join between the two datasets and aggregating the FSRs into distinct groups. However, the FSR names are formatted differently between the two sets. 
 
-Cleaning the data. 
+Cleaning the data included reengineering the Representatives names after I found all sorts of quirks like nicknames and two part last names. I divided the Reps into 3 categories, subsetting them by hiring date. I call them Seasoned, Yellow Hires, and Recent Hires. 
 
-```{r}
+Then I merged the two datasets. Joining them left me with 79 FSRs altogether. All 19 of the Yellow hires remained. The ones eliminated were mostly recent hires. This left me with a total of 41637 FSRs. 
 
-```
+There was quite a bit of missing data, most of which came from entries starting in the first week of 2016. I filled in what was necessary to complete the analysis, namely the Week.Ending date. I also added days of the week data because i thought it would be interesting to look at that closer. 
 
 ```{r create name columns on fullData}
 #Split FSR names so they match with the other dataset. This is a new dataframe
@@ -52,7 +52,6 @@ fullData1$FirstName <- substring(fullData1$FirstName, 1,1)
 #fullData1$LastName <- substring(fullData1$LastName, 1,3)
 fullData2 <- fullData1 %>% mutate(FSR = paste(LastName, ",", FirstName))
 fullData3 <- fullData2 %>%  select(FSR, Running.Count:YearMonth, Activity.Recorded.On:Method)
-head(fullData3)
 ```
 
 ```{r, message=FALSE, warning=FALSE}
@@ -93,8 +92,7 @@ startDates3 <- startDates2 %>% mutate(FSR = paste(LastName, ",", FirstName)) %>%
 startDates3$Last.Hire.Date <- as.POSIXct(startDates3$Last.Hire.Date, format = "%m/%d/%Y", tz = "EST")
 #Create hiring status field
 startDates4 <-  startDates3 %>% mutate(Status = ifelse(Last.Hire.Date <= "2014-10-12", "Seasoned", ifelse(Last.Hire.Date >= "2014-10-13" & Last.Hire.Date < "2014-11-04", "Yellow", "Recent Hire")))
-startDates4
-dim(fullData3)
+
 ```
 
 After merging the FSR and their start dates with the full activity
@@ -102,7 +100,6 @@ After merging the FSR and their start dates with the full activity
 ```{r}
 n <- inner_join(startDates4, fullData3)
 dim(n)
-
 #write.csv(one, "NNNN.csv", row.names = F)
 ```
 
@@ -114,15 +111,13 @@ n$Week.Ending <- as.POSIXct(n$Week.Ending, format = "%m/%d/%Y")
 n$Activity.Recorded.On <- as.POSIXct(n$Activity.Recorded.On, format = "%m/%d/%Y")
 ```
 
-```{r}
-head(n)
-```
+
 
 
 ```{r}
 n1 <- n %>% arrange(Actual.Activity.Date)
 n1$Index <- seq(from = 1, to = 41637, 1)
-head(n1)
+
 ```
 
 
@@ -131,12 +126,6 @@ Add a Week Number
 ```{r add a week number column, echo=TRUE}
 #added a week number
 n2 <- n1 %>%  mutate(WeekNumber = format(Actual.Activity.Date, format = "%W"))
-head(n2)
-#n2$WeekNumber <- as.numeric(n2$WeekNumber)
-#n2$WeekNumber <- n2$WeekNumber + 1
-#notice week number restarts in 2016, this will be corrected later
-head(n2)
-tail(n2)
 ```
 Add 2 new columns, the day names for **Actual.Activity.Date** and **Week.Ending**. 
 
@@ -150,27 +139,15 @@ n3 <- n3 %>% mutate(DayWeekEnding = c("Sunday", "Monday", "Tuesday", "Wednesday"
 This is where we see that a lot of data is missing at the year change. 
 
 ```{r}
-
-head(n3)
-n3[c(28625:28635), ]
+#n3[c(28625:28635), ]
 ```
-
-
-We see there are 28629 rows in 2015
-
-head(n2015)
-tail(n2015)
-head(n2016)
-tail(n2016)
-dim(n2015)
-dim(n2016)
 
 ```{r}
 n2015 <- n3[c(1:28629), -c(5,9) ]
 ```
 
 ```{r}
-tail(n2015)
+
 ```
 ```{r}
 n2016 <- n3[c(28630:41637), -c(5,9)]
@@ -181,7 +158,7 @@ Maybe do this later
 
 ```{r}
 n2016$DayWeekEnding <- "Sunday"
-head(n2016)
+
 ```
 
 Week.Ending
@@ -195,14 +172,10 @@ WeekNumber1 <- seq(from = 53, to = 78, by = 1)
 dateDataFrame <- cbind.data.frame(datesSundays, WeekNumber1)
 
 dateDataFrame <- dateDataFrame %>% rename(WeekNumber = WeekNumber1)
-dateDataFrame
-
 
 dateDataFrame1 <- dateDataFrame %>%  mutate(WeekNumber = format(datesSundays, format = "%W"))
 
-dateDataFrame1
-head(n2016)
-dim(n2015)
+
 
 
 ```
@@ -211,26 +184,15 @@ dim(n2015)
 
 
 x <- inner_join(n2016, dateDataFrame1)
-head(x)
-dim(x)
+
 x$Week.Ending <- x$datesSundays
 x <- x[ , c(1:23)]
-head(x)
+
 
 x1 <- x %>% mutate(WeekNumber1 = as.numeric(WeekNumber))
 x1$WeekNumber1 <- x1$WeekNumber1 + 52
+
 x1$WeekNumber1 <- as.character(x1$WeekNumber1)
-head(x1)
-
-
-head(n20151)
-n20151 <-  n2015%>% mutate(WeekNumber1 = as.numeric(WeekNumber))
-n20151$WeekNumber1 <- as.character(n20151$WeekNumber1)
-
-x1$WeekNumber1 <- x1$WeekNumber1 + 52
-x1$WeekNumber1 <- as.character(x1$WeekNumber1)
-head(x1)
-
 
 ```
 
@@ -238,76 +200,78 @@ head(x1)
 This is the repackaged dataset **bytjj**
 
 ```{r}
-names(n2015)
-names(x)
+
 bytjjYes <- rbind.data.frame(n20151, x1)
 bytjjYes <- bytjjYes[, -c(21)]
-tail(bytjjYes)
-bytjj[c(28625:28635), ]
-bytjjYes$WeekNumber1 <- as.numeric(bytjjYes$WeekNumber1)
-summary(bytjj)
 
+bytjj[c(28625:28635), ]
+#bytjjYes$WeekNumber1 <- as.numeric(bytjjYes$WeekNumber1)
 #write.csv(bytjjYes, "theTableauSet.csv", row.names = F)
 ```
 
+
+The final data renders :
+
 ```{r}
-dim(bytjjYes)
-tail(bytjjYes)
-bytjjYes %>% group_by(Status) %>% summarise(n = n())
-Yellow <- bytjjYes %>% filter(Status == "Yellow") 
-dim(Yellow)
-head(Yellow)
-yy <- Yellow %>% group_by(FSR, WeekNumber1) %>% summarise(n = n())
-dim(yy)
-yy$WeekNumber1 <- as.character(yy$WeekNumber1)
-library(dplyr)
-yyyy <- yy %>% group_by(WeekNumber1, FSR) %>% summarise(n = sum(n))
-yyyy
+#bytjjYes %>% group_by(Status) %>% summarise(n = n())
 ```
+
 
 
 ```{r}
 A <- bytjjYes %>% group_by(WeekNumber1,Status, FSR ) %>% summarise(TotalVisitsby = n())
-A
+
 AA <- A %>% group_by(WeekNumber1, Status) %>% summarise(sumVisitsbyWk = sum(TotalVisitsby))
-AA
+
 ```
 
 ```{r}
 #
 B <- A %>% group_by(WeekNumber1, Status) %>% summarise(FSRWorking = n())
-B
+
 ```
 
 ```{r}
 C <- inner_join(AA, B)
 CC <- C %>% mutate(AverageWkVisits = round(sumVisitsbyWk/FSRWorking, 2)) 
-CC
-write.csv(CC, "AveragesPerWeek.csv", row.names = F)
+CC$WeekNumber1 <- as.numeric(CC$WeekNumber1)
+CC <- CC %>% arrange(WeekNumber1)
+CCC <- CC %>% filter(Status == "Seasoned")
+
+#write.csv(CC, "AveragesPerWeek.csv", row.names = F)
+
+```
+
+```{r}
+Yellow <- bytjjYes %>% filter(Status == "Yellow") 
+
 ```
 
 
+Average Seasoned Worker vs Yellow Worker
+
+```{r}
+yy <- Yellow %>% group_by(WeekNumber1, FSR) %>% summarise(visitsThisWeek = n())
+
+
+YYY <- yy %>% group_by(FSR) %>% summarise(totalVisits = n())
+yy$WeekNumber1 <- as.numeric(yy$WeekNumber1)
+
+
+D <- inner_join(yy, CCC)
+
+DD <- D %>% mutate(Diff = AverageWkVisits - visitsThisWeek) %>% select(WeekNumber1, FSR, visitsThisWeek, AverageWkVisits, Diff)
+
+#write.csv(DD, "SeasonVsYellow.csv", row.names = F)
+```
+
 ```{r}
 First <- A %>% group_by(WeekNumber1, FSR, Status) %>% summarise(n = n())
-First
+
 ```
 ```{r}
 First <- group_by(Status, WeekNumber1 ) %>% summarise(n = n())
 ```
-
-
-Denom <- B %>% arrange(Status)
-Denom
-B
-B %>% filter(Status == "Seasoned") %>% arrange(WeekNumber1)
-
-
-
-
-
-
-
-
 
 
  
@@ -329,21 +293,14 @@ The combined set is called **bytjj**
 
 ```{r}
 a <- bytjjYes %>% group_by(WeekNumber1, Status) %>% summarise(n = n())
-a
+
 b <- a %>% group_by(WeekNumber1,Status) %>% summarise(mean = mean(n))
 #write.csv(b, "theTableauSet2.csv", row.names = F)
 ```
 
 
 
-There are many missing fields that need to be corrected. This mainly has to do with the dates. So first we need to find the break. 
 
-
-
-
-### Week.Ending
-
-Weeks always end on Sundays. 
 
 
 
@@ -353,19 +310,6 @@ Weeks always end on Sundays.
 
 1. In order to make the Field Service Reps names recognizable for a table join with the Start Date dataset, the **Activity.Recorded.By** column has to be split and reengineered. This will add 2 new columns. 
 
-
-**Note**
-To be used after
-
-```{r}
-dim(Combined)
-
-```
-
-
-```{r}
-dim(startDates)
-```
 
 
 
