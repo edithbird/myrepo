@@ -32,11 +32,21 @@ generalStatus <- pipelineSales %>% group_by(Week.Ending, Status) %>% summarise(v
 countFSR <- generalStatus %>% group_by(Week.Ending, Status) %>% summarise(n = n())
 #Step 1 Numerator
 a <- pipelineSales %>% group_by(Week.Ending, Status) %>% summarise(numberVisits = n())
+
+a1 <- pipeLong %>% group_by(Week.Ending, Status,Visit.Objective) %>% summarise(numberVisits = n())
+head(a1)
+dim(a1)
+head(pipeLong)
 #Step 2a Denom
 b <- pipelineGeneral %>% group_by(Week.Ending, Status) %>% summarise(numberReps = n())
+######
+
+
+
+
 #Average
 c <- inner_join(a,b)
-c <- c %>% mutate(averageVisitsPerWeek = round(numberVisits/numberReps, 0))
+c <- c %>% mutate(averageVisitsPerWeek = numberVisits/numberReps)
 #save c, pipelong, pipelineGeneral
 ```
 
