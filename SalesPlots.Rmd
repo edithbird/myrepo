@@ -1,0 +1,94 @@
+---
+title: "Sales Plots"
+author: "Christine Iyer"
+date: "September 6, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+```
+
+Load data and convert dates **data**
+
+```{r data, echo=FALSE}
+data <- read.csv("FinalFullSet.csv", header = T, stringsAsFactors = F)
+#convert to posixct
+data$Week.Ending <- as.POSIXct(data$Week.Ending, format = "%m/%d/%Y")
+data$Last.Hire.Date <-  as.POSIXct(data$Last.Hire.Date, format = "%m/%d/%Y")
+```
+
+```{r data1, echo=FALSE, message=FALSE, warning=FALSE}
+#weeks between hire and week ending
+data1 <- data %>% mutate(x = difftime(Week.Ending, Last.Hire.Date, units = "weeks"))
+data1 <- data1 %>% mutate(x = round(x,0))
+#Convert x to integer as an additional column **data2**
+data2 <- data1 %>% mutate(xWeeks = as.integer(data1$x))
+dataXXXX <- data2 %>% filter(Last.Hire.Date>="2014-09-08" & Last.Hire.Date<= "2015-10-19") 
+dataXXXX <- dataXXXX %>% filter(xWeeks<=52)
+dataA <- dataXXXX %>% group_by(Status,FSR, Week.Ending, Last.Hire.Date, x, xWeeks) %>% summarise(numberOfVisits = n()) %>% arrange(x)
+#Total number of visits per week per status.
+#Numerator** for calculation **dataC**
+dataC <- dataXXXX %>% group_by(Week.Ending, Status, x, xWeeks) %>% summarise(totalNumberOfVisits = n())
+#Number of visits per week per FSR **dataD**
+dataD <- dataXXXX %>% group_by(FSR,Status, Week.Ending, x, xWeeks) %>% summarise(n = n())
+#Number of Reps who worked each week by Status
+#Denominator for calculation **dataE**
+dataE <- dataD %>% group_by(Week.Ending, Status, x, xWeeks) %>% summarise(numReps = n())
+#Numerator dataF
+dataF <- dataA %>% group_by(Status, Week.Ending, x, xWeeks) %>% summarise(totalNumberOfVisits = sum(numberOfVisits)) %>% arrange(Week.Ending)
+dataG <- inner_join(dataC, dataE)
+#Average visits per week per status **dataH**
+dataH <- dataG %>% mutate(averageVisitsWeek = round(totalNumberOfVisits/numReps, 2))
+dataI <- dataH %>% group_by(xWeeks, Status) %>% summarise(meanVisitsWk = mean(averageVisitsWeek))
+dataR <- dataI %>% filter(Status == "Seasoned") %>% select(Status, xWeeks, numberOfVisits = meanVisitsWk)
+dataY <- dataI %>% filter(Status == "Yellow") %>% select(Status, xWeeks, numberOfVisits = meanVisitsWk)
+#Isolating Red and Yellow to show them in comparison to each other
+dayaRY <- dataI %>% filter(Status != "Recent Hire") %>% select(Status, xWeeks, numberOfVisits = meanVisitsWk)
+```
+
+
+```{r, echo=FALSE}
+ggplot(dataI, aes(x = xWeeks, y = meanVisitsWk, group  = Status, color = Status)) +  scale_color_manual(values=c("chartreuse4","tomato3", "goldenrod3")) + theme_bw() + geom_smooth(method = "lm", se = FALSE) + 
+ ggtitle(expression(atop(bold("How do they compare on average"), atop(italic("Average Visits Per Week"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") 
+```
+
+
+```{r, echo=FALSE}
+ggplot(dataI, aes(x = xWeeks, y = meanVisitsWk, group  = Status, color = Status))+ geom_line(size = 1) + scale_color_manual(values=c("chartreuse4", "tomato3", "goldenrod3")) + theme_bw()+ 
+ ggtitle(expression(atop(bold("How do they compare on average"), atop(italic("Average Visits Per Week"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") 
+```
+
+
+```{r, echo=FALSE, fig.height=6, fig.width=9}
+ggplot(dataR, aes(x = xWeeks, y = numberOfVisits, group  = Status, color = Status))+ geom_line(size = 1) + scale_color_manual(values=c("tomato3")) + theme_bw() + 
+ ggtitle(expression(atop(bold("How do they compare on average"), atop(italic("Average Visits Per Week"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") 
+```
+
+
+```{r, echo=FALSE, fig.height=30, fig.width=9}
+ggplot(dataA, aes(x = xWeeks, y = numberOfVisits, fill = Status)) + geom_bar(aes(fill = Status),stat = "identity")+ facet_wrap(~FSR, ncol = 2) + geom_line(data = dataR, color = "indianred4", size = 1.25) + scale_fill_manual(values=c("chartreuse4", "tomato3", "goldenrod3"))   + theme_bw() +
+  theme(strip.background =element_rect(fill="indianred4"))+
+  theme(strip.text = element_text(colour = 'white'))+ 
+ ggtitle(expression(atop(bold("How do they compare on average"), atop(italic("Average Visits Per Week"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") 
+```
+
+```{r, echo=FALSE, fig.height=30, fig.width=9}
+dataR1 <- dataR %>% rename(averageVisits = numberOfVisits) %>% select(xWeeks, averageVisits)
+dataZ <- inner_join(dataA, dataR1)
+dataZ1 <- dataZ %>% mutate(difference = averageVisits - numberOfVisits)
+```
+
+```{r, echo=FALSE, fig.height=30, fig.width=9}
+ggplot(dataZ1, aes(x = xWeeks, y = difference, group  = Status, color = Status)) + geom_line() + geom_line(size = 1) + scale_color_manual(values=c("chartreuse4", "tomato3", "goldenrod3")) + theme_bw()+ facet_wrap(~FSR, ncol = 2) +geom_hline(yintercept = 0) + geom_smooth(method = "lm", se = FALSE) +
+  theme(strip.background =element_rect(fill="indianred4"))+
+  theme(strip.text = element_text(colour = 'white'))+ 
+ ggtitle(expression(atop(bold("Difference From Standard"), atop(italic("Slope Up means Not Good"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") 
+```
+
