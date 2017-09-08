@@ -92,3 +92,24 @@ ggplot(dataZ1, aes(x = xWeeks, y = difference, group  = Status, color = Status))
  ggtitle(expression(atop(bold("Difference From Standard"), atop(italic("Slope Up means Not Good"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") 
 ```
 
+```{r, echo=FALSE}
+#filter out the Green
+dataYR <- data1 %>% filter(Status != 'Recent Hire') 
+#intersection viz
+ggplot(dataYR, aes(x = Week.Ending, y = meanVisitsWeekbyStatus,group  = Status, color = Status)) + scale_color_manual(values=c("tomato3", "goldenrod3")) + theme_bw() + geom_smooth(method = "lm", se = FALSE) + 
+ ggtitle(expression(atop(bold("Where do the Yellows catch up with the Reds"), atop(italic("About 44 Weeks"), "")))) + labs(x = "Weeks At the New Job", y = "Average Number of Visits Per Week") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+```{r, echo=FALSE, fig.height=30, fig.width=9}
+#create order days of the week
+orderDays <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+#order days of the week
+dataYR <- dataYR %>%
+  mutate(Day =  factor(Day, levels = orderDays)) %>%
+  arrange(Day)  
+ggplot(dataYR, aes(x = Day, fill = Status)) + geom_bar() + facet_wrap(~FSR, ncol = 3) + scale_fill_manual(values=c("tomato3", "goldenrod3")) + theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(strip.background =element_rect(fill="chartreuse4"))+
+  theme(strip.text = element_text(colour = 'white'))+ 
+ ggtitle(expression(atop(bold("Distribution of Visits"), atop(italic("By Day of the Week"), "")))) + labs(y = "Total Number of Visits") 
+```
+
