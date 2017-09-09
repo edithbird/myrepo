@@ -15,6 +15,9 @@ library(ggplot2)
 library(lubridate)
 ```
 
+
+
+
 Load data and convert dates **data**
 
 ```{r data, echo=FALSE}
@@ -111,5 +114,51 @@ ggplot(dataYR, aes(x = Day, fill = Status)) + geom_bar() + facet_wrap(~FSR, ncol
   theme(strip.background =element_rect(fill="chartreuse4"))+
   theme(strip.text = element_text(colour = 'white'))+ 
  ggtitle(expression(atop(bold("Distribution of Visits"), atop(italic("By Day of the Week"), "")))) + labs(y = "Total Number of Visits") 
+```
+
+```{r, echo=FALSE}
+data1 <- data1 %>% rename(lon = Longitude, lat = Latitude)
+```
+
+```{r, fig.height=30, fig.width=9, message=FALSE, warning=FALSE}
+library(ggmap)
+
+head(dataA)
+data1$lat <- jitter(data1$lat, amount = .5)
+data1$lon <- jitter(data1$lon, amount = .7)
+usa.map = get_map(location = 'United States', zoom = 3, scale = 2 ,maptype = "toner-lite", source = "stamen")
+```
+
+
+
+```{r, fig.height=30, fig.width=13, message=FALSE, warning=FALSE}
+
+dataB <- data1 %>% group_by(FSR, Week.Ending, Visit.Objective, lat, lon) %>% summarise(n = n())
+
+
+mapB <- ggmap(usa.map, base_layer = ggplot(dataB, aes(lon, lat, color = Visit.Objective, size = n))) 
+mapC <- ggmap(usa.map, base_layer = ggplot(dataB, aes(lon, lat, color = Visit.Objective))) 
+
+mapC + geom_point(shape = 1) +  
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())  + facet_wrap(~FSR, ncol = 6) + guides(size = FALSE) + theme(legend.position = "bottom") +
+  theme(strip.background =element_rect(fill="chartreuse4"))+
+  theme(strip.text = element_text(colour = 'white'))
+
+```
+
+```{r, echo=FALSE, fig.height=10, fig.width=10}
+mapC + geom_point(shape = 1,  size = 0.05) + theme(legend.position="none")
+```
+
+```{r}
+head(data1)
+dataStateRep <- data1 %>% group_by(State, FSR) %>% summarise(n = n())
+dataStateRep2 <- dataStateRep %>% group_by(State) %>% summarise(numberRepsInState = n())
+head(dataStateRep2)
+data1StateReps <- inner_join(data1, dataStateRep2)
+
 ```
 
