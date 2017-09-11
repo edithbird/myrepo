@@ -122,8 +122,6 @@ data1 <- data1 %>% rename(lon = Longitude, lat = Latitude)
 
 ```{r, fig.height=30, fig.width=9, message=FALSE, warning=FALSE}
 library(ggmap)
-
-head(dataA)
 data1$lat <- jitter(data1$lat, amount = .5)
 data1$lon <- jitter(data1$lon, amount = .7)
 usa.map = get_map(location = 'United States', zoom = 3, scale = 2 ,maptype = "toner-lite", source = "stamen")
@@ -154,11 +152,27 @@ mapC + geom_point(shape = 1,  size = 0.05) + theme(legend.position="none")
 ```
 
 ```{r}
-head(data1)
 dataStateRep <- data1 %>% group_by(State, FSR) %>% summarise(n = n())
 dataStateRep2 <- dataStateRep %>% group_by(State) %>% summarise(numberRepsInState = n())
-head(dataStateRep2)
+dataStateRep2 <- dataStateRep2 %>% na.omit()
 data1StateReps <- inner_join(data1, dataStateRep2)
-
 ```
+
+```{r}
+ggmap(usa.map) +
+    geom_polygon(data = data1StateReps, aes(x = lon, y = lat, 
+        fill = numberRepsInState, group = numberRepsInState), colour = NA, alpha = 0.5) + scale_fill_distiller(palette = "YlOrRd", trans = "reverse")
+```
+__Who went where, when?__
+
+```{r, echo=FALSE}
+
+dataFrameSave <- data2 %>% group_by(FSR,Status, Week.Ending, Practice.Name, x, xWeeks,Latitude, Longitude) %>% summarise(n = n())
+```
+
+
+```{r}
+#write.csv(dataFrameSave, "myDataFrame1.csv", row.names = F)
+```
+
 
